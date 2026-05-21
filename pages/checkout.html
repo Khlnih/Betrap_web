@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Thanh Toán — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .checkout-layout{display:grid;grid-template-columns:1fr 380px;gap:var(--sp-xl);padding:var(--sp-xl) 0}
+    .section-card{background:white;border-radius:var(--r-xl);padding:var(--sp-xl);box-shadow:var(--shadow-sm);margin-bottom:var(--sp-lg)}
+    .section-card-title{font-family:var(--font-h);font-size:1.2rem;font-weight:700;margin-bottom:var(--sp-lg);padding-bottom:var(--sp-md);border-bottom:1px solid rgba(220,165,174,.08);display:flex;align-items:center;gap:var(--sp-sm)}
+    .order-summary{background:white;border-radius:var(--r-xl);box-shadow:var(--shadow-md);padding:var(--sp-xl);position:sticky;top:calc(var(--nav-h)+var(--sp-lg));border:1px solid rgba(191,167,162,.1)}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;padding:var(--sp-sm) 0;font-size:.9rem}
+    .summary-row.total{font-weight:800;font-size:1.1rem;border-top:2px solid rgba(220,165,174,.1);margin-top:var(--sp-md);padding-top:var(--sp-md)}
+    .summary-row.total .amount{color:var(--gold);font-family:var(--font-h);font-size:1.4rem}
+    .payment-options{display:flex;flex-direction:column;gap:var(--sp-sm)}
+    /* Success overlay */
+    .success-overlay{position:fixed;inset:0;background:var(--grad-hero);display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;text-align:center;padding:var(--sp-lg)}
+    .success-icon{width:100px;height:100px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:white;margin:0 auto var(--sp-xl);animation:bounceIn .7s ease both}
+    @media(max-width:1024px){.checkout-layout{grid-template-columns:1fr}.order-summary{position:static}}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page-header">
+    <div class="container">
+      <h1>Xác Nhận Đặt Dịch Vụ</h1>
+      <p>Kiểm tra thông tin và chọn phương thức thanh toán</p>
+    </div>
+  </div>
+
+  <div class="container page-content" style="padding-top:0">
+    <div class="checkout-layout" id="checkout-content">
+      <div style="text-align:center;padding:var(--sp-3xl)"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Success overlay (hidden) -->
+  <div class="success-overlay hidden" id="success-overlay">
+    <div class="success-icon"><i class="ri-checkbox-circle-fill"></i></div>
+    <h2 style="color:white;font-size:2rem">Đặt Dịch Vụ Thành Công! 🎉</h2>
+    <p style="color:rgba(249,243,228,.7);margin:var(--sp-md) 0 var(--sp-xl);font-size:1.05rem">Nhà cung cấp sẽ xác nhận trong vòng 24 giờ. Chúc bạn có ngày đám hỏi thật đẹp!</p>
+    <div style="display:flex;gap:var(--sp-md)">
+      <a href="history.html" class="btn btn-gold btn-lg"><i class="ri-history-line"></i> Xem Đơn Hàng</a>
+      <a href="services.html" class="btn btn-outline-light btn-lg">Tìm Thêm Dịch Vụ</a>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    let txnData = null;
+    let selectedPayment = 'momo';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      const sess = API.auth.requireAuth();
+      if (!sess) return;
+
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) { location.href = 'history.html'; return; }
+
+      txnData = await API.txn.getById(id);
+      if (!txnData) { UI.toast('Không tìm thấy đơn hàng!', 'error'); return; }
+
+      const svc = DB.services.findById(txnData.serviceId);
+      const provider = DB.users.findById(txnData.providerId);
+      const isPaid = txnData.paymentStatus === 'paid';
+
+      document.getElementById('checkout-content').innerHTML = `
+        <div>
+          <!-- Order detail -->
+          <div class="section-card animate-fadeInUp">
+            <div class="section-card-title"><i class="ri-file-list-3-line" style="color:var(--gold)"></i> Chi Tiết Đơn Hàng</div>
+            <div style="display:flex;gap:var(--sp-lg);align-items:flex-start;flex-wrap:wrap">
+              <img src="${svc?.image||''}" alt="" style="width:120px;height:90px;object-fit:cover;border-radius:var(--r-md);flex-shrink:0">
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:1.1rem">${txnData.serviceName}</div>
+                <div style="font-size:.8rem;color:var(--text-muted);margin-top:4px">Nhà cung cấp: ${provider?.name||''}</div>
+                <div style="display:flex;gap:var(--sp-lg);margin-top:var(--sp-md);font-size:.875rem;color:var(--text-muted);flex-wrap:wrap">
+                  <span><i class="ri-calendar-line"></i> ${txnData.date}</span>
+                  <span><i class="ri-time-line"></i> ${txnData.time}</span>
+                  <span><i class="ri-map-pin-line"></i> ${txnData.address}</span>
+                </div>
+                ${txnData.note?`<div style="margin-top:var(--sp-sm);font-size:.8rem;color:var(--text-muted)">Ghi chú: ${txnData.note}</div>`:''}
+              </div>
+              <div style="flex-shrink:0">${UI.statusBadge(txnData.status)}</div>
+            </div>
+          </div>
+
+          <!-- Payment -->
+          ${!isPaid ? `
+          <div class="section-card animate-fadeInUp delay-100">
+            <div class="section-card-title"><i class="ri-secure-payment-line" style="color:var(--gold)"></i> Phương Thức Thanh Toán</div>
+            <div class="payment-options" id="payment-opts">
+              <div class="payment-option selected" onclick="selectPay(this,'momo')">
+                <div class="payment-icon" style="background:#A50064;color:white;font-weight:800;font-size:.8rem">MM</div>
+                <div><div class="payment-name">Ví MoMo</div><div class="payment-desc">Thanh toán nhanh qua MoMo</div></div>
+                <i class="ri-checkbox-circle-fill" style="color:var(--gold);margin-left:auto;font-size:1.2rem"></i>
+              </div>
+              <div class="payment-option" onclick="selectPay(this,'vnpay')">
+                <div class="payment-icon" style="background:#005BAA;color:white;font-weight:800;font-size:.75rem">VNP</div>
+                <div><div class="payment-name">VNPay</div><div class="payment-desc">Cổng thanh toán VNPay</div></div>
+              </div>
+              <div class="payment-option" onclick="selectPay(this,'bank')">
+                <div class="payment-icon"><i class="ri-bank-line" style="color:var(--gold)"></i></div>
+                <div><div class="payment-name">Chuyển khoản ngân hàng</div><div class="payment-desc">Chuyển khoản trực tiếp</div></div>
+              </div>
+            </div>
+          </div>` : `
+          <div class="section-card" style="border:2px solid var(--success)">
+            <div style="display:flex;align-items:center;gap:var(--sp-md)">
+              <i class="ri-checkbox-circle-fill" style="font-size:2rem;color:var(--success)"></i>
+              <div><div style="font-weight:700;color:var(--success)">Đã Thanh Toán</div>
+              <div style="font-size:.8rem;color:var(--text-muted)">Thanh toán qua ${txnData.paymentMethod?.toUpperCase()} · ${UI.formatDateTime(txnData.paidAt||txnData.updatedAt)}</div></div>
+            </div>
+          </div>`}
+        </div>
+
+        <!-- Summary -->
+        <div>
+          <div class="order-summary animate-fadeInRight">
+            <h4 style="margin-bottom:var(--sp-lg)">Tóm Tắt Đơn Hàng</h4>
+            <div class="summary-row"><span style="color:var(--text-muted)">Mã đơn</span><span class="order-id">${txnData.id}</span></div>
+            <div class="summary-row"><span style="color:var(--text-muted)">Dịch vụ</span><span style="font-weight:600;max-width:180px;text-align:right">${txnData.serviceName}</span></div>
+            <div class="summary-row"><span style="color:var(--text-muted)">Ngày</span><span>${txnData.date}</span></div>
+            <div class="summary-row"><span style="color:var(--text-muted)">Trạng thái</span>${UI.statusBadge(txnData.status)}</div>
+            <div class="summary-row total"><span>Tổng cộng</span><span class="amount">${UI.formatCurrency(txnData.price)}</span></div>
+            ${!isPaid ? `<button class="btn btn-gold btn-block btn-lg mt-lg" onclick="pay()"><i class="ri-secure-payment-line"></i> Thanh Toán Ngay</button>
+            <p style="font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:var(--sp-md)"><i class="ri-shield-check-line" style="color:var(--success)"></i> Thanh toán được bảo mật</p>` : ''}
+            <div class="divider"></div>
+            <a href="chat.html" class="btn btn-outline btn-block"><i class="ri-message-3-line"></i> Chat Với Nhà Cung Cấp</a>
+          </div>
+        </div>`;
+    });
+
+    function selectPay(el, method) {
+      selectedPayment = method;
+      document.querySelectorAll('.payment-option').forEach(o => {
+        o.classList.remove('selected');
+        o.querySelector('.ri-checkbox-circle-fill')?.remove();
+      });
+      el.classList.add('selected');
+      const icon = document.createElement('i');
+      icon.className = 'ri-checkbox-circle-fill';
+      icon.style.cssText = 'color:var(--gold);margin-left:auto;font-size:1.2rem';
+      el.appendChild(icon);
+    }
+
+    async function pay() {
+      if (!txnData) return;
+      UI.showLoading();
+      try {
+        await API.txn.pay(txnData.id, selectedPayment);
+        UI.hideLoading();
+        UI.launchConfetti(60);
+        document.getElementById('success-overlay').classList.remove('hidden');
+      } catch(e) {
+        UI.hideLoading();
+        UI.toast('Thanh toán thất bại, vui lòng thử lại!', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

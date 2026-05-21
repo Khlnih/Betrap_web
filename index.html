@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>BêTráp — Dịch Vụ Đám Hỏi Truyền Thống Việt Nam</title>
+  <meta name="description" content="Nền tảng kết nối dịch vụ đám hỏi uy tín — Bê Tráp, Áo Dài, Làm Tráp, Media, Make Up tại Việt Nam.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    /* ── HERO ── */
+    .hero{min-height:100vh;background:var(--grad-hero);display:flex;align-items:center;position:relative;overflow:hidden}
+    .hero-bg-pattern{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C8963E' fill-opacity='0.04'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3C/g%3E%3C/svg%3E");opacity:.5}
+    .hero-glow{position:absolute;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(191,167,162,.18) 0%,transparent 70%);pointer-events:none}
+    .hero-glow-2{position:absolute;bottom:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(220,165,174,.2) 0%,transparent 70%);pointer-events:none}
+    .hero-content{position:relative;z-index:2;max-width:700px}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(220,165,174,.15);border:1px solid rgba(220,165,174,.3);color:var(--text-dark);padding:6px 18px;border-radius:var(--r-full);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:var(--sp-lg)}
+    .hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:800;color:var(--text-dark);line-height:1.15;margin-bottom:var(--sp-lg)}
+    .hero p{font-size:1.1rem;color:var(--text-muted);margin-bottom:var(--sp-xl);max-width:540px;line-height:1.8}
+    .hero-btns{display:flex;gap:var(--sp-md);flex-wrap:wrap}
+    .hero-stats{display:flex;gap:var(--sp-xl);margin-top:var(--sp-2xl);padding-top:var(--sp-xl);border-top:1px solid rgba(220,165,174,.3)}
+    .hero-stat .num{font-family:var(--font-h);font-size:2rem;font-weight:700;color:var(--text-dark);line-height:1}
+    .hero-stat .lbl{font-size:.75rem;color:var(--text-muted);margin-top:4px}
+    .hero-img-wrap{position:absolute;right:5%;bottom:0;width:40%;height:85%;pointer-events:none;}
+    .hero-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:300px 300px 0 0;box-shadow:var(--shadow-lg)}
+    .hero-img-gradient{display:none}
+
+    /* ── CATEGORIES ── */
+    .categories-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-lg)}
+    @media(max-width:1024px){.categories-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:640px){.categories-grid{grid-template-columns:repeat(2,1fr)}}
+
+    /* ── HOW IT WORKS ── */
+    .how-section{background:var(--cream-dark);padding:var(--sp-3xl) 0}
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-xl);position:relative}
+    .steps::before{content:'';position:absolute;top:32px;left:60px;right:60px;height:2px;background:linear-gradient(to right,var(--gold),var(--red));z-index:0;opacity:.3}
+    .step{text-align:center;position:relative;z-index:1}
+    .step-num{width:64px;height:64px;border-radius:var(--r-full);background:white;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:1.4rem;font-weight:800;color:var(--gold);margin:0 auto var(--sp-md);box-shadow:var(--shadow-md);border:2px solid var(--gold-faint)}
+    .step h4{color:var(--text-dark);font-family:var(--font);font-size:.95rem;font-weight:700;margin-bottom:var(--sp-sm)}
+    .step p{color:var(--text-muted);font-size:.8rem;line-height:1.7}
+    @media(max-width:768px){.steps{grid-template-columns:repeat(2,1fr)}.steps::before{display:none}}
+
+    /* ── FEATURED SERVICES ── */
+    .services-slider{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-lg)}
+    @media(max-width:768px){.services-slider{grid-template-columns:1fr}}
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-section{background:var(--cream-dark);padding:var(--sp-3xl) 0}
+    .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-lg)}
+    .testimonial-card{background:white;border-radius:var(--r-xl);padding:var(--sp-xl);box-shadow:var(--shadow-sm);position:relative;border:1px solid rgba(191,167,162,.2)}
+    .testimonial-card::before{content:'\201C';font-family:var(--font-h);font-size:5rem;color:var(--gold-faint);line-height:1;position:absolute;top:var(--sp-md);left:var(--sp-xl);color:var(--gold);opacity:.3}
+    .testimonial-text{font-size:.9rem;color:var(--text-muted);line-height:1.8;margin-bottom:var(--sp-lg);margin-top:var(--sp-xl)}
+    .testimonial-author{display:flex;align-items:center;gap:var(--sp-md)}
+    .testimonial-avatar{width:46px;height:46px;border-radius:var(--r-full);background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .testimonial-name{font-weight:700;font-size:.9rem}
+    .testimonial-location{font-size:.75rem;color:var(--text-muted)}
+    @media(max-width:768px){.testimonials-grid{grid-template-columns:1fr}}
+
+    /* ── CTA ── */
+    .cta-section{background:var(--grad-gold);padding:var(--sp-3xl) 0;text-align:center;position:relative;overflow:hidden}
+    .cta-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z'/%3E%3C/g%3E%3C/svg%3E")}
+    .cta-section h2,.cta-section p{color:var(--text-dark);position:relative}
+    .cta-section p{color:var(--text-muted);margin:var(--sp-md) 0 var(--sp-xl);font-size:1.05rem}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-img-wrap animate-floatSlow">
+      <video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:300px 300px 0 0;box-shadow:var(--shadow-lg)">
+        <source src="assets/videos/video-1.mp4" type="video/mp4">
+      </video>
+      <div class="hero-img-gradient"></div>
+    </div>
+    <div class="container">
+      <div class="hero-content animate-fadeInLeft">
+        <div class="hero-eyebrow eyebrow-line">✨ Nền Tảng Dịch Vụ Đám Hỏi #1 Việt Nam</div>
+        <h1>Nghi Lễ <span class="grad-text grad-text-animate">Bê Tráp</span><br>Trọn Vẹn & Đáng Nhớ</h1>
+        <p>Kết nối bạn với những đội bê tráp chuyên nghiệp, trang phục áo dài đẹp, dịch vụ media và make up — cho ngày đám hỏi hoàn hảo nhất.</p>
+        <div class="hero-btns">
+          <a href="pages/services.html" class="btn btn-primary btn-lg animate-pulse">Tìm Dịch Vụ <i class="ri-arrow-right-line"></i></a>
+          <a href="pages/register.html?role=provider" class="btn btn-outline btn-lg">Đăng Ký Cung Cấp</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num" data-count="500">0</div><div class="lbl">Đơn thành công</div></div>
+          <div class="hero-stat"><div class="num" data-count="120">0</div><div class="lbl">Nhà cung cấp</div></div>
+          <div class="hero-stat"><div class="num" data-count="63">0</div><div class="lbl">Tỉnh thành</div></div>
+          <div class="hero-stat"><div class="num" data-count="98">0</div><div class="lbl">% Hài lòng</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">Danh Mục Dịch Vụ</span>
+        <h2>Tất Cả Những Gì Bạn Cần<br>Cho Ngày Trọng Đại</h2>
+        <p>Từ đội bê tráp đến áo dài, làm tráp, chụp ảnh và trang điểm — chúng tôi có tất cả.</p>
+      </div>
+      <div class="categories-grid stagger-children">
+        <a href="pages/services.html?cat=be-trap" class="cat-card hover-lift">
+          <div class="cat-card-bg" style="background-image:url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80')"></div>
+          <div class="cat-card-overlay"></div>
+          <div class="cat-card-content">
+            <div class="cat-card-icon">👰</div>
+            <div class="cat-card-title">Bê Tráp</div>
+            <div class="cat-card-count">12 gói dịch vụ</div>
+          </div>
+        </a>
+        <a href="pages/services.html?cat=ao-dai" class="cat-card hover-lift">
+          <div class="cat-card-bg" style="background-image:url('https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&q=80')"></div>
+          <div class="cat-card-overlay"></div>
+          <div class="cat-card-content">
+            <div class="cat-card-icon">👘</div>
+            <div class="cat-card-title">Thuê Áo Dài</div>
+            <div class="cat-card-count">28 mẫu</div>
+          </div>
+        </a>
+        <a href="pages/services.html?cat=lam-trap" class="cat-card hover-lift">
+          <div class="cat-card-bg" style="background-image:url('https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80')"></div>
+          <div class="cat-card-overlay"></div>
+          <div class="cat-card-content">
+            <div class="cat-card-icon">🎁</div>
+            <div class="cat-card-title">Làm Tráp</div>
+            <div class="cat-card-count">15 phong cách</div>
+          </div>
+        </a>
+        <a href="pages/services.html?cat=media" class="cat-card hover-lift">
+          <div class="cat-card-bg" style="background-image:url('https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80')"></div>
+          <div class="cat-card-overlay"></div>
+          <div class="cat-card-content">
+            <div class="cat-card-icon">📸</div>
+            <div class="cat-card-title">Media</div>
+            <div class="cat-card-count">20 studio</div>
+          </div>
+        </a>
+        <a href="pages/services.html?cat=makeup" class="cat-card hover-lift">
+          <div class="cat-card-bg" style="background-image:url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600&q=80')"></div>
+          <div class="cat-card-overlay"></div>
+          <div class="cat-card-content">
+            <div class="cat-card-icon">💄</div>
+            <div class="cat-card-title">Make Up</div>
+            <div class="cat-card-count">35 nghệ nhân</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="about">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow" style="color:var(--gold)">Cách Hoạt Động</span>
+        <h2 style="color:white">Đơn Giản — Nhanh Chóng — Tin Cậy</h2>
+        <p style="color:rgba(249,243,228,.5)">Chỉ vài bước để có ngày đám hỏi hoàn hảo.</p>
+      </div>
+      <div class="steps stagger-children">
+        <div class="step"><div class="step-num hover-lift">1</div><h4>Chọn Dịch Vụ</h4><p>Duyệt qua hàng trăm gói dịch vụ theo danh mục và khu vực của bạn.</p></div>
+        <div class="step"><div class="step-num hover-lift">2</div><h4>Chat & Xác Nhận</h4><p>Liên hệ trực tiếp với nhà cung cấp qua chat để thoả thuận chi tiết.</p></div>
+        <div class="step"><div class="step-num hover-lift">3</div><h4>Đặt & Thanh Toán</h4><p>Đặt lịch và thanh toán an toàn qua MoMo, VNPay hoặc chuyển khoản.</p></div>
+        <div class="step"><div class="step-num hover-lift">4</div><h4>Tận Hưởng</h4><p>Nhà cung cấp đến đúng giờ — bạn chỉ cần tận hưởng ngày trọng đại.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED SERVICES -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">Được Yêu Thích</span>
+        <h2>Dịch Vụ Nổi Bật</h2>
+        <p>Được đánh giá cao nhất bởi khách hàng trên toàn quốc.</p>
+      </div>
+      <div class="services-slider stagger-children" id="featured-services"></div>
+      <div class="text-center mt-xl">
+        <a href="pages/services.html" class="btn btn-outline btn-lg">Xem Tất Cả Dịch Vụ <i class="ri-arrow-right-line"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials-section" id="testimonials">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">Khách Hàng Nói Gì</span>
+        <h2>Hàng Trăm Đôi Uyên Ương<br>Tin Tưởng BêTráp</h2>
+      </div>
+      <div class="testimonials-grid stagger-children">
+        <div class="testimonial-card tilt-card glass-card hover-lift">
+          <div class="tilt-shine"></div>
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">Đội bê tráp của Lan Ngọc Wedding thật sự chuyên nghiệp! Trang phục đẹp, đúng giờ, các bạn rất nhiệt tình. Ngày đám hỏi của mình hoàn hảo hơn mong đợi rất nhiều!</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">TH</div>
+            <div><div class="testimonial-name">Trần Thị Hương</div><div class="testimonial-location">Hà Nội · Đám hỏi 2024</div></div>
+          </div>
+        </div>
+        <div class="testimonial-card tilt-card glass-card hover-lift">
+          <div class="tilt-shine"></div>
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">Thuê áo dài ở đây quá xứng đáng! Áo đẹp, vải mềm, khi mặc lên rất sang. Studio Kim Cương chụp ảnh cũng cực đẹp. Mình recommend 10 điểm!</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">NL</div>
+            <div><div class="testimonial-name">Nguyễn Thị Lan</div><div class="testimonial-location">TP. HCM · Đám hỏi 2024</div></div>
+          </div>
+        </div>
+        <div class="testimonial-card tilt-card glass-card hover-lift">
+          <div class="tilt-shine"></div>
+          <div class="stars">★★★★☆</div>
+          <p class="testimonial-text">Mâm tráp được trang trí rất tỉ mỉ và đẹp mắt, cả nhà ai cũng khen. Chat trực tiếp với nhà cung cấp rất tiện, không phải chạy đôn chạy đáo như trước.</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">PQ</div>
+            <div><div class="testimonial-name">Phạm Quang Minh</div><div class="testimonial-location">Đà Nẵng · Đám hỏi 2024</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEAD CAPTURE FORM / CTA -->
+  <section class="cta-section" id="contact" style="background:var(--cream);padding:var(--sp-2xl) 0">
+    <div class="container">
+      <div class="grid-2 reveal-scale" style="background:white;border-radius:var(--r-xl);box-shadow:var(--shadow-lg);overflow:hidden;align-items:stretch">
+        <div style="background:url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800') center/cover;position:relative;min-height:300px">
+          <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(246,233,235,0.2), rgba(246,233,235,0.9))"></div>
+        </div>
+        <div style="padding:var(--sp-2xl)">
+          <span class="eyebrow" style="color:var(--text-muted);background:rgba(220,165,174,.15);border:1px solid rgba(220,165,174,.3);margin-bottom:var(--sp-sm)">Tư Vấn Miễn Phí</span>
+          <h2 style="font-family:var(--font-h);font-size:2.2rem;font-weight:700;color:var(--text-dark);margin-bottom:var(--sp-xs)">Nhận Báo Giá</h2>
+          <p style="color:var(--text-muted);margin-bottom:var(--sp-xl)">Để lại thông tin, đội ngũ BêTráp sẽ liên hệ tư vấn các gói dịch vụ đám hỏi phù hợp nhất cho bạn.</p>
+          <form id="lead-form" onsubmit="submitLead(event)">
+            <div class="form-group">
+              <label class="form-label">Tên của bạn</label>
+              <input type="text" class="form-control" id="lead-name" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Số điện thoại</label>
+              <input type="tel" class="form-control" id="lead-phone" placeholder="0901 234 567" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dịch vụ quan tâm</label>
+              <select class="form-control" id="lead-service">
+                <option value="be-trap">Cung cấp đội bê tráp</option>
+                <option value="ao-dai">Cho thuê áo dài</option>
+                <option value="lam-trap">Làm tráp</option>
+                <option value="media">Chụp ảnh & Quay phim</option>
+                <option value="other">Tư vấn trọn gói</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg mt-md" id="lead-btn">
+              <i class="ri-send-plane-fill"></i> Gửi Yêu Cầu
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initPage();
+      UI.renderFooter('footer-container');
+
+      // Animate counters when hero visible
+      const counters = document.querySelectorAll('[data-count]');
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            UI.animateCounter(e.target, +e.target.dataset.count);
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(el => io.observe(el));
+
+      // Render featured services
+      renderFeatured();
+    });
+
+    async function renderFeatured() {
+      const svcs = await API.svc.getAll({ sort: 'rating' });
+      const top = svcs.slice(0, 3);
+      const el = document.getElementById('featured-services');
+      el.innerHTML = top.map(s => `
+        <a href="pages/service-detail.html?id=${s.id}" class="service-card">
+          <div class="service-card-img" style="position:relative;overflow:hidden;height:220px">
+            <img src="${s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover">
+            <div class="category-badge" style="position:absolute;top:12px;left:12px;background:var(--grad-primary);color:white;padding:4px 12px;border-radius:var(--r-full);font-size:.75rem;font-weight:700">${UI.categoryIcon(s.category)} ${UI.categoryLabel(s.category)}</div>
+          </div>
+          <div class="service-card-body">
+            <div class="service-card-title">${s.name}</div>
+            <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location}</div>
+            <div class="stars">${UI.stars(s.rating)}</div>
+            <div class="service-card-footer">
+              <div class="service-card-price">${UI.formatCurrency(s.price)}<span style="font-size:.7em;font-weight:400;color:var(--text-muted)">/${s.unit}</span></div>
+              <span class="btn btn-primary btn-sm">Đặt ngay</span>
+            </div>
+          </div>
+        </a>`).join('');
+    }
+
+    function submitLead(e) {
+      e.preventDefault();
+      const btn = document.getElementById('lead-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:2px;display:inline-block"></span>';
+      setTimeout(() => {
+        UI.toast('Đã gửi thông tin! Đội ngũ tư vấn sẽ liên hệ với bạn trong 24h tới.', 'success');
+        document.getElementById('lead-form').reset();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ri-send-plane-fill"></i> Gửi Yêu Cầu';
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

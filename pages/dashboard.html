@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body{background:var(--cream)}
+    .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - var(--nav-h))}
+    .dash-sidebar{background:white;padding:var(--sp-lg) 0;position:sticky;top:var(--nav-h);height:calc(100vh - var(--nav-h));overflow-y:auto;border-right:1px solid rgba(220,165,174,.15)}
+    .dash-main{padding:var(--sp-xl);overflow-y:auto}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-lg);margin-bottom:var(--sp-xl)}
+    .orders-table{background:white;border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+    .orders-table-header{padding:var(--sp-lg);border-bottom:1px solid rgba(220,165,174,.08);display:flex;align-items:center;justify-content:space-between}
+    .order-row{padding:var(--sp-md) var(--sp-lg);border-bottom:1px solid rgba(220,165,174,.05);display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:var(--sp-md);transition:background var(--t-fast)}
+    .order-row:hover{background:var(--cream)}
+    .order-row:last-child{border-bottom:none}
+    .quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin-bottom:var(--sp-xl)}
+    .quick-action{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);text-align:center;box-shadow:var(--shadow-sm);cursor:pointer;transition:all var(--t-normal);text-decoration:none}
+    .quick-action:hover{transform:translateY(-4px);box-shadow:var(--shadow-gold)}
+    .quick-action i{font-size:2rem;color:var(--gold);margin-bottom:var(--sp-sm);display:block}
+    .quick-action span{font-size:.875rem;font-weight:600;color:var(--text-dark)}
+    @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dash-layout{grid-template-columns:1fr}.dash-sidebar{display:none}}
+    @media(max-width:640px){.stats-grid{grid-template-columns:1fr}.quick-actions{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div style="padding-top:var(--nav-h)">
+    <div class="dash-layout">
+      <aside class="dash-sidebar">
+        <div style="padding:var(--sp-lg) var(--sp-xl) var(--sp-xl)">
+          <div class="navbar-avatar" id="sidebar-avatar" style="width:52px;height:52px;font-size:1.1rem;margin-bottom:var(--sp-md)"></div>
+          <div style="font-weight:700;color:var(--text-dark);font-size:.95rem" id="sidebar-name"></div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px" id="sidebar-role"></div>
+        </div>
+        <div class="dash-nav-section">Tổng quan</div>
+        <div class="dash-nav-item active" onclick="showSection('overview')" id="nav-overview"><i class="ri-dashboard-line"></i> Dashboard</div>
+        <div class="dash-nav-item" onclick="showSection('profile')" id="nav-profile"><i class="ri-user-settings-line"></i> Thông Tin Cá Nhân</div>
+        <div class="dash-nav-item" onclick="location.href='services.html'"><i class="ri-search-line"></i> Tìm Dịch Vụ</div>
+        <div class="dash-nav-section">Quản lý</div>
+        <div class="dash-nav-item" onclick="location.href='history.html'"><i class="ri-history-line"></i> Lịch Sử Đơn Hàng</div>
+        <div class="dash-nav-item" onclick="location.href='chat.html'"><i class="ri-message-3-line"></i> Tin Nhắn</div>
+        <div class="dash-nav-section">Tài khoản</div>
+        <div class="dash-nav-item" onclick="API.auth.logout()" style="color:rgba(231,76,60,.7)"><i class="ri-logout-box-line"></i> Đăng Xuất</div>
+      </aside>
+      <main class="dash-main">
+        <div id="panel-overview">
+          <div class="dash-title" id="dash-greeting"></div>
+          <p class="dash-subtitle">Chào mừng trở lại! Đây là tổng quan hoạt động của bạn.</p>
+
+          <!-- Stats -->
+          <div class="stats-grid stagger-children" id="stats-grid"></div>
+
+          <!-- Quick Actions -->
+          <h4 style="margin-bottom:var(--sp-md);color:var(--text-dark)">Thao Tác Nhanh</h4>
+          <div class="quick-actions">
+            <a href="services.html" class="quick-action"><i class="ri-search-line"></i><span>Tìm Dịch Vụ</span></a>
+            <a href="chat.html" class="quick-action"><i class="ri-message-3-line"></i><span>Tin Nhắn</span></a>
+            <a href="history.html" class="quick-action"><i class="ri-history-line"></i><span>Lịch Sử Đơn</span></a>
+          </div>
+
+          <!-- Recent Orders -->
+          <div class="orders-table">
+            <div class="orders-table-header">
+              <h4>Đơn Hàng Gần Đây</h4>
+              <a href="history.html" style="font-size:.875rem;color:var(--gold);font-weight:600">Xem tất cả →</a>
+            </div>
+            <div id="recent-orders"></div>
+          </div>
+        </div>
+
+        <!-- Profile Panel -->
+        <div id="panel-profile" class="hidden">
+          <h2 style="margin-bottom:var(--sp-md);color:var(--text-dark)">Thông Tin Cá Nhân</h2>
+          <div style="background:white;padding:var(--sp-xl);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg)">
+              <div class="form-group">
+                <label class="form-label">Họ và tên</label>
+                <input type="text" id="prof-name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="prof-email" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại</label>
+                <input type="tel" id="prof-phone" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Khu vực</label>
+                <input type="text" id="prof-location" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ngày dự kiến cưới</label>
+                <input type="date" id="prof-wedding-date" class="form-control">
+              </div>
+            </div>
+            <button class="btn btn-primary mt-lg" onclick="updateProfile()"><i class="ri-save-line"></i> Lưu Thay Đổi</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      const sess = API.auth.requireAuth();
+      if (!sess) return;
+      if (sess.role === 'provider') { location.href = 'provider-dashboard.html'; return; }
+
+      document.getElementById('sidebar-avatar').textContent = sess.avatar;
+      document.getElementById('sidebar-name').textContent = sess.name;
+      document.getElementById('sidebar-role').textContent = 'Khách hàng';
+
+      const hour = new Date().getHours();
+      const greet = hour < 12 ? 'Chào buổi sáng' : hour < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
+      document.getElementById('dash-greeting').textContent = greet + ', ' + sess.name + '!';
+
+      // Load stats
+      const s = await API.stats.customer();
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card animate-fadeInUp"><div class="stat-icon gold"><i class="ri-file-list-3-line"></i></div><div><div class="stat-value">${s.total}</div><div class="stat-label">Tổng đơn hàng</div></div></div>
+        <div class="stat-card animate-fadeInUp delay-100"><div class="stat-icon blue"><i class="ri-time-line"></i></div><div><div class="stat-value">${s.pending}</div><div class="stat-label">Đang chờ xác nhận</div></div></div>
+        <div class="stat-card animate-fadeInUp delay-200"><div class="stat-icon green"><i class="ri-checkbox-circle-line"></i></div><div><div class="stat-value">${s.done}</div><div class="stat-label">Đã hoàn thành</div></div></div>
+        <div class="stat-card animate-fadeInUp delay-300"><div class="stat-icon red"><i class="ri-money-cny-circle-line"></i></div><div><div class="stat-value">${UI.formatCurrency(s.spent)}</div><div class="stat-label">Đã chi tiêu</div></div></div>`;
+
+      // Recent orders
+      const orders = await API.txn.getMyOrders();
+      const el = document.getElementById('recent-orders');
+      if (!orders.length) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>Chưa có đơn hàng nào</h3><p>Hãy tìm và đặt dịch vụ đám hỏi đầu tiên của bạn!</p><a href="services.html" class="btn btn-primary mt-md">Tìm Dịch Vụ</a></div>`;
+      } else {
+        el.innerHTML = orders.slice(0, 5).map(o => `
+          <div class="order-row">
+            <div>
+              <div style="font-weight:600;font-size:.9rem">${o.serviceName}</div>
+              <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
+            </div>
+            <div>${UI.statusBadge(o.status)}</div>
+            <div style="font-weight:700;color:var(--gold)">${UI.formatCurrency(o.price)}</div>
+            <a href="checkout.html?id=${o.id}" class="btn btn-ghost btn-sm"><i class="ri-eye-line"></i></a>
+          </div>`).join('');
+      }
+
+      // Load Profile Data
+      document.getElementById('prof-name').value = sess.name || '';
+      document.getElementById('prof-email').value = sess.email || '';
+      document.getElementById('prof-phone').value = sess.phone || '';
+      document.getElementById('prof-location').value = sess.location || '';
+      document.getElementById('prof-wedding-date').value = sess.weddingDate || '';
+    });
+
+    function showSection(sec) {
+      document.getElementById('panel-overview').classList.toggle('hidden', sec !== 'overview');
+      document.getElementById('panel-profile').classList.toggle('hidden', sec !== 'profile');
+      document.getElementById('nav-overview').classList.toggle('active', sec === 'overview');
+      document.getElementById('nav-profile').classList.toggle('active', sec === 'profile');
+    }
+
+    async function updateProfile() {
+      const data = {
+        name: document.getElementById('prof-name').value.trim(),
+        phone: document.getElementById('prof-phone').value.trim(),
+        location: document.getElementById('prof-location').value.trim(),
+        weddingDate: document.getElementById('prof-wedding-date').value
+      };
+      if (!data.name) { UI.toast('Tên không được để trống.', 'error'); return; }
+      
+      try {
+        await API.auth.updateProfile(data);
+        UI.toast('Cập nhật thông tin thành công!', 'success');
+        document.getElementById('sidebar-name').textContent = data.name;
+      } catch (e) {
+        UI.toast(e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

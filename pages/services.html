@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dịch Vụ — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .services-layout{display:grid;grid-template-columns:260px 1fr;gap:var(--sp-xl);padding:var(--sp-xl) 0}
+    .filter-sidebar{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-sm);position:sticky;top:calc(var(--nav-h) + var(--sp-lg));height:fit-content}
+    .filter-section{margin-bottom:var(--sp-lg)}
+    .filter-title{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:var(--sp-sm)}
+    .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-lg)}
+    .search-bar{display:flex;gap:var(--sp-md);margin-bottom:var(--sp-lg)}
+    .search-input{flex:1;padding:12px 18px;border:1.5px solid rgba(220,165,174,.15);border-radius:var(--r-full);font-size:.9rem;outline:none;transition:border-color var(--t-fast)}
+    .search-input:focus{border-color:var(--gold)}
+    .price-inputs{display:flex;gap:var(--sp-sm);align-items:center}
+    .price-input{width:100%;padding:8px 12px;border:1.5px solid rgba(220,165,174,.15);border-radius:var(--r-sm);font-size:.8rem;outline:none}
+    .price-input:focus{border-color:var(--gold)}
+    .result-count{font-size:.875rem;color:var(--text-muted);margin-bottom:var(--sp-md)}
+    @media(max-width:1024px){.services-layout{grid-template-columns:1fr}.filter-sidebar{display:none}.services-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){.services-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page-header">
+    <div class="container">
+      <h1>Tìm Dịch Vụ</h1>
+      <p>Hàng trăm dịch vụ đám hỏi uy tín trên toàn quốc</p>
+    </div>
+  </div>
+
+  <div class="container page-content" style="padding-top:0">
+    <!-- Mobile filter chips -->
+    <div class="filter-bar" id="mobile-cats">
+      <button class="filter-chip active" data-cat="">Tất cả</button>
+      <button class="filter-chip" data-cat="be-trap">👰 Bê Tráp</button>
+      <button class="filter-chip" data-cat="ao-dai">👘 Áo Dài</button>
+      <button class="filter-chip" data-cat="lam-trap">🎁 Làm Tráp</button>
+      <button class="filter-chip" data-cat="media">📸 Media</button>
+      <button class="filter-chip" data-cat="makeup">💄 Make Up</button>
+    </div>
+
+    <div class="services-layout">
+      <!-- Sidebar Filters -->
+      <aside class="filter-sidebar">
+        <h4 style="margin-bottom:var(--sp-lg)">Bộ Lọc</h4>
+        <div class="filter-section">
+          <div class="filter-title">Danh Mục</div>
+          <div style="display:flex;flex-direction:column;gap:var(--sp-sm)">
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="" checked> Tất cả</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="be-trap"> 👰 Bê Tráp</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="ao-dai"> 👘 Áo Dài</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="lam-trap"> 🎁 Làm Tráp</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="media"> 📸 Media</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="makeup"> 💄 Make Up</label>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">Khu Vực</div>
+          <select id="location-filter" class="form-control" style="font-size:.875rem;padding:10px 14px">
+            <option value="">Tất cả khu vực</option>
+            <option>Hà Nội</option><option>TP. HCM</option><option>Đà Nẵng</option>
+            <option>Hải Phòng</option><option>Huế</option>
+          </select>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">Sắp Xếp</div>
+          <select id="sort-filter" class="form-control" style="font-size:.875rem;padding:10px 14px">
+            <option value="rating">Đánh giá cao nhất</option>
+            <option value="price_asc">Giá thấp nhất</option>
+            <option value="price_desc">Giá cao nhất</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="applyFilters()">Áp Dụng</button>
+        <button class="btn btn-ghost btn-block mt-sm" onclick="resetFilters()">Đặt Lại</button>
+      </aside>
+
+      <!-- Results -->
+      <div>
+        <div class="search-bar">
+          <input id="search-input" type="text" class="search-input" placeholder="🔍 Tìm tên dịch vụ, mô tả...">
+          <button class="btn btn-primary" onclick="applyFilters()"><i class="ri-search-line"></i></button>
+        </div>
+        <div class="result-count" id="result-count"></div>
+        <div class="services-grid stagger-children" id="services-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initPage();
+      UI.renderFooter('footer-container');
+
+      // Read URL param
+      const cat = new URLSearchParams(location.search).get('cat') || '';
+      if (cat) {
+        const radio = document.querySelector(`input[name="cat"][value="${cat}"]`);
+        if (radio) radio.checked = true;
+        const chip = document.querySelector(`[data-cat="${cat}"]`);
+        if (chip) { document.querySelectorAll('[data-cat]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
+      }
+
+      // Mobile chips
+      document.querySelectorAll('[data-cat]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          const r = document.querySelector(`input[name="cat"][value="${btn.dataset.cat}"]`);
+          if (r) r.checked = true;
+          applyFilters();
+        });
+      });
+
+      // Sidebar radio
+      document.querySelectorAll('input[name="cat"]').forEach(r => r.addEventListener('change', applyFilters));
+      document.getElementById('location-filter').addEventListener('change', applyFilters);
+      document.getElementById('sort-filter').addEventListener('change', applyFilters);
+      document.getElementById('search-input').addEventListener('input', debounce(applyFilters, 400));
+
+      applyFilters();
+    });
+
+    async function applyFilters() {
+      const cat      = document.querySelector('input[name="cat"]:checked')?.value || '';
+      const location = document.getElementById('location-filter').value;
+      const sort     = document.getElementById('sort-filter').value;
+      const search   = document.getElementById('search-input').value;
+      const svcs = await API.svc.getAll({ category:cat, location, sort, search });
+      renderServices(svcs);
+    }
+
+    function renderServices(svcs) {
+      const grid = document.getElementById('services-grid');
+      document.getElementById('result-count').textContent = `Tìm thấy ${svcs.length} dịch vụ`;
+      if (!svcs.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><h3>Không tìm thấy dịch vụ phù hợp</h3><p>Thử thay đổi bộ lọc hoặc từ khoá tìm kiếm.</p></div>`;
+        return;
+      }
+      grid.innerHTML = svcs.map(s => `
+        <a href="service-detail.html?id=${s.id}" class="service-card">
+          <div style="overflow:hidden;height:200px">
+            <img src="${s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease">
+          </div>
+          <div class="service-card-body">
+            <span style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(s.category)} ${UI.categoryLabel(s.category)}</span>
+            <div class="service-card-title mt-xs">${s.name}</div>
+            <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location} · ${API.svc.getProviderName(s.providerId)}</div>
+            <div class="stars">${UI.stars(s.rating)} <span style="font-size:.75rem;color:var(--text-muted)">(${s.reviewCount})</span></div>
+            <div class="service-card-footer">
+              <div class="service-card-price">${UI.formatCurrency(s.price)}<span style="font-size:.7em;font-weight:400;color:var(--text-muted)">/${s.unit}</span></div>
+              <span class="btn btn-primary btn-sm">Xem chi tiết</span>
+            </div>
+          </div>
+        </a>`).join('');
+    }
+
+    function resetFilters() {
+      document.querySelector('input[name="cat"][value=""]').checked = true;
+      document.getElementById('location-filter').value = '';
+      document.getElementById('sort-filter').value = 'rating';
+      document.getElementById('search-input').value = '';
+      applyFilters();
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+  </script>
+</body>
+</html>

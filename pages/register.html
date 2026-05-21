@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Đăng Ký — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body{background:var(--grad-hero);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:var(--sp-lg)}
+    .auth-card{background:white;border-radius:var(--r-xl);padding:var(--sp-2xl);width:100%;max-width:560px;box-shadow:var(--shadow-lg);border:1px solid rgba(191,167,162,.1)}
+    .role-row{display:flex;gap:var(--sp-md)}
+    .step-indicator{display:flex;align-items:center;gap:var(--sp-sm);margin-bottom:var(--sp-xl)}
+    .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;transition:all var(--t-normal)}
+    .step-dot.active{background:var(--grad-primary);color:white;box-shadow:var(--shadow-gold)}
+    .step-dot.done{background:var(--success);color:white}
+    .step-dot.idle{background:rgba(191,167,162,.1);color:var(--text-muted)}
+    .step-line{flex:1;height:2px;background:rgba(191,167,162,.15);border-radius:2px;position:relative;overflow:hidden}
+    .step-line-fill{height:100%;background:var(--grad-gold);width:0%;transition:width .5s ease}
+  </style>
+</head>
+<body>
+  <a href="../index.html" style="position:fixed;top:20px;left:20px;color:var(--gold-light);font-size:.875rem;display:flex;align-items:center;gap:6px;z-index:10">
+    <i class="ri-arrow-left-line"></i> Về trang chủ
+  </a>
+
+  <div class="auth-card animate-scaleIn">
+    <div style="text-align:center;margin-bottom:var(--sp-lg)">
+      <a href="../index.html" class="navbar-brand" style="justify-content:center;color:var(--text-dark);font-size:1.4rem;margin-bottom:var(--sp-md)">
+        <div class="brand-icon" style="width:36px;height:36px">🎀</div> BêTráp
+      </a>
+      <h2 style="color:var(--text-dark);font-size:1.6rem">Tạo Tài Khoản</h2>
+      <p style="color:var(--text-muted);font-size:.875rem;margin-top:4px">Đã có tài khoản? <a href="login.html" style="color:var(--red-dark);font-weight:600">Đăng nhập</a></p>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-1">1</div>
+      <div class="step-line"><div class="step-line-fill" id="line-1"></div></div>
+      <div class="step-dot idle" id="dot-2">2</div>
+      <div class="step-line"><div class="step-line-fill" id="line-2"></div></div>
+      <div class="step-dot idle" id="dot-3">3</div>
+    </div>
+
+    <!-- Step 1: Role -->
+    <div id="step-1">
+      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:var(--sp-lg);text-align:center">Bạn muốn tham gia với vai trò nào?</p>
+      <div class="role-row">
+        <div class="role-option" id="role-customer" onclick="selectRole('customer')">
+          <div class="role-icon">👩‍👰</div>
+          <div class="role-name">Khách Hàng</div>
+          <div class="role-desc">Tìm và đặt dịch vụ đám hỏi</div>
+        </div>
+        <div class="role-option" id="role-provider" onclick="selectRole('provider')">
+          <div class="role-icon">🏪</div>
+          <div class="role-name">Nhà Cung Cấp</div>
+          <div class="role-desc">Đăng dịch vụ và nhận đơn hàng</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block mt-lg" onclick="nextStep(2)" id="step1-next" disabled>
+        Tiếp theo <i class="ri-arrow-right-line"></i>
+      </button>
+    </div>
+
+    <!-- Step 2: Account info -->
+    <div id="step-2" class="hidden">
+      <div class="form-group">
+        <label class="form-label">Họ và tên</label>
+        <div class="input-group">
+          <i class="ri-user-line input-icon" style="color:var(--text-muted)"></i>
+          <input id="reg-name" type="text" class="form-control" placeholder="Nguyễn Văn A">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <div class="input-group">
+          <i class="ri-mail-line input-icon" style="color:var(--text-muted)"></i>
+          <input id="reg-email" type="email" class="form-control" placeholder="email@example.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mật khẩu</label>
+        <div class="input-group">
+          <i class="ri-lock-line input-icon" style="color:var(--text-muted)"></i>
+          <input id="reg-password" type="password" class="form-control" placeholder="Tối thiểu 6 ký tự">
+          <i class="ri-eye-off-line input-icon-right" id="toggle-pw2" onclick="togglePw2()"></i>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--sp-md)">
+        <button class="btn btn-ghost btn-block" onclick="nextStep(1)" style="color:var(--text-muted);border:1px solid rgba(191,167,162,.15)">← Quay lại</button>
+        <button class="btn btn-primary btn-block" onclick="nextStep(3)">Tiếp theo <i class="ri-arrow-right-line"></i></button>
+      </div>
+    </div>
+
+    <!-- Step 3: Additional info -->
+    <div id="step-3" class="hidden">
+      <div class="form-group">
+        <label class="form-label">Số điện thoại</label>
+        <div class="input-group">
+          <i class="ri-phone-line input-icon" style="color:var(--text-muted)"></i>
+          <input id="reg-phone" type="tel" class="form-control" placeholder="0901 234 567">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Khu vực</label>
+        <select id="reg-location" class="form-control">
+          <option value="">Chọn tỉnh/thành phố</option>
+          <option>Hà Nội</option><option>TP. HCM</option><option>Đà Nẵng</option>
+          <option>Hải Phòng</option><option>Cần Thơ</option><option>Huế</option>
+          <option>Nha Trang</option><option>Vũng Tàu</option><option>Khác</option>
+        </select>
+      </div>
+      <div id="reg-error" class="form-error hidden"></div>
+      <div style="display:flex;gap:var(--sp-md)">
+        <button class="btn btn-ghost btn-block" onclick="nextStep(2)" style="color:var(--text-muted);border:1px solid rgba(191,167,162,.15)">← Quay lại</button>
+        <button class="btn btn-primary btn-block" onclick="doRegister()" id="reg-btn"><i class="ri-check-line"></i> Hoàn Thành</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    DB.SEED.run();
+    let selectedRole = null;
+
+    // Pre-select role from URL param
+    const urlRole = new URLSearchParams(location.search).get('role');
+    if (urlRole) { setTimeout(() => selectRole(urlRole), 100); }
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('role-customer').classList.toggle('selected', role === 'customer');
+      document.getElementById('role-provider').classList.toggle('selected', role === 'provider');
+      document.getElementById('step1-next').disabled = false;
+    }
+
+    function nextStep(n) {
+      if (n === 3) {
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const pw = document.getElementById('reg-password').value;
+        if (!name || !email || !pw) { UI.toast('Vui lòng điền đầy đủ thông tin!', 'error'); return; }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) { UI.toast('Email không đúng định dạng.', 'error'); return; }
+        
+        const passRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
+        if (!passRegex.test(pw)) { UI.toast('Mật khẩu phải từ 6 ký tự, gồm 1 chữ in hoa và 1 ký tự đặc biệt.', 'error'); return; }
+      }
+      document.querySelectorAll('[id^="step-"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById('step-' + n).classList.remove('hidden');
+      // update indicators
+      [1,2,3].forEach(i => {
+        const dot = document.getElementById('dot-' + i);
+        dot.className = 'step-dot ' + (i < n ? 'done' : i === n ? 'active' : 'idle');
+        if (i < n) dot.innerHTML = '<i class="ri-check-line" style="font-size:.8rem"></i>';
+        else dot.innerHTML = i;
+      });
+      if (n > 1) { document.getElementById('line-1').style.width = '100%'; }
+      if (n > 2) { document.getElementById('line-2').style.width = '100%'; }
+    }
+
+    async function doRegister() {
+      const errEl = document.getElementById('reg-error');
+      const btn = document.getElementById('reg-btn');
+      errEl.classList.add('hidden');
+      
+      const phone = document.getElementById('reg-phone').value;
+      const phoneRegex = /^(03|05|07|08|09)\d{8}$/;
+      
+      if (phone.includes(' ')) {
+        errEl.textContent = 'Số điện thoại không được chứa dấu cách (khoảng trắng).';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      
+      if (!phoneRegex.test(phone)) {
+        errEl.textContent = 'Số điện thoại không hợp lệ (Phải là ĐTDĐ Việt Nam 10 số, chỉ gồm các chữ số).';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:2px"></span>';
+      try {
+        await API.auth.register({
+          name: document.getElementById('reg-name').value.trim(),
+          email: document.getElementById('reg-email').value.trim(),
+          password: document.getElementById('reg-password').value,
+          role: selectedRole,
+          phone: phone,
+          location: document.getElementById('reg-location').value,
+        });
+        window.location.href = 'welcome.html';
+      } catch(err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ri-check-line"></i> Hoàn Thành';
+      }
+    }
+
+    function togglePw2() {
+      const inp = document.getElementById('reg-password');
+      const icon = document.getElementById('toggle-pw2');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.className = inp.type === 'password' ? 'ri-eye-off-line input-icon-right' : 'ri-eye-line input-icon-right';
+    }
+  </script>
+</body>
+</html>

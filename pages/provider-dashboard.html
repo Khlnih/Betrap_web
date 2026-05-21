@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Nhà Cung Cấp — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body{background:var(--cream)}
+    .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - var(--nav-h))}
+    .dash-sidebar{background:white;padding:var(--sp-lg) 0;position:sticky;top:var(--nav-h);height:calc(100vh - var(--nav-h));overflow-y:auto;border-right:1px solid rgba(220,165,174,.15)}
+    .dash-main{padding:var(--sp-xl);overflow-y:auto}
+    .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-md);margin-bottom:var(--sp-xl)}
+    .content-tabs{display:flex;gap:0;border-bottom:2px solid rgba(220,165,174,.1);margin-bottom:var(--sp-xl)}
+    .tab-btn{padding:12px 24px;font-size:.875rem;font-weight:600;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all var(--t-fast);cursor:pointer}
+    .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+    .tab-btn:hover{color:var(--gold-dark)}
+    .svc-manage-card{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);display:flex;gap:var(--sp-md);align-items:flex-start;border-left:4px solid var(--gold);transition:box-shadow var(--t-fast)}
+    .svc-manage-card:hover{box-shadow:var(--shadow-md)}
+    @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dash-layout{grid-template-columns:1fr}.dash-sidebar{display:none}}
+    @media(max-width:640px){.stats-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div style="padding-top:var(--nav-h)">
+    <div class="dash-layout">
+      <aside class="dash-sidebar">
+        <div style="padding:var(--sp-lg) var(--sp-xl) var(--sp-xl)">
+          <div class="navbar-avatar" id="sidebar-avatar" style="width:52px;height:52px;font-size:1.1rem;margin-bottom:var(--sp-md)"></div>
+          <div style="font-weight:700;color:var(--text-dark);font-size:.95rem" id="sidebar-name"></div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px" id="sidebar-role"></div>
+        </div>
+        <div class="dash-nav-section">Tổng quan</div>
+        <div class="dash-nav-item active" onclick="showTab('overview')"><i class="ri-dashboard-line"></i> Dashboard</div>
+        <div class="dash-nav-section">Quản lý</div>
+        <div class="dash-nav-item" onclick="showTab('orders')"><i class="ri-file-list-3-line"></i> Đơn Hàng</div>
+        <div class="dash-nav-item" onclick="showTab('services')"><i class="ri-apps-line"></i> Dịch Vụ</div>
+        <div class="dash-nav-item" onclick="location.href='chat.html'"><i class="ri-message-3-line"></i> Tin Nhắn</div>
+        <div class="dash-nav-section">Tài khoản</div>
+        <div class="dash-nav-item" onclick="API.auth.logout()" style="color:rgba(231,76,60,.7)"><i class="ri-logout-box-line"></i> Đăng Xuất</div>
+      </aside>
+
+      <main class="dash-main">
+        <div class="dash-title" id="dash-greeting"></div>
+        <p class="dash-subtitle">Chào mừng trở lại! Quản lý dịch vụ và đơn hàng của bạn.</p>
+
+        <!-- Stats -->
+        <div class="stats-grid stagger-children" id="stats-grid"></div>
+
+        <div class="content-tabs">
+          <div class="tab-btn active" id="tab-overview" onclick="showTab('overview')">Tổng Quan</div>
+          <div class="tab-btn" id="tab-orders" onclick="showTab('orders')">Đơn Hàng <span id="pending-badge"></span></div>
+          <div class="tab-btn" id="tab-services" onclick="showTab('services')">Dịch Vụ</div>
+          <div class="tab-btn" id="tab-profile" onclick="showTab('profile')">Thông Tin Studio</div>
+        </div>
+
+        <!-- Overview -->
+        <div id="panel-overview">
+          <h4 style="margin-bottom:var(--sp-md)">Đơn Hàng Cần Xử Lý</h4>
+          <div id="pending-orders"></div>
+        </div>
+
+        <!-- Orders -->
+        <div id="panel-orders" class="hidden">
+          <div style="display:flex;gap:var(--sp-sm);margin-bottom:var(--sp-lg);flex-wrap:wrap">
+            <button class="filter-chip active" data-status="" onclick="filterOrders(this,'')">Tất cả</button>
+            <button class="filter-chip" data-status="pending" onclick="filterOrders(this,'pending')">Chờ xác nhận</button>
+            <button class="filter-chip" data-status="confirmed" onclick="filterOrders(this,'confirmed')">Đã xác nhận</button>
+            <button class="filter-chip" data-status="done" onclick="filterOrders(this,'done')">Hoàn thành</button>
+          </div>
+          <div id="all-orders-list"></div>
+        </div>
+
+        <!-- Services -->
+        <div id="panel-services" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-lg)">
+            <h4>Dịch Vụ Của Tôi</h4>
+          </div>
+          <div id="my-services-list" style="display:flex;flex-direction:column;gap:var(--sp-md)"></div>
+        </div>
+
+        <!-- Profile Panel -->
+        <div id="panel-profile" class="hidden">
+          <h2 style="margin-bottom:var(--sp-md);color:var(--text-dark)">Thông Tin Nhà Cung Cấp</h2>
+          <div style="background:white;padding:var(--sp-xl);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg)">
+              <div class="form-group" style="grid-column: 1 / -1">
+                <label class="form-label">Tên Studio / Đội Bê Tráp</label>
+                <input type="text" id="prof-name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email liên hệ</label>
+                <input type="email" id="prof-email" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại (Tổng đài)</label>
+                <input type="tel" id="prof-phone" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Địa chỉ trụ sở</label>
+                <input type="text" id="prof-location" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tài khoản ngân hàng</label>
+                <input type="text" id="prof-bank" class="form-control" placeholder="VD: VCB 0123456789 - NGUYEN VAN A">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1">
+                <label class="form-label">Giới thiệu (Bio)</label>
+                <textarea id="prof-bio" class="form-control" rows="4" placeholder="Giới thiệu về kinh nghiệm, phong cách làm việc..."></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary mt-lg" onclick="updateProfile()"><i class="ri-save-line"></i> Lưu Thông Tin</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+  <div id="modal-overlay"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    let allOrders = [];
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      const sess = API.auth.requireAuth();
+      if (!sess) return;
+      if (sess.role !== 'provider') { location.href = 'dashboard.html'; return; }
+
+      document.getElementById('sidebar-avatar').textContent = sess.avatar;
+      document.getElementById('sidebar-name').textContent = sess.name;
+
+      const hour = new Date().getHours();
+      const greet = hour < 12 ? 'Chào buổi sáng' : hour < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
+      document.getElementById('dash-greeting').textContent = greet + ', ' + sess.name + '!';
+
+      const s = await API.stats.provider();
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card"><div class="stat-icon gold"><i class="ri-file-list-3-line"></i></div><div><div class="stat-value">${s.orders}</div><div class="stat-label">Tổng đơn</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="ri-time-line"></i></div><div><div class="stat-value">${s.pending}</div><div class="stat-label">Chờ xác nhận</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="ri-checkbox-circle-line"></i></div><div><div class="stat-value">${s.done}</div><div class="stat-label">Hoàn thành</div></div></div>
+        <div class="stat-card"><div class="stat-icon red"><i class="ri-money-cny-circle-line"></i></div><div><div class="stat-value">${UI.formatCurrency(s.revenue)}</div><div class="stat-label">Doanh thu</div></div></div>
+        <div class="stat-card"><div class="stat-icon gold"><i class="ri-apps-line"></i></div><div><div class="stat-value">${s.services}</div><div class="stat-label">Dịch vụ</div></div></div>`;
+
+      allOrders = await API.txn.getMyOrders();
+      const pending = allOrders.filter(o => o.status === 'pending');
+      if (pending.length) document.getElementById('pending-badge').innerHTML = `<span class="badge badge-pending" style="font-size:.65rem">${pending.length}</span>`;
+
+      renderPendingOrders(pending);
+      renderAllOrders(allOrders);
+      renderMyServices();
+
+      // Load Profile
+      document.getElementById('prof-name').value = sess.name || '';
+      document.getElementById('prof-email').value = sess.email || '';
+      document.getElementById('prof-phone').value = sess.phone || '';
+      document.getElementById('prof-location').value = sess.location || '';
+      document.getElementById('prof-bank').value = sess.bank || '';
+      document.getElementById('prof-bio').value = sess.bio || '';
+    });
+
+    function showTab(tab) {
+      ['overview','orders','services','profile'].forEach(t => {
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+      });
+      document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+    }
+
+    async function updateProfile() {
+      const data = {
+        name: document.getElementById('prof-name').value.trim(),
+        phone: document.getElementById('prof-phone').value.trim(),
+        location: document.getElementById('prof-location').value.trim(),
+        bank: document.getElementById('prof-bank').value.trim(),
+        bio: document.getElementById('prof-bio').value.trim()
+      };
+      if (!data.name) { UI.toast('Tên Studio không được để trống.', 'error'); return; }
+      
+      try {
+        await API.auth.updateProfile(data);
+        UI.toast('Cập nhật hồ sơ Studio thành công!', 'success');
+        document.getElementById('sidebar-name').textContent = data.name;
+      } catch (e) {
+        UI.toast(e.message, 'error');
+      }
+    }
+
+    function renderPendingOrders(orders) {
+      const el = document.getElementById('pending-orders');
+      if (!orders.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h3>Không có đơn nào đang chờ</h3></div>`; return; }
+      el.innerHTML = orders.map(o => `
+        <div class="order-card-full border-pending" style="margin-bottom:var(--sp-md)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap">
+            <div>
+              <div class="order-id">${o.id}</div>
+              <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
+              <div style="font-size:.8rem;color:var(--text-muted);margin-top:4px"><i class="ri-calendar-line"></i> ${o.date} ${o.time} · <i class="ri-map-pin-line"></i> ${o.address}</div>
+            </div>
+            <div style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--gold)">${UI.formatCurrency(o.price)}</div>
+          </div>
+          <div style="display:flex;gap:var(--sp-sm);margin-top:var(--sp-md)">
+            <button class="btn btn-primary btn-sm" onclick="updateStatus('${o.id}','confirmed')"><i class="ri-check-line"></i> Xác Nhận</button>
+            <button class="btn btn-danger btn-sm" onclick="updateStatus('${o.id}','cancelled')"><i class="ri-close-line"></i> Từ Chối</button>
+            <a href="chat.html" class="btn btn-ghost btn-sm"><i class="ri-message-3-line"></i> Chat</a>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderAllOrders(orders) {
+      const el = document.getElementById('all-orders-list');
+      if (!orders.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>Chưa có đơn hàng nào</h3></div>`; return; }
+      el.innerHTML = orders.map(o => `
+        <div style="background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);margin-bottom:var(--sp-md);border-left:4px solid var(--${o.status==='done'?'success':o.status==='cancelled'?'error':'gold'})">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-md)">
+            <div>
+              <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
+              <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
+              <div style="font-size:.8rem;color:var(--text-muted)">${o.date} ${o.time} · ${o.address}</div>
+            </div>
+            <div style="text-align:right">${UI.statusBadge(o.status)}<div style="font-family:var(--font-h);font-weight:700;color:var(--gold);font-size:1.2rem;margin-top:4px">${UI.formatCurrency(o.price)}</div></div>
+          </div>
+          ${o.status==='confirmed'?`<div style="margin-top:var(--sp-md)"><button class="btn btn-primary btn-sm" onclick="updateStatus('${o.id}','done')"><i class="ri-check-double-line"></i> Đánh dấu Hoàn Thành</button></div>`:''}
+        </div>`).join('');
+    }
+
+    function renderMyServices() {
+      const sess = API.auth.currentSession();
+      const svcs = DB.services.findByProvider(sess.userId);
+      const el = document.getElementById('my-services-list');
+      if (!svcs.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏪</div><h3>Chưa có dịch vụ nào</h3><p>Hãy liên hệ admin để đăng dịch vụ của bạn.</p></div>`; return; }
+      el.innerHTML = svcs.map(s => `
+        <div class="svc-manage-card">
+          <img src="${s.image}" alt="${s.name}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--r-sm);flex-shrink:0">
+          <div style="flex:1">
+            <div style="font-weight:700">${s.name}</div>
+            <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">${UI.categoryLabel(s.category)} · ${s.location}</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-md);margin-top:4px">
+              <span class="stars" style="font-size:.8rem">${UI.stars(s.rating)}</span>
+              <span style="font-size:.75rem;color:var(--text-muted)">${s.reviewCount} đánh giá</span>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--font-h);font-weight:700;color:var(--gold)">${UI.formatCurrency(s.price)}</div>
+            <div style="font-size:.75rem;color:var(--text-muted)">/${s.unit}</div>
+            <span class="${s.active?'badge badge-active':'badge badge-cancelled'}" style="margin-top:4px">${s.active?'Hoạt động':'Ẩn'}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    function filterOrders(btn, status) {
+      document.querySelectorAll('[data-status]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = status ? allOrders.filter(o=>o.status===status) : allOrders;
+      renderAllOrders(filtered);
+    }
+
+    async function updateStatus(id, status) {
+      await API.txn.updateStatus(id, status);
+      UI.toast(status==='confirmed'?'✅ Đã xác nhận đơn hàng!':status==='done'?'✅ Đã hoàn thành!':'❌ Đã từ chối đơn hàng.', status==='cancelled'?'info':'success');
+      allOrders = await API.txn.getMyOrders();
+      const pending = allOrders.filter(o=>o.status==='pending');
+      renderPendingOrders(pending);
+      renderAllOrders(allOrders);
+    }
+  </script>
+</body>
+</html>

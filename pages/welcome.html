@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Chào Mừng — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body{background:var(--grad-hero);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .welcome-card{text-align:center;max-width:520px;width:100%;padding:var(--sp-lg)}
+    .welcome-icon{width:100px;height:100px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin:0 auto var(--sp-xl);box-shadow:0 0 60px rgba(191,167,162,.4);animation:bounceIn .8s ease both,glow 2s ease-in-out infinite 1s}
+    .welcome-name{font-family:var(--font-h);font-size:2.5rem;font-weight:800;color:white;margin-bottom:var(--sp-sm)}
+    .welcome-sub{font-size:1.05rem;color:rgba(249,243,228,.7);margin-bottom:var(--sp-xl);line-height:1.8}
+    .role-badge{display:inline-flex;align-items:center;gap:var(--sp-sm);background:var(--grad-gold);color:var(--dark);padding:8px 24px;border-radius:var(--r-full);font-weight:700;font-size:.9rem;margin-bottom:var(--sp-xl)}
+    .feature-list{display:flex;flex-direction:column;gap:var(--sp-md);margin:var(--sp-xl) 0;text-align:left}
+    .feature-item{display:flex;align-items:center;gap:var(--sp-md);color:rgba(249,243,228,.85);font-size:.9rem;background:rgba(255,255,255,.05);border:1px solid rgba(191,167,162,.1);border-radius:var(--r-md);padding:var(--sp-md);animation:fadeInLeft .5s ease both}
+    .feature-item i{font-size:1.3rem;color:var(--gold-light);width:24px;text-align:center;flex-shrink:0}
+    .countdown{font-size:.8rem;color:rgba(249,243,228,.4);margin-top:var(--sp-lg)}
+    .progress-bar{height:3px;background:rgba(191,167,162,.15);border-radius:3px;margin-top:var(--sp-sm);overflow:hidden}
+    .progress-fill{height:100%;background:var(--grad-gold);border-radius:3px;width:100%;transform-origin:left;animation:shrink 5s linear forwards}
+    @keyframes shrink{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+  </style>
+</head>
+<body>
+  <div class="welcome-card">
+    <div class="welcome-icon animate-bounceIn" id="welcome-icon">🎉</div>
+    <div class="welcome-name animate-fadeInUp delay-200" id="welcome-name">Xin chào!</div>
+    <p class="welcome-sub animate-fadeInUp delay-300">
+      Chào mừng bạn đến với <strong style="color:var(--gold-light)">BêTráp</strong> — nền tảng dịch vụ đám hỏi truyền thống Việt Nam.
+    </p>
+    <div class="role-badge animate-scaleIn delay-400" id="role-badge">
+      <i class="ri-user-line"></i> <span id="role-text">Khách hàng</span>
+    </div>
+
+    <div class="feature-list" id="feature-list"></div>
+
+    <button class="btn btn-gold btn-lg btn-block animate-fadeInUp delay-500" onclick="goToDashboard()" id="go-btn">
+      <i class="ri-dashboard-line"></i> Vào Dashboard Ngay
+    </button>
+
+    <div class="countdown">
+      Tự động chuyển sau <span id="timer">5</span> giây...
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    DB.SEED.run();
+    const sess = DB.session.get();
+    if (!sess) { window.location.href = 'login.html'; }
+
+    const user = DB.users.findById(sess.userId);
+    document.getElementById('welcome-name').textContent = 'Xin chào, ' + (user?.name || sess.name) + '!';
+
+    const isProvider = sess.role === 'provider';
+    document.getElementById('role-badge').innerHTML = isProvider
+      ? '<i class="ri-store-2-line"></i> Nhà Cung Cấp Dịch Vụ'
+      : '<i class="ri-user-heart-line"></i> Khách Hàng';
+    document.getElementById('welcome-icon').textContent = isProvider ? '🏪' : '👰';
+
+    const features = isProvider ? [
+      { icon:'ri-add-circle-line', text:'Đăng gói dịch vụ của bạn để tiếp cận hàng nghìn khách hàng' },
+      { icon:'ri-message-3-line', text:'Chat trực tiếp với khách hàng để tư vấn và chốt đơn' },
+      { icon:'ri-bar-chart-line', text:'Theo dõi doanh thu và đơn hàng trên dashboard' },
+    ] : [
+      { icon:'ri-search-eye-line', text:'Duyệt hàng trăm gói dịch vụ bê tráp theo khu vực' },
+      { icon:'ri-message-3-line', text:'Chat trực tiếp với nhà cung cấp để hỏi thêm thông tin' },
+      { icon:'ri-secure-payment-line', text:'Đặt lịch và thanh toán an toàn qua MoMo / VNPay' },
+    ];
+
+    document.getElementById('feature-list').innerHTML = features.map((f, i) => `
+      <div class="feature-item" style="animation-delay:${0.5 + i * 0.1}s">
+        <i class="${f.icon}"></i><span>${f.text}</span>
+      </div>`).join('');
+
+    // Confetti!
+    UI.launchConfetti(80);
+
+    function goToDashboard() {
+      window.location.href = isProvider ? 'provider-dashboard.html' : 'dashboard.html';
+    }
+
+    // Countdown
+    let t = 5;
+    const tick = setInterval(() => {
+      t--;
+      document.getElementById('timer').textContent = t;
+      if (t <= 0) { clearInterval(tick); goToDashboard(); }
+    }, 1000);
+  </script>
+</body>
+</html>

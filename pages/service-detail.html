@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Chi Tiết Dịch Vụ — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    .detail-layout{display:grid;grid-template-columns:1fr 380px;gap:var(--sp-xl);padding:var(--sp-xl) 0}
+    .main-img{width:100%;height:420px;object-fit:cover;border-radius:var(--r-xl)}
+    .tags{display:flex;gap:var(--sp-sm);flex-wrap:wrap;margin:var(--sp-md) 0}
+    .tag{background:var(--gold-faint);color:var(--gold-dark);border:1px solid rgba(191,167,162,.25);padding:4px 14px;border-radius:var(--r-full);font-size:.8rem;font-weight:600}
+    .booking-card{background:white;border-radius:var(--r-xl);box-shadow:var(--shadow-md);padding:var(--sp-xl);position:sticky;top:calc(var(--nav-h) + var(--sp-lg));border:1px solid rgba(191,167,162,.1)}
+    .provider-card{background:var(--cream-dark);border-radius:var(--r-lg);padding:var(--sp-lg);display:flex;align-items:center;gap:var(--sp-md);margin-bottom:var(--sp-xl)}
+    .reviews-section{margin-top:var(--sp-xl)}
+    .review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md);margin-top:var(--sp-lg)}
+    @media(max-width:1024px){.detail-layout{grid-template-columns:1fr}.booking-card{position:static}.review-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page-content">
+    <div class="container">
+      <div style="padding:var(--sp-lg) 0">
+        <a href="services.html" style="color:var(--text-muted);font-size:.875rem;display:inline-flex;align-items:center;gap:6px">
+          <i class="ri-arrow-left-line"></i> Quay lại danh sách
+        </a>
+      </div>
+      <div class="detail-layout" id="detail-content">
+        <div style="text-align:center;padding:var(--sp-3xl)"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+  <div id="modal-overlay"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      UI.renderFooter('footer-container');
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) { location.href = 'services.html'; return; }
+
+      const svc = await API.svc.getById(id);
+      if (!svc) { location.href = 'services.html'; return; }
+
+      document.title = svc.name + ' — BêTráp';
+      const provider = DB.users.findById(svc.providerId);
+      const reviews  = await API.review.getByService(id);
+
+      document.getElementById('detail-content').innerHTML = `
+        <div>
+          <img class="main-img animate-fadeIn" src="${svc.image}" alt="${svc.name}">
+          <div style="margin-top:var(--sp-lg)">
+            <span style="font-size:.8rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(svc.category)} ${UI.categoryLabel(svc.category)}</span>
+            <h1 style="font-size:2rem;margin:var(--sp-sm) 0">${svc.name}</h1>
+            <div style="display:flex;align-items:center;gap:var(--sp-lg);flex-wrap:wrap;margin-bottom:var(--sp-md)">
+              <span class="stars">${UI.stars(svc.rating)}</span>
+              <span style="font-size:.875rem;color:var(--text-muted)">${svc.rating} · ${svc.reviewCount} đánh giá</span>
+              <span style="font-size:.875rem;color:var(--text-muted)"><i class="ri-map-pin-line"></i> ${svc.location}</span>
+            </div>
+            <div class="tags">${(svc.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <div class="provider-card">
+              <div class="navbar-avatar" style="width:52px;height:52px;font-size:1rem;flex-shrink:0">${provider?.avatar||'??'}</div>
+              <div style="flex:1">
+                <div style="font-weight:700">${provider?.name||'Nhà cung cấp'}</div>
+                <div style="font-size:.8rem;color:var(--text-muted)">${provider?.bio||''}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px"><i class="ri-map-pin-line"></i> ${provider?.location||''}</div>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="startChat('${svc.providerId}','${svc.id}')"><i class="ri-message-3-line"></i> Chat</button>
+            </div>
+            <h3>Mô Tả Dịch Vụ</h3>
+            <p style="color:var(--text-muted);margin-top:var(--sp-md);line-height:1.9">${svc.description}</p>
+          </div>
+          <div class="reviews-section">
+            <h3>Đánh Giá Từ Khách Hàng (${reviews.length})</h3>
+            ${reviews.length ? `<div class="review-grid">${reviews.map(r=>`
+              <div class="review-card">
+                <div class="review-header">
+                  <div class="review-avatar">${r.user?.avatar||'?'}</div>
+                  <div><div style="font-weight:700;font-size:.9rem">${r.user?.name||'Khách hàng'}</div>
+                  <div class="stars" style="font-size:.8rem">${UI.stars(r.rating)}</div></div>
+                  <div style="margin-left:auto;font-size:.75rem;color:var(--text-muted)">${UI.timeAgo(r.createdAt)}</div>
+                </div>
+                <p class="review-text">${r.comment}</p>
+              </div>`).join('')}</div>` : `<div class="empty-state"><div class="empty-icon">💬</div><h3>Chưa có đánh giá</h3></div>`}
+          </div>
+        </div>
+
+        <!-- Booking Card -->
+        <div>
+          <div class="booking-card animate-fadeInRight">
+            <div style="font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--gold)">${UI.formatCurrency(svc.price)}<span style="font-size:.6em;font-weight:400;color:var(--text-muted)">/${svc.unit}</span></div>
+            <div class="divider"></div>
+            <div class="form-group">
+              <label class="form-label">Ngày tổ chức</label>
+              <input type="date" id="book-date" class="form-control" min="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Giờ bắt đầu</label>
+              <input type="time" id="book-time" class="form-control" value="08:00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Địa chỉ tổ chức</label>
+              <input type="text" id="book-address" class="form-control" placeholder="Số nhà, đường, phường, quận...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ghi chú thêm</label>
+              <textarea id="book-note" class="form-control" rows="3" placeholder="Yêu cầu đặc biệt..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" onclick="bookNow('${svc.id}')"><i class="ri-calendar-check-line"></i> Đặt Ngay</button>
+            <button class="btn btn-outline btn-block mt-sm" onclick="startChat('${svc.providerId}','${svc.id}')"><i class="ri-message-3-line"></i> Hỏi Nhà Cung Cấp</button>
+            <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:var(--sp-md)">
+              <i class="ri-shield-check-line" style="color:var(--success)"></i> Thanh toán an toàn · Hoàn tiền nếu huỷ trước 48h
+            </p>
+          </div>
+        </div>`;
+    });
+
+    async function bookNow(serviceId) {
+      const sess = API.auth.currentSession();
+      if (!sess) { UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' }); return; }
+      const date = document.getElementById('book-date').value;
+      const time = document.getElementById('book-time').value;
+      const address = document.getElementById('book-address').value;
+      if (!date || !address) { UI.toast('Vui lòng điền ngày và địa chỉ!', 'error'); return; }
+      const txn = await API.txn.create({ serviceId, date, time, address, note: document.getElementById('book-note').value });
+      location.href = `checkout.html?id=${txn.id}`;
+    }
+
+    async function startChat(providerId, serviceId) {
+      const sess = API.auth.currentSession();
+      if (!sess) { location.href = 'login.html'; return; }
+      const conv = await API.chat.startConversation(providerId, serviceId);
+      location.href = `chat.html?conv=${conv.id}`;
+    }
+  </script>
+</body>
+</html>

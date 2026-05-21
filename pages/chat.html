@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Tin Nhắn — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body{overflow:hidden}
+    .chat-wrap{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - var(--nav-h));margin-top:var(--nav-h)}
+    .chat-sidebar{border-right:1px solid rgba(220,165,174,.1);overflow-y:auto;background:white}
+    .chat-main{display:flex;flex-direction:column;background:var(--cream)}
+    .chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center}
+    @media(max-width:768px){.chat-wrap{grid-template-columns:1fr}.chat-sidebar-panel{position:fixed;inset:var(--nav-h) 0 0 0;z-index:50;background:white;transform:translateX(-100%);transition:transform .3s ease}.chat-sidebar-panel.open{transform:translateX(0)}}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="chat-wrap">
+    <!-- Sidebar: conversation list -->
+    <div class="chat-sidebar" id="conv-sidebar">
+      <div style="padding:var(--sp-lg);border-bottom:1px solid rgba(220,165,174,.08);background:var(--cream);display:flex;align-items:center;gap:var(--sp-md)">
+        <h4 style="flex:1">Tin Nhắn</h4>
+        <span id="unread-badge" class="badge badge-gold hidden"></span>
+      </div>
+      <div id="conv-list"><div style="padding:var(--sp-xl);text-align:center;color:var(--text-muted)"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Main chat area -->
+    <div class="chat-main" id="chat-main-area">
+      <div class="chat-empty" id="chat-placeholder">
+        <div style="font-size:4rem;margin-bottom:var(--sp-lg)">💬</div>
+        <h3 style="color:var(--text-muted)">Chọn cuộc trò chuyện</h3>
+        <p style="color:var(--text-muted);font-size:.875rem;margin-top:var(--sp-sm)">Chọn một hội thoại từ danh sách bên trái để bắt đầu chat</p>
+      </div>
+      <div id="chat-view" class="hidden" style="display:flex;flex-direction:column;height:100%">
+        <div class="chat-header" id="chat-header"></div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <input id="msg-input" class="chat-input" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="chat-send-btn" onclick="sendMsg()"><i class="ri-send-plane-fill"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    let activeConvId = null;
+    let pollInterval = null;
+    let currentSession = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      currentSession = API.auth.requireAuth();
+      if (!currentSession) return;
+      await loadConversations();
+
+      // Auto-open from URL param
+      const convId = new URLSearchParams(location.search).get('conv');
+      if (convId) openConversation(convId);
+
+      // Poll for new messages every 3s
+      pollInterval = setInterval(async () => {
+        await loadConversations();
+        if (activeConvId) await loadMessages(activeConvId, false);
+      }, 3000);
+    });
+
+    async function loadConversations() {
+      const convs = await API.chat.getConversations();
+      const el = document.getElementById('conv-list');
+      const totalUnread = convs.reduce((s,c) => s + c.unreadCount, 0);
+      const badge = document.getElementById('unread-badge');
+      if (totalUnread > 0) { badge.textContent = totalUnread; badge.classList.remove('hidden'); }
+      else badge.classList.add('hidden');
+
+      if (!convs.length) {
+        el.innerHTML = `<div style="padding:var(--sp-xl);text-align:center;color:var(--text-muted);font-size:.875rem">Chưa có tin nhắn nào.<br><a href="services.html" style="color:var(--gold)">Tìm dịch vụ và chat ngay!</a></div>`;
+        return;
+      }
+      el.innerHTML = convs.map(c => `
+        <div class="chat-item ${c.id===activeConvId?'active':''}" onclick="openConversation('${c.id}')">
+          <div class="chat-avatar">${c.otherUser?.avatar||'?'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="chat-name">${c.otherUser?.name||'Người dùng'}</div>
+            <div class="chat-preview">${c.lastMessage||'Bắt đầu cuộc trò chuyện...'}</div>
+          </div>
+          <div class="chat-time">${c.lastAt?UI.timeAgo(c.lastAt):''}</div>
+          ${c.unreadCount>0?`<div class="chat-unread">${c.unreadCount}</div>`:''}
+        </div>`).join('');
+    }
+
+    async function openConversation(convId) {
+      activeConvId = convId;
+      document.getElementById('chat-placeholder').classList.add('hidden');
+      document.getElementById('chat-view').style.display = 'flex';
+      document.getElementById('chat-view').classList.remove('hidden');
+      await loadMessages(convId, true);
+      await loadConversations();
+    }
+
+    async function loadMessages(convId, scroll) {
+      const msgs = await API.chat.getMessages(convId);
+      const conv = DB.conversations.findById(convId);
+      const otherId = conv?.participants?.find(p => p !== currentSession.userId);
+      const other = DB.users.findById(otherId);
+
+      document.getElementById('chat-header').innerHTML = `
+        <div class="chat-avatar">${other?.avatar||'?'}</div>
+        <div><div style="font-weight:700">${other?.name||'Người dùng'}</div>
+        <div style="font-size:.75rem;color:var(--text-muted)">${other?.role==='provider'?'Nhà cung cấp':'Khách hàng'} · ${other?.location||''}</div></div>
+        <a href="services.html" class="btn btn-ghost btn-sm" style="margin-left:auto"><i class="ri-external-link-line"></i></a>`;
+
+      const el = document.getElementById('chat-messages');
+      el.innerHTML = msgs.map(m => {
+        const isSent = m.senderId === currentSession.userId;
+        return `<div style="display:flex;flex-direction:column;align-items:${isSent?'flex-end':'flex-start'}">
+          <div class="chat-bubble ${isSent?'sent':'received'}">${m.content}
+            <div class="chat-bubble-time">${UI.formatDateTime(m.createdAt)} ${isSent&&m.read?'✓✓':isSent?'✓':''}</div>
+          </div></div>`;
+      }).join('');
+
+      if (scroll) el.scrollTop = el.scrollHeight;
+    }
+
+    async function sendMsg() {
+      const input = document.getElementById('msg-input');
+      const content = input.value.trim();
+      if (!content || !activeConvId) return;
+      input.value = '';
+      await API.chat.sendMessage(activeConvId, content);
+      await loadMessages(activeConvId, true);
+      await loadConversations();
+    }
+  </script>
+</body>
+</html>
