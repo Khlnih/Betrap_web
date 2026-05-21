@@ -157,12 +157,44 @@ const API = (() => {
         address: t.Address, status: t.Status, paymentMethod: t.PaymentMethod, paymentStatus: t.PaymentStatus
       }));
     },
-    getById: async (id) => DB.transactions.findById(id),
-    updateStatus: async (id, status) => DB.transactions.updateStatus(id, status),
-    // Mock pay
-    pay: async (txnId, method) => {
-      await new Promise(r => setTimeout(r, 1200)); // simulate delay
-      return DB.transactions.updateStatus(txnId, 'confirmed', { paymentMethod: method, paymentStatus: 'paid', paidAt: DB.now() });
+    getById: async (id) => {
+      const res = await fetch(`${BASE_URL}/transaction/${id}`);
+      if (!res.ok) return null;
+      const t = await res.json();
+      return {
+        id: t.Id, customerId: t.CustomerId, providerId: t.ProviderId, serviceId: t.ServiceId,
+        serviceName: t.ServiceName, price: t.Price, date: t.Date, time: t.Time,
+        address: t.Address, status: t.Status, paymentMethod: t.PaymentMethod, paymentStatus: t.PaymentStatus,
+        note: t.Note, createdAt: t.CreatedAt
+      };
+    },
+    updateStatus: async (id, status) => {
+      const res = await fetch(`${BASE_URL}/transaction/${id}/status`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error('Cập nhật trạng thái thất bại');
+      return true;
+    },
+    pay: async (txnId, method, amount = 1000000) => {
+      if (method === 'vnpay') {
+        const res = await fetch(`${BASE_URL}/payment/create_payment_url`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ txnId, amount, bankCode: '' })
+        });
+        if (!res.ok) throw new Error('Lỗi kết nối Cổng thanh toán VNPay');
+        const data = await res.json();
+        window.location.href = data.url;
+        return new Promise(() => {}); // Wait for redirect
+      } else {
+        await new Promise(r => setTimeout(r, 1200)); // simulate delay
+        const res = await fetch(`${BASE_URL}/transaction/${txnId}/status`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'confirmed', paymentMethod: method, paymentStatus: 'paid' })
+        });
+        if (!res.ok) throw new Error('Thanh toán thất bại');
+        return true;
+      }
     },
   };
 

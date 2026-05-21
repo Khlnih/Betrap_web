@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const oldFont = /family=Be\+Vietnam\+Pro[^\&]+\&family=Playfair\+Display[^\"']+/g;
-const newFont = 'family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600';
+const oldFont = /family=Montserrat[^\&]+\&family=Cormorant\+Garamond[^\"']+/g;
+const newFont = 'family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800';
 
 const walkSync = (dir, filelist = []) => {
   fs.readdirSync(dir).forEach(file => {

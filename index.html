@@ -6,7 +6,7 @@
   <title>BêTráp — Dịch Vụ Đám Hỏi Truyền Thống Việt Nam</title>
   <meta name="description" content="Nền tảng kết nối dịch vụ đám hỏi uy tín — Bê Tráp, Áo Dài, Làm Tráp, Media, Make Up tại Việt Nam.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
@@ -14,15 +14,41 @@
   <style>
     /* ── HERO ── */
     .hero{min-height:100vh;background:var(--grad-hero);display:flex;align-items:center;position:relative;overflow:hidden}
-    .hero-bg-pattern{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C8963E' fill-opacity='0.04'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3C/g%3E%3C/svg%3E");opacity:.5}
-    .hero-glow{position:absolute;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(191,167,162,.18) 0%,transparent 70%);pointer-events:none}
-    .hero-glow-2{position:absolute;bottom:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(220,165,174,.2) 0%,transparent 70%);pointer-events:none}
+    .hero-bg-pattern{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0 C60 20 80 40 100 50 C80 60 60 80 50 100 C40 80 20 60 0 50 C20 40 40 20 50 0 Z' fill='%23D4AF37' fill-opacity='0.05'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23D4AF37' fill-opacity='0.03'/%3E%3C/svg%3E");opacity:.7}
+    .petal {
+      position: absolute;
+      top: -10%;
+      width: 18px;
+      height: 18px;
+      /* Màu cánh hoa đào/hồng nhạt */
+      background: linear-gradient(135deg, #ffd1dc 0%, #ff9eaf 100%);
+      border-radius: 18px 0 18px 0;
+      opacity: 0.8;
+      pointer-events: none;
+      animation: fall linear infinite;
+      z-index: 1;
+      box-shadow: 0 0 8px rgba(255,158,175,0.4);
+    }
+    .petal:nth-child(even) {
+      /* Màu cánh hoa mai/vàng nhạt */
+      background: linear-gradient(135deg, #fff3b0 0%, #ffdf00 100%);
+      border-radius: 0 18px 0 18px;
+      box-shadow: 0 0 8px rgba(255,223,0,0.4);
+    }
+    @keyframes fall {
+      0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.9; }
+      90% { opacity: 0.9; }
+      100% { transform: translate(150px, 110vh) rotate(720deg); opacity: 0; }
+    }
+    .hero-glow{position:absolute;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(212,175,55,.18) 0%,transparent 70%);pointer-events:none}
+    .hero-glow-2{position:absolute;bottom:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(200,16,46,.2) 0%,transparent 70%);pointer-events:none}
     .hero-content{position:relative;z-index:2;max-width:700px}
-    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(220,165,174,.15);border:1px solid rgba(220,165,174,.3);color:var(--text-dark);padding:6px 18px;border-radius:var(--r-full);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:var(--sp-lg)}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);color:var(--text-dark);padding:6px 18px;border-radius:var(--r-full);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:var(--sp-lg)}
     .hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:800;color:var(--text-dark);line-height:1.15;margin-bottom:var(--sp-lg)}
     .hero p{font-size:1.1rem;color:var(--text-muted);margin-bottom:var(--sp-xl);max-width:540px;line-height:1.8}
     .hero-btns{display:flex;gap:var(--sp-md);flex-wrap:wrap}
-    .hero-stats{display:flex;gap:var(--sp-xl);margin-top:var(--sp-2xl);padding-top:var(--sp-xl);border-top:1px solid rgba(220,165,174,.3)}
+    .hero-stats{display:flex;gap:var(--sp-xl);margin-top:var(--sp-2xl);padding-top:var(--sp-xl);border-top:1px solid rgba(200,16,46,.3)}
     .hero-stat .num{font-family:var(--font-h);font-size:2rem;font-weight:700;color:var(--text-dark);line-height:1}
     .hero-stat .lbl{font-size:.75rem;color:var(--text-muted);margin-top:4px}
     .hero-img-wrap{position:absolute;right:5%;bottom:0;width:40%;height:85%;pointer-events:none;}
@@ -51,7 +77,7 @@
     /* ── TESTIMONIALS ── */
     .testimonials-section{background:var(--cream-dark);padding:var(--sp-3xl) 0}
     .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-lg)}
-    .testimonial-card{background:white;border-radius:var(--r-xl);padding:var(--sp-xl);box-shadow:var(--shadow-sm);position:relative;border:1px solid rgba(191,167,162,.2)}
+    .testimonial-card{background:white;border-radius:var(--r-xl);padding:var(--sp-xl);box-shadow:var(--shadow-sm);position:relative;border:1px solid rgba(212,175,55,.2)}
     .testimonial-card::before{content:'\201C';font-family:var(--font-h);font-size:5rem;color:var(--gold-faint);line-height:1;position:absolute;top:var(--sp-md);left:var(--sp-xl);color:var(--gold);opacity:.3}
     .testimonial-text{font-size:.9rem;color:var(--text-muted);line-height:1.8;margin-bottom:var(--sp-lg);margin-top:var(--sp-xl)}
     .testimonial-author{display:flex;align-items:center;gap:var(--sp-md)}
@@ -71,7 +97,7 @@
   <div id="nav-container"></div>
 
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero" id="hero-section">
     <div class="hero-bg-pattern"></div>
     <div class="hero-glow"></div>
     <div class="hero-glow-2"></div>
@@ -234,10 +260,10 @@
     <div class="container">
       <div class="grid-2 reveal-scale" style="background:white;border-radius:var(--r-xl);box-shadow:var(--shadow-lg);overflow:hidden;align-items:stretch">
         <div style="background:url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800') center/cover;position:relative;min-height:300px">
-          <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(246,233,235,0.2), rgba(246,233,235,0.9))"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(252,249,242,0.2), rgba(252,249,242,0.9))"></div>
         </div>
         <div style="padding:var(--sp-2xl)">
-          <span class="eyebrow" style="color:var(--text-muted);background:rgba(220,165,174,.15);border:1px solid rgba(220,165,174,.3);margin-bottom:var(--sp-sm)">Tư Vấn Miễn Phí</span>
+          <span class="eyebrow" style="color:var(--text-muted);background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);margin-bottom:var(--sp-sm)">Tư Vấn Miễn Phí</span>
           <h2 style="font-family:var(--font-h);font-size:2.2rem;font-weight:700;color:var(--text-dark);margin-bottom:var(--sp-xs)">Nhận Báo Giá</h2>
           <p style="color:var(--text-muted);margin-bottom:var(--sp-xl)">Để lại thông tin, đội ngũ BêTráp sẽ liên hệ tư vấn các gói dịch vụ đám hỏi phù hợp nhất cho bạn.</p>
           <form id="lead-form" onsubmit="submitLead(event)">
@@ -302,7 +328,7 @@
       el.innerHTML = top.map(s => `
         <a href="pages/service-detail.html?id=${s.id}" class="service-card">
           <div class="service-card-img" style="position:relative;overflow:hidden;height:220px">
-            <img src="${s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover">
+            <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover">
             <div class="category-badge" style="position:absolute;top:12px;left:12px;background:var(--grad-primary);color:white;padding:4px 12px;border-radius:var(--r-full);font-size:.75rem;font-weight:700">${UI.categoryIcon(s.category)} ${UI.categoryLabel(s.category)}</div>
           </div>
           <div class="service-card-body">
@@ -329,6 +355,27 @@
         btn.innerHTML = '<i class="ri-send-plane-fill"></i> Gửi Yêu Cầu';
       }, 1000);
     }
+  </script>
+  <!-- Petal Animation Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hero = document.getElementById('hero-section');
+      if (!hero) return;
+      const petalCount = 35;
+      for (let i = 0; i < petalCount; i++) {
+        let petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.style.left = Math.random() * 100 + 'vw';
+        petal.style.animationDuration = (Math.random() * 4 + 5) + 's'; // 5s to 9s
+        petal.style.animationDelay = Math.random() * 5 + 's';
+        
+        // Randomize size slightly
+        let scale = Math.random() * 0.6 + 0.6; 
+        petal.style.transform = 'scale(' + scale + ')';
+        
+        hero.appendChild(petal);
+      }
+    });
   </script>
 </body>
 </html>

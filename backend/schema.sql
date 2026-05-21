@@ -147,38 +147,22 @@ GO
 
 -- Seed Services
 INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Rating, ReviewCount, Tags) VALUES
-('s1', 'p1', 'be-trap', N'Gói Bê Tráp Tiêu Chuẩn', N'Đội bê tráp 6 người, trang phục áo dài đồng bộ, chuyên nghiệp và lịch sự.', 2500000, N'buổi', 'assets/images/gallery-6.jpg', N'Hà Nội', 4.8, 24, N'["6 người","Áo dài","Chuyên nghiệp"]'),
-('s2', 'p1', 'be-trap', N'Gói Bê Tráp Cao Cấp', N'Đội bê tráp 10 người, trang phục sang trọng, có ban nhạc đệm, xe hoa.', 5000000, N'buổi', 'assets/images/gallery-7.jpg', N'Hà Nội', 4.9, 18, N'["10 người","Xe hoa","Ban nhạc"]'),
-('s3', 'p2', 'ao-dai', N'Thuê Áo Dài Cô Dâu', N'Bộ sưu tập áo dài cô dâu cao cấp, đa dạng màu sắc, kích cỡ, thêu tay tinh xảo.', 800000, N'ngày', 'assets/images/gallery-8.jpg', N'TP. HCM', 4.7, 32, N'["Cô dâu","Thêu tay","Đa màu"]'),
-('s4', 'p2', 'ao-dai', N'Thuê Áo Dài Đội Bê', N'Áo dài đồng phục đội bê tráp, nhiều màu sắc phù hợp với chủ đề đám hỏi.', 150000, N'bộ/ngày', 'assets/images/gallery-9.jpg', N'TP. HCM', 4.6, 45, N'["Đồng phục","Nhiều màu"]'),
-('s5', 'p1', 'lam-trap', N'Làm Tráp Truyền Thống', N'Trang trí mâm tráp theo phong cách truyền thống, hoa tươi đẹp, ý nghĩa.', 3500000, N'bộ', 'assets/images/gallery-10.jpg', N'Hà Nội', 4.9, 15, N'["Hoa tươi","Truyền thống"]'),
-('s6', 'p3', 'media', N'Chụp & Quay Đám Hỏi Full', N'Gói chụp ảnh + quay phim đám hỏi trọn gói, edit màu chuyên nghiệp, giao file trong 7 ngày.', 8000000, N'buổi', 'assets/images/gallery-11.jpg', N'Đà Nẵng', 5.0, 22, N'["Ảnh+Video","Edit màu","7 ngày"]'),
-('s7', 'p3', 'makeup', N'Trang Điểm Cô Dâu', N'Make up cô dâu đám hỏi, phong cách tự nhiên hoặc glamour, bền màu cả ngày.', 1200000, N'lần', 'assets/images/gallery-12.jpg', N'Đà Nẵng', 4.8, 38, N'["Cô dâu","Bền màu","Tự nhiên"]');
+('s1', 'p1', 'be-trap', N'Gói Bê Tráp Tiêu Chuẩn (Nam)', N'Đội bê tráp 5 nam thanh lịch, trang phục áo dài truyền thống đỏ.', 1500000, N'buổi', 'assets/images/betrap-1.jpg', N'Hà Nội', 4.8, 24, N'["5 người","Nam","Truyền thống"]'),
+('s2', 'p1', 'be-trap', N'Gói Bê Tráp Tiêu Chuẩn (Nữ)', N'Đội bê tráp 5 nữ xinh xắn, áo dài hồng pastel nhẹ nhàng.', 1500000, N'buổi', 'assets/images/betrap-2.jpg', N'Hà Nội', 4.7, 18, N'["5 người","Nữ"]'),
+('s3', 'p2', 'be-trap', N'Gói Bê Tráp Áo Dài Đỏ', N'Đội hình 7 người, áo dài đỏ rực rỡ mang lại may mắn cho ngày cưới.', 2100000, N'buổi', 'assets/images/betrap-4.jpg', N'TP. HCM', 4.9, 35, N'["7 người","Áo dài đỏ"]'),
+('s4', 'p2', 'be-trap', N'Gói Bê Tráp Áo Dài Vàng', N'Đội hình 7 người, trang phục áo dài vàng kim sang trọng.', 2200000, N'buổi', 'assets/images/betrap-5.jpg', N'TP. HCM', 4.8, 21, N'["7 người","Áo dài vàng"]'),
+('s5', 'p1', 'be-trap', N'Gói Bê Tráp Cao Cấp (VIP)', N'Đội hình 9 người cao ráo, trang phục thiết kế riêng, chuyên nghiệp.', 3500000, N'buổi', 'assets/images/betrap-7.jpg', N'Hà Nội', 5.0, 42, N'["9 người","VIP","Thiết kế"]'),
+('s6', 'p3', 'be-trap', N'Gói Bê Tráp Kèm Xe Hoa', N'Đội bê tráp 5 người kèm dịch vụ xe hoa sang trọng phục vụ đưa rước.', 5000000, N'ngày', 'assets/images/betrap-25.jpg', N'Đà Nẵng', 4.9, 12, N'["5 người","Xe hoa"]'),
+('s7', 'p3', 'be-trap', N'Gói Bê Tráp Truyền Thống Xưa', N'Đội hình 7 người mặc áo tấc, khăn vấn đậm chất truyền thống Bắc Bộ.', 2800000, N'buổi', 'assets/images/betrap-12.jpg', N'Đà Nẵng', 4.8, 15, N'["7 người","Áo tấc","Cổ điển"]'),
+('s8', 'p2', 'be-trap', N'Gói Bê Tráp Hiện Đại', N'Đội hình 9 người, trang phục suit và áo dài cách tân hiện đại.', 3200000, N'buổi', 'assets/images/betrap-22.jpg', N'TP. HCM', 4.6, 28, N'["9 người","Hiện đại"]');
 GO
 
 -- Seed Transactions
-INSERT INTO Transactions (Id, CustomerId, ProviderId, ServiceId, ServiceName, Price, Date, Time, Address, Note, Status, PaymentMethod, PaymentStatus) VALUES
-('TXN_1', 'c1', 'p1', 's1', N'Gói Bê Tráp Tiêu Chuẩn', 2500000, '2024-03-15', '08:00', N'123 Hoàng Mai, Hà Nội', N'Vui lòng đến trước 30 phút', 'done', 'momo', 'paid'),
-('TXN_2', 'c1', 'p3', 's6', N'Chụp & Quay Đám Hỏi Full', 8000000, '2024-03-15', '09:00', N'123 Hoàng Mai, Hà Nội', NULL, 'confirmed', 'bank', 'paid');
-GO
+-- (Deleted old mock transactions because they don't match the new data well)
 
 -- Seed Reviews
-INSERT INTO Reviews (Id, ServiceId, CustomerId, TransactionId, Rating, Comment) VALUES
-('REV_1', 's1', 'c1', 'TXN_1', 5, N'Đội bê tráp rất chuyên nghiệp, đúng giờ và lịch sự. Trang phục đẹp và gọn gàng. Rất hài lòng!');
-GO
+-- (Deleted old mock reviews)
 
 -- Seed Chat
-INSERT INTO Conversations (Id, ServiceId, LastMessage, LastAt) VALUES
-('CONV_1', 's1', N'Mình dự định ngày 15/3 ạ', GETDATE());
-GO
+-- (Deleted old mock chats)
 
-INSERT INTO ConversationParticipants (ConversationId, UserId) VALUES
-('CONV_1', 'c1'),
-('CONV_1', 'p1');
-GO
-
-INSERT INTO Messages (Id, ConversationId, SenderId, Content, IsRead) VALUES
-('MSG_1', 'CONV_1', 'c1', N'Chào bạn, mình muốn hỏi về gói bê tráp tiêu chuẩn ạ!', 1),
-('MSG_2', 'CONV_1', 'p1', N'Chào bạn! Gói tiêu chuẩn của mình gồm 6 người, trang phục áo dài đồng bộ. Bạn dự định tổ chức vào ngày nào vậy?', 1),
-('MSG_3', 'CONV_1', 'c1', N'Mình dự định ngày 15/3 ạ, khoảng 8 giờ sáng.', 1);
-GO

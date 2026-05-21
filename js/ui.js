@@ -42,12 +42,11 @@ const UI = (() => {
       : `<a href="${root}index.html">Trang chủ</a><a href="${root}pages/services.html">Dịch vụ</a>`;
 
     const actions = sess
-      ? `<a href="${root}pages/chat.html" class="btn btn-ghost btn-sm"><i class="ri-message-3-line"></i></a>
+      ? `
          <div class="nav-dropdown" id="user-menu">
            <div class="navbar-avatar" onclick="UI.toggleDropdown()" id="nav-avatar">${sess.avatar}</div>
            <div class="nav-dropdown-menu" id="nav-dropdown">
              <div class="nav-dropdown-item" onclick="window.location.href='${root}pages/${sess.role==='provider'?'provider-dashboard':'dashboard'}.html'"><i class="ri-dashboard-line"></i> Dashboard</div>
-             <div class="nav-dropdown-item" onclick="window.location.href='${root}pages/chat.html'"><i class="ri-message-3-line"></i> Tin nhắn</div>
              <div class="nav-dropdown-item" onclick="window.location.href='${root}pages/history.html'"><i class="ri-history-line"></i> Lịch sử</div>
              <div class="nav-dropdown-divider"></div>
              <div class="nav-dropdown-item" style="color:var(--error)" onclick="API.auth.logout()"><i class="ri-logout-box-line"></i> Đăng xuất</div>

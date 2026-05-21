@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Chi Tiết Dịch Vụ — BêTráp</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
@@ -56,7 +56,7 @@
 
       document.getElementById('detail-content').innerHTML = `
         <div>
-          <img class="main-img animate-fadeIn" src="${svc.image}" alt="${svc.name}">
+          <img class="main-img animate-fadeIn" src="${svc.image.startsWith('http') ? svc.image : rootPath() + svc.image}" alt="${svc.name}">
           <div style="margin-top:var(--sp-lg)">
             <span style="font-size:.8rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(svc.category)} ${UI.categoryLabel(svc.category)}</span>
             <h1 style="font-size:2rem;margin:var(--sp-sm) 0">${svc.name}</h1>
@@ -73,7 +73,6 @@
                 <div style="font-size:.8rem;color:var(--text-muted)">${provider?.bio||''}</div>
                 <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px"><i class="ri-map-pin-line"></i> ${provider?.location||''}</div>
               </div>
-              <button class="btn btn-outline btn-sm" onclick="startChat('${svc.providerId}','${svc.id}')"><i class="ri-message-3-line"></i> Chat</button>
             </div>
             <h3>Mô Tả Dịch Vụ</h3>
             <p style="color:var(--text-muted);margin-top:var(--sp-md);line-height:1.9">${svc.description}</p>
@@ -115,7 +114,6 @@
               <textarea id="book-note" class="form-control" rows="3" placeholder="Yêu cầu đặc biệt..."></textarea>
             </div>
             <button class="btn btn-primary btn-block btn-lg" onclick="bookNow('${svc.id}')"><i class="ri-calendar-check-line"></i> Đặt Ngay</button>
-            <button class="btn btn-outline btn-block mt-sm" onclick="startChat('${svc.providerId}','${svc.id}')"><i class="ri-message-3-line"></i> Hỏi Nhà Cung Cấp</button>
             <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:var(--sp-md)">
               <i class="ri-shield-check-line" style="color:var(--success)"></i> Thanh toán an toàn · Hoàn tiền nếu huỷ trước 48h
             </p>
@@ -130,8 +128,13 @@
       const time = document.getElementById('book-time').value;
       const address = document.getElementById('book-address').value;
       if (!date || !address) { UI.toast('Vui lòng điền ngày và địa chỉ!', 'error'); return; }
-      const txn = await API.txn.create({ serviceId, date, time, address, note: document.getElementById('book-note').value });
-      location.href = `checkout.html?id=${txn.id}`;
+      
+      try {
+        const txn = await API.txn.create({ serviceId, date, time, address, note: document.getElementById('book-note').value });
+        location.href = `checkout.html?id=${txn.id}`;
+      } catch (e) {
+        UI.toast(e.message, 'error');
+      }
     }
 
     async function startChat(providerId, serviceId) {

@@ -20,16 +20,16 @@
 @keyframes ripple        { 0%{transform:scale(0);opacity:.7} 100%{transform:scale(4.5);opacity:0} }
 @keyframes bounceIn      { 0%{transform:scale(.3);opacity:0} 50%{transform:scale(1.1)} 75%{transform:scale(.95)} 100%{transform:scale(1);opacity:1} }
 @keyframes confettiFall  { 0%{transform:translateY(-100px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
-@keyframes glow          { 0%,100%{box-shadow:0 0 20px rgba(220,165,174,.3)} 50%{box-shadow:0 0 50px rgba(220,165,174,.7),0 0 80px rgba(220,165,174,.3)} }
+@keyframes glow          { 0%,100%{box-shadow:0 0 20px rgba(200,16,46,.3)} 50%{box-shadow:0 0 50px rgba(200,16,46,.7),0 0 80px rgba(200,16,46,.3)} }
 @keyframes particleFloat { 0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1} 100%{transform:translateY(-120vh) translateX(60px) rotate(720deg);opacity:0} }
 @keyframes morphBlob     { 0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%} 25%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%} 50%{border-radius:40% 60% 30% 70%/40% 50% 60% 50%} 75%{border-radius:70% 30% 60% 40%/30% 60% 40% 70%} }
-@keyframes textGlow      { 0%,100%{text-shadow:0 0 10px rgba(220,165,174,0)} 50%{text-shadow:0 0 30px rgba(220,165,174,.6),0 0 60px rgba(191,167,162,.3)} }
+@keyframes textGlow      { 0%,100%{text-shadow:0 0 10px rgba(200,16,46,0)} 50%{text-shadow:0 0 30px rgba(200,16,46,.6),0 0 60px rgba(212,175,55,.3)} }
 @keyframes lineGrow      { from{width:0;opacity:0} to{width:100%;opacity:1} }
 @keyframes slideUp       { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
 @keyframes rotateY       { from{transform:rotateY(-15deg) translateX(-30px);opacity:0} to{transform:rotateY(0deg) translateX(0);opacity:1} }
 @keyframes flipIn        { from{transform:perspective(600px) rotateX(-30deg);opacity:0} to{transform:perspective(600px) rotateX(0deg);opacity:1} }
 @keyframes heartBeat     { 0%,100%{transform:scale(1)} 14%{transform:scale(1.15)} 28%{transform:scale(1)} 42%{transform:scale(1.1)} 70%{transform:scale(1)} }
-@keyframes borderPulse   { 0%,100%{border-color:rgba(220,165,174,.2)} 50%{border-color:rgba(220,165,174,.8)} }
+@keyframes borderPulse   { 0%,100%{border-color:rgba(200,16,46,.2)} 50%{border-color:rgba(200,16,46,.8)} }
 @keyframes bgFloat       { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 @keyframes petalDrop     { 0%{transform:translateY(-20px) rotate(0deg) scale(0);opacity:0} 20%{opacity:1;transform:translateY(0) rotate(-10deg) scale(1)} 100%{transform:translateY(120vh) rotate(360deg) scale(.8);opacity:0} }
 @keyframes inkDraw       { from{stroke-dashoffset:1000} to{stroke-dashoffset:0} }
@@ -144,7 +144,7 @@
 /* ── PETAL DROP (decorative) ── */
 .petal {
   position:fixed;width:12px;height:12px;
-  background:rgba(220,165,174,.6);
+  background:rgba(200,16,46,.6);
   border-radius:50% 0 50% 0;
   pointer-events:none;
   animation:petalDrop linear forwards;
@@ -167,7 +167,7 @@
 }
 .hover-lift:hover {
   transform:translateY(-7px) scale(1.01);
-  box-shadow:0 20px 50px rgba(220,165,174,.25);
+  box-shadow:0 20px 50px rgba(200,16,46,.25);
 }
 
 /* ── UNDERLINE DRAW ON HOVER ── */
@@ -197,13 +197,13 @@
 .glass-card {
   background:rgba(255,255,255,.55);
   backdrop-filter:blur(20px);
-  border:1px solid rgba(220,165,174,.3);
+  border:1px solid rgba(200,16,46,.3);
   transition:all .4s cubic-bezier(.22,.68,0,1.2);
 }
 .glass-card:hover {
   background:rgba(255,255,255,.75);
-  border-color:rgba(220,165,174,.6);
-  box-shadow:0 20px 60px rgba(220,165,174,.2);
+  border-color:rgba(200,16,46,.6);
+  box-shadow:0 20px 60px rgba(200,16,46,.2);
   transform:translateY(-5px);
 }
 
@@ -213,7 +213,7 @@
 }
 .service-card:hover {
   transform:translateY(-10px) scale(1.01);
-  box-shadow:0 24px 60px rgba(220,165,174,.25);
+  box-shadow:0 24px 60px rgba(200,16,46,.25);
 }
 .service-card .service-card-img img {
   transition:transform .6s cubic-bezier(.22,.68,0,1.2);
@@ -244,7 +244,7 @@
 /* ── LOADING SPINNER (enhanced) ── */
 .spinner {
   width:32px;height:32px;
-  border:3px solid rgba(220,165,174,.2);
+  border:3px solid rgba(200,16,46,.2);
   border-top-color:var(--red-dark);
   border-radius:50%;
   animation:spin .7s linear infinite;

@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
+const vnpay = require('./vnpay');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -183,7 +184,7 @@ app.post('/api/transactions', async (req, res) => {
         const id = 'TXN_' + Math.random().toString(36).substr(2, 9);
         await sql.query`
             INSERT INTO Transactions (Id, CustomerId, ProviderId, ServiceId, ServiceName, Price, Date, Time, Address, Note, PaymentMethod)
-            VALUES (${id}, ${customerId}, ${svc.ProviderId}, ${serviceId}, ${svc.Name}, ${svc.Price}, ${date}, ${time}, ${address}, ${note}, ${paymentMethod})
+            VALUES (${id}, ${customerId}, ${svc.ProviderId}, ${serviceId}, ${svc.Name}, ${svc.Price}, ${date}, ${time}, ${address}, ${note || null}, ${paymentMethod || null})
         `;
         res.json({ id });
     } catch (err) {
@@ -200,6 +201,82 @@ app.get('/api/transactions/:userId', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/transaction/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await sql.query`SELECT * FROM Transactions WHERE Id = ${id}`;
+        if (result.recordset.length === 0) return res.status(404).json({ error: 'Transaction not found' });
+        res.json(result.recordset[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/transaction/:id/status', async (req, res) => {
+    const { id } = req.params;
+    const { status, paymentMethod, paymentStatus, paidAt } = req.body;
+    try {
+        if (paymentMethod && paymentStatus) {
+            await sql.query`
+                UPDATE Transactions 
+                SET Status = ${status}, PaymentMethod = ${paymentMethod}, PaymentStatus = ${paymentStatus}
+                WHERE Id = ${id}
+            `;
+        } else {
+            await sql.query`
+                UPDATE Transactions 
+                SET Status = ${status}
+                WHERE Id = ${id}
+            `;
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 4. PAYMENT (VNPay)
+app.post('/api/payment/create_payment_url', async (req, res) => {
+    const { txnId, amount, bankCode } = req.body;
+    try {
+        const url = vnpay.createPaymentUrl(req, txnId, amount, bankCode || '', 'Thanh toan don hang ' + txnId);
+        res.json({ url });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/payment/vnpay_return', async (req, res) => {
+    let vnp_Params = req.query;
+    if(vnpay.verifyReturnUrl(vnp_Params)) {
+        const txnId = vnp_Params['vnp_TxnRef'];
+        const rspCode = vnp_Params['vnp_ResponseCode'];
+        if (rspCode === '00') {
+            await sql.query`UPDATE Transactions SET Status = 'confirmed', PaymentMethod = 'vnpay', PaymentStatus = 'paid' WHERE Id = ${txnId}`;
+        }
+        res.redirect(`http://127.0.0.1:5500/pages/checkout.html?id=${txnId}&vnp_ResponseCode=${rspCode}`);
+    } else {
+        res.send('Xác thực chữ ký thất bại');
+    }
+});
+
+app.get('/api/payment/vnpay_ipn', async (req, res) => {
+    let vnp_Params = req.query;
+    if(vnpay.verifyReturnUrl(vnp_Params)) {
+        const txnId = vnp_Params['vnp_TxnRef'];
+        const rspCode = vnp_Params['vnp_ResponseCode'];
+        if (rspCode === '00') {
+            await sql.query`UPDATE Transactions SET Status = 'confirmed', PaymentMethod = 'vnpay', PaymentStatus = 'paid' WHERE Id = ${txnId}`;
+        }
+        res.status(200).json({RspCode: '00', Message: 'Confirm Success'});
+    } else {
+        res.status(200).json({RspCode: '97', Message: 'Fail checksum'});
     }
 });
 

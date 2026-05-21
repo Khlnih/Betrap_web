@@ -167,48 +167,32 @@ const DB = (() => {
   // ─── SEED DATA ───────────────────────────────────────────────────────────
   const SEED = {
     run() {
-      if (read(KEY.seeded)) return;
+      const VERSION = 'v4_betrap_fixed_ids';
+      if (read('bt_seed_version') === VERSION) return;
+      
+      // Clear all to start fresh
+      localStorage.clear();
+      write('bt_seed_version', VERSION);
 
       // Providers
-      const p1 = users.create({ name:'Lan Ngọc Wedding', email:'lan@betrap.vn', password:'123456', role:'provider', phone:'0901234567', avatar:'LN', location:'Hà Nội', bio:'Đội bê tráp chuyên nghiệp 5 năm kinh nghiệm', verified:true });
-      const p2 = users.create({ name:'Áo Dài Thiên Phúc', email:'thienphuc@betrap.vn', password:'123456', role:'provider', phone:'0912345678', avatar:'TP', location:'TP. HCM', bio:'Cho thuê áo dài cao cấp', verified:true });
-      const p3 = users.create({ name:'Studio Kim Cương', email:'kimcuong@betrap.vn', password:'123456', role:'provider', phone:'0923456789', avatar:'KC', location:'Đà Nẵng', bio:'Media & Make up chuyên nghiệp', verified:true });
+      const p1 = users.create({ id:'p1', name:'Lan Ngọc Wedding', email:'lan@betrap.vn', password:'123456', role:'provider', phone:'0901234567', avatar:'LN', location:'Hà Nội', bio:'Đội bê tráp chuyên nghiệp 5 năm kinh nghiệm', verified:true });
+      const p2 = users.create({ id:'p2', name:'Áo Dài Thiên Phúc', email:'thienphuc@betrap.vn', password:'123456', role:'provider', phone:'0912345678', avatar:'TP', location:'TP. HCM', bio:'Cho thuê áo dài cao cấp', verified:true });
+      const p3 = users.create({ id:'p3', name:'Studio Kim Cương', email:'kimcuong@betrap.vn', password:'123456', role:'provider', phone:'0923456789', avatar:'KC', location:'Đà Nẵng', bio:'Media & Make up chuyên nghiệp', verified:true });
 
       // Customer
-      const c1 = users.create({ name:'Nguyễn Thị Mai', email:'mai@gmail.com', password:'123456', role:'customer', phone:'0934567890', avatar:'NM', location:'Hà Nội' });
+      const c1 = users.create({ id:'c1', name:'Nguyễn Thị Mai', email:'mai@gmail.com', password:'123456', role:'customer', phone:'0934567890', avatar:'NM', location:'Hà Nội' });
 
       // Services — Bê Tráp
-      const s1 = services.create({ providerId:p1.id, category:'be-trap', name:'Gói Bê Tráp Tiêu Chuẩn', description:'Đội bê tráp 6 người, trang phục áo dài đồng bộ, chuyên nghiệp và lịch sự.', price:2500000, unit:'buổi', image:'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&q=80', rating:4.8, reviewCount:24, location:'Hà Nội', tags:['6 người','Áo dài','Chuyên nghiệp'] });
-      const s2 = services.create({ providerId:p1.id, category:'be-trap', name:'Gói Bê Tráp Cao Cấp', description:'Đội bê tráp 10 người, trang phục sang trọng, có ban nhạc đệm, xe hoa.', price:5000000, unit:'buổi', image:'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80', rating:4.9, reviewCount:18, location:'Hà Nội', tags:['10 người','Xe hoa','Ban nhạc'] });
+      services.create({ id:'s1', providerId:p1.id, category:'be-trap', name:'Gói Bê Tráp Tiêu Chuẩn (Nam)', description:'Đội bê tráp 5 nam thanh lịch, trang phục áo dài truyền thống đỏ.', price:1500000, unit:'buổi', image:'assets/images/betrap-1.jpg', rating:4.8, reviewCount:24, location:'Hà Nội', tags:['5 người','Nam','Truyền thống'] });
+      services.create({ id:'s2', providerId:p1.id, category:'be-trap', name:'Gói Bê Tráp Tiêu Chuẩn (Nữ)', description:'Đội bê tráp 5 nữ xinh xắn, áo dài hồng pastel nhẹ nhàng.', price:1500000, unit:'buổi', image:'assets/images/betrap-2.jpg', rating:4.7, reviewCount:18, location:'Hà Nội', tags:['5 người','Nữ'] });
+      services.create({ id:'s3', providerId:p2.id, category:'be-trap', name:'Gói Bê Tráp Áo Dài Đỏ', description:'Đội hình 7 người, áo dài đỏ rực rỡ mang lại may mắn cho ngày cưới.', price:2100000, unit:'buổi', image:'assets/images/betrap-4.jpg', rating:4.9, reviewCount:35, location:'TP. HCM', tags:['7 người','Áo dài đỏ'] });
+      services.create({ id:'s4', providerId:p2.id, category:'be-trap', name:'Gói Bê Tráp Áo Dài Vàng', description:'Đội hình 7 người, trang phục áo dài vàng kim sang trọng.', price:2200000, unit:'buổi', image:'assets/images/betrap-5.jpg', rating:4.8, reviewCount:21, location:'TP. HCM', tags:['7 người','Áo dài vàng'] });
+      services.create({ id:'s5', providerId:p1.id, category:'be-trap', name:'Gói Bê Tráp Cao Cấp (VIP)', description:'Đội hình 9 người cao ráo, trang phục thiết kế riêng, chuyên nghiệp.', price:3500000, unit:'buổi', image:'assets/images/betrap-7.jpg', rating:5.0, reviewCount:42, location:'Hà Nội', tags:['9 người','VIP','Thiết kế'] });
+      services.create({ id:'s6', providerId:p3.id, category:'be-trap', name:'Gói Bê Tráp Kèm Xe Hoa', description:'Đội bê tráp 5 người kèm dịch vụ xe hoa sang trọng phục vụ đưa rước.', price:5000000, unit:'ngày', image:'assets/images/betrap-25.jpg', rating:4.9, reviewCount:12, location:'Đà Nẵng', tags:['5 người','Xe hoa'] });
+      services.create({ id:'s7', providerId:p3.id, category:'be-trap', name:'Gói Bê Tráp Truyền Thống Xưa', description:'Đội hình 7 người mặc áo tấc, khăn vấn đậm chất truyền thống Bắc Bộ.', price:2800000, unit:'buổi', image:'assets/images/betrap-12.jpg', rating:4.8, reviewCount:15, location:'Đà Nẵng', tags:['7 người','Áo tấc','Cổ điển'] });
+      services.create({ id:'s8', providerId:p2.id, category:'be-trap', name:'Gói Bê Tráp Hiện Đại', description:'Đội hình 9 người, trang phục suit và áo dài cách tân hiện đại.', price:3200000, unit:'buổi', image:'assets/images/betrap-22.jpg', rating:4.6, reviewCount:28, location:'TP. HCM', tags:['9 người','Hiện đại'] });
 
-      // Services — Áo Dài
-      const s3 = services.create({ providerId:p2.id, category:'ao-dai', name:'Thuê Áo Dài Cô Dâu', description:'Bộ sưu tập áo dài cô dâu cao cấp, đa dạng màu sắc, kích cỡ, thêu tay tinh xảo.', price:800000, unit:'ngày', image:'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&q=80', rating:4.7, reviewCount:32, location:'TP. HCM', tags:['Cô dâu','Thêu tay','Đa màu'] });
-      const s4 = services.create({ providerId:p2.id, category:'ao-dai', name:'Thuê Áo Dài Đội Bê', description:'Áo dài đồng phục đội bê tráp, nhiều màu sắc phù hợp với chủ đề đám hỏi.', price:150000, unit:'bộ/ngày', image:'https://images.unsplash.com/photo-1610041518868-e7c3de54c626?w=600&q=80', rating:4.6, reviewCount:45, location:'TP. HCM', tags:['Đồng phục','Nhiều màu'] });
-
-      // Services — Làm Tráp
-      const s5 = services.create({ providerId:p1.id, category:'lam-trap', name:'Làm Tráp Truyền Thống', description:'Trang trí mâm tráp theo phong cách truyền thống, hoa tươi đẹp, ý nghĩa.', price:3500000, unit:'bộ', image:'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80', rating:4.9, reviewCount:15, location:'Hà Nội', tags:['Hoa tươi','Truyền thống'] });
-
-      // Services — Media
-      const s6 = services.create({ providerId:p3.id, category:'media', name:'Chụp & Quay Đám Hỏi Full', description:'Gói chụp ảnh + quay phim đám hỏi trọn gói, edit màu chuyên nghiệp, giao file trong 7 ngày.', price:8000000, unit:'buổi', image:'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80', rating:5.0, reviewCount:22, location:'Đà Nẵng', tags:['Ảnh+Video','Edit màu','7 ngày'] });
-
-      // Services — Make Up
-      const s7 = services.create({ providerId:p3.id, category:'makeup', name:'Trang Điểm Cô Dâu', description:'Make up cô dâu đám hỏi, phong cách tự nhiên hoặc glamour, bền màu cả ngày.', price:1200000, unit:'lần', image:'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600&q=80', rating:4.8, reviewCount:38, location:'Đà Nẵng', tags:['Cô dâu','Bền màu','Tự nhiên'] });
-
-      // Sample transaction
-      transactions.create({ customerId:c1.id, providerId:p1.id, serviceId:s1.id, serviceName:s1.name, price:s1.price, date:'2024-03-15', time:'08:00', address:'123 Hoàng Mai, Hà Nội', note:'Vui lòng đến trước 30 phút', status:'done', paymentMethod:'momo', paymentStatus:'paid' });
-      transactions.create({ customerId:c1.id, providerId:p3.id, serviceId:s6.id, serviceName:s6.name, price:s6.price, date:'2024-03-15', time:'09:00', address:'123 Hoàng Mai, Hà Nội', note:'', status:'confirmed', paymentMethod:'bank', paymentStatus:'paid' });
-
-      // Sample conversation
-      const conv = conversations.create({ participants:[c1.id, p1.id], serviceId:s1.id });
-      messages.create({ conversationId:conv.id, senderId:c1.id, content:'Chào bạn, mình muốn hỏi về gói bê tráp tiêu chuẩn ạ!' });
-      messages.create({ conversationId:conv.id, senderId:p1.id, content:'Chào bạn! Gói tiêu chuẩn của mình gồm 6 người, trang phục áo dài đồng bộ. Bạn dự định tổ chức vào ngày nào vậy?' });
-      messages.create({ conversationId:conv.id, senderId:c1.id, content:'Mình dự định ngày 15/3 ạ, khoảng 8 giờ sáng.' });
-      conversations.update(conv.id, { lastMessage:'Mình dự định ngày 15/3 ạ', lastAt: now() });
-
-      // Sample review
-      reviews.create({ serviceId:s1.id, customerId:c1.id, transactionId:'sample', rating:5, comment:'Đội bê tráp rất chuyên nghiệp, đúng giờ và lịch sự. Trang phục đẹp và gọn gàng. Rất hài lòng!' });
-
-      write(KEY.seeded, true);
+      // Only be-trap services are seeded
     }
   };
 
