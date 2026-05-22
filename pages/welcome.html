@@ -51,12 +51,10 @@
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    DB.SEED.run();
-    const sess = DB.session.get();
+    const sess = API.auth.currentSession();
     if (!sess) { window.location.href = 'login.html'; }
 
-    const user = DB.users.findById(sess.userId);
-    document.getElementById('welcome-name').textContent = 'Xin chào, ' + (user?.name || sess.name) + '!';
+    document.getElementById('welcome-name').textContent = 'Xin chào, ' + sess.name + '!';
 
     const isProvider = sess.role === 'provider';
     document.getElementById('role-badge').innerHTML = isProvider

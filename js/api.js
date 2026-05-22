@@ -1,293 +1,288 @@
 /**
- * BêTráp — Business Logic Layer
- *
- * All UI code calls only this file (API.*).
- * This file calls only DB.* — never localStorage directly.
- *
- * MIGRATION → Real backend:
- *   Replace DB.* calls with fetch('/api/...') calls.
- *   UI code stays the same.
+ * BêTráp — API Layer v2.0
+ * Tất cả UI chỉ gọi API.* — không bao giờ trực tiếp fetch hay localStorage
+ * Backend: Express + SQL Server (localhost:3000)
  */
 
 const API = (() => {
 
-  const BASE_URL = 'http://localhost:3000/api';
+  // ── Cấu hình (thay đổi URL khi deploy) ───────────────────────────────────
+  const BASE_URL = window.BT_API_URL || 'http://localhost:3000/api';
 
-  // ─── AUTH ───────────────────────────────────────────────────────────────
+  // ── Token helpers ─────────────────────────────────────────────────────────
+  const getToken  = ()      => localStorage.getItem('bt_token');
+  const setToken  = (t)     => localStorage.setItem('bt_token', t);
+  const clearToken= ()      => localStorage.removeItem('bt_token');
+
+  const getSession  = ()    => JSON.parse(localStorage.getItem('bt_session') || 'null');
+  const setSession  = (s)   => localStorage.setItem('bt_session', JSON.stringify(s));
+  const clearSession= ()    => localStorage.removeItem('bt_session');
+
+  // ── Fetch wrapper ─────────────────────────────────────────────────────────
+  async function req(method, path, body, needAuth = false) {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = getToken();
+    if (needAuth) {
+      if (!token) throw new Error('Chưa đăng nhập.');
+      headers['Authorization'] = 'Bearer ' + token;
+    } else if (token) {
+      // Gửi token nếu có (optional auth)
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+    const opts = { method, headers };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(BASE_URL + path, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  }
+
+  const get  = (path, auth)       => req('GET',    path, null, auth);
+  const post = (path, body, auth) => req('POST',   path, body, auth);
+  const put  = (path, body, auth) => req('PUT',    path, body, auth);
+  const del  = (path, auth)       => req('DELETE', path, null, auth);
+
+  // ── AUTH ──────────────────────────────────────────────────────────────────
   const auth = {
-    register: async (data) => {
-      if (!data.name || !data.email || !data.password || !data.role) throw new Error('Vui lòng điền đầy đủ thông tin.');
-      
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(data.email)) throw new Error('Email không đúng định dạng.');
-      
-      const passRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
-      if (!passRegex.test(data.password)) throw new Error('Mật khẩu phải có ít nhất 6 ký tự, gồm 1 chữ in hoa và 1 ký tự đặc biệt.');
-      
-      if (data.role === 'provider') {
-        const phoneRegex = /^(03|05|07|08|09)\d{8}$/;
-        if (!phoneRegex.test(data.phone)) throw new Error('Số điện thoại không hợp lệ (Phải là ĐTDĐ Việt Nam 10 số).');
-      }
-
-      const res = await fetch(`${BASE_URL}/auth/register`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Đăng ký thất bại');
-      localStorage.setItem('bt_session', JSON.stringify(result.session));
-      return result;
-    },
+    currentSession: getSession,
+    currentUser:    getSession,
 
     login: async ({ email, password }) => {
       if (!email || !password) throw new Error('Vui lòng nhập email và mật khẩu.');
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) throw new Error('Email không đúng định dạng.');
-
-      const res = await fetch(`${BASE_URL}/auth/login`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password })
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Đăng nhập thất bại');
-      localStorage.setItem('bt_session', JSON.stringify(result.session));
+      const result = await post('/auth/login', { email, password });
+      setToken(result.token);
+      setSession(result.session);
       return result;
     },
 
-    logout: () => { localStorage.removeItem('bt_session'); window.location.href = rootPath() + 'index.html'; },
-
-    currentSession: () => JSON.parse(localStorage.getItem('bt_session')),
-
-    updateProfile: async (data) => {
-      const sess = auth.currentSession();
-      if (!sess) throw new Error('Chưa đăng nhập.');
-      
-      const payload = { ...data, userId: sess.userId, role: sess.role };
-      const res = await fetch(`${BASE_URL}/auth/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Cập nhật thất bại');
-
-      const updated = { ...sess, ...data };
-      localStorage.setItem('bt_session', JSON.stringify(updated));
-      return updated;
+    register: async (data) => {
+      if (!data.name || !data.email || !data.password || !data.role)
+        throw new Error('Vui lòng điền đầy đủ thông tin.');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) throw new Error('Email không đúng định dạng.');
+      const passRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
+      if (!passRegex.test(data.password))
+        throw new Error('Mật khẩu phải có ít nhất 6 ký tự, gồm 1 chữ in hoa và 1 ký tự đặc biệt.');
+      if (data.role === 'provider') {
+        const phoneRegex = /^(03|05|07|08|09)\d{8}$/;
+        if (!phoneRegex.test(data.phone)) throw new Error('Số điện thoại không hợp lệ (Phải là ĐTDĐ Việt Nam 10 số).');
+      }
+      const result = await post('/auth/register', data);
+      setToken(result.token);
+      setSession(result.session);
+      return result;
     },
 
-    currentUser: () => {
-      // Mocked for now until we have a /me endpoint
-      return JSON.parse(localStorage.getItem('bt_session'));
+    logout: () => {
+      clearToken();
+      clearSession();
+      window.location.href = rootPath() + 'index.html';
+    },
+
+    updateProfile: async (data) => {
+      const result = await put('/auth/profile', data, true);
+      // Update local session
+      const sess = getSession();
+      if (sess) setSession({ ...sess, ...data });
+      return result;
+    },
+
+    changePassword: async ({ oldPassword, newPassword }) => {
+      return await put('/auth/password', { oldPassword, newPassword }, true);
     },
 
     requireAuth: (redirectTo) => {
-      const s = DB.session.get();
-      if (!s) { window.location.href = (redirectTo || rootPath() + 'pages/login.html'); return null; }
+      const s = getSession();
+      if (!s || !getToken()) {
+        window.location.href = redirectTo || rootPath() + 'pages/login.html';
+        return null;
+      }
       return s;
     },
 
     requireRole: (role) => {
       const s = auth.requireAuth();
-      if (s && s.role !== role) { window.location.href = rootPath() + 'pages/dashboard.html'; return null; }
+      if (s && s.role !== role) {
+        window.location.href = rootPath() + 'pages/dashboard.html';
+        return null;
+      }
       return s;
     },
   };
 
-  // ─── SERVICES ───────────────────────────────────────────────────────────
+  // ── SERVICES ──────────────────────────────────────────────────────────────
   const svc = {
     getAll: async (filters = {}) => {
-      const res = await fetch(`${BASE_URL}/services`);
-      if (!res.ok) return [];
-      let list = await res.json();
-      
-      if (filters.category) list = list.filter(s => s.Category === filters.category);
-      if (filters.search)   list = list.filter(s => s.Name.toLowerCase().includes(filters.search.toLowerCase()));
-      if (filters.location) list = list.filter(s => s.Location && s.Location.includes(filters.location));
-      if (filters.maxPrice) list = list.filter(s => s.Price <= filters.maxPrice);
-      if (filters.sort === 'price_asc')  list.sort((a,b) => a.Price - b.Price);
-      if (filters.sort === 'price_desc') list.sort((a,b) => b.Price - a.Price);
-      if (filters.sort === 'rating')     list.sort((a,b) => b.Rating - a.Rating);
-      
-      // Map to camelCase to maintain frontend compatibility
-      return list.map(s => ({
-        id: s.Id, providerId: s.ProviderId, category: s.Category, name: s.Name,
-        description: s.Description, price: s.Price, unit: s.Unit, image: s.Image,
-        location: s.Location, rating: s.Rating, reviewCount: s.ReviewCount, tags: s.Tags
-      }));
+      const params = new URLSearchParams();
+      if (filters.category) params.set('category', filters.category);
+      if (filters.location) params.set('location', filters.location);
+      if (filters.search)   params.set('search', filters.search);
+      if (filters.sort)     params.set('sort', filters.sort);
+      if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
+      const qs = params.toString();
+      return await get('/services' + (qs ? '?' + qs : ''));
     },
-    getById:   async (id)  => DB.services.findById(id), // Temporarily keep DB for details not implemented yet
-    getByProvider: async (pid) => DB.services.findByProvider(pid),
-    create:    async (data) => {
-      const s = auth.currentSession();
-      if (!s || s.role !== 'provider') throw new Error('Chỉ nhà cung cấp mới có thể đăng dịch vụ.');
-      return DB.services.create({ ...data, providerId: s.userId });
+
+    getById: async (id) => {
+      try { return await get('/services/' + id); }
+      catch { return null; }
     },
-    update:    async (id, data) => DB.services.update(id, data),
-    getProviderName: (pid) => { const u = DB.users.findById(pid); return u?.name || 'Nhà cung cấp'; },
+
+    create: async (data) => {
+      return await post('/services', data, true);
+    },
+
+    update: async (id, data) => {
+      return await put('/services/' + id, data, true);
+    },
+
+    remove: async (id) => {
+      return await del('/services/' + id, true);
+    },
+
+    getProviderName: (providerId) => {
+      // Fallback — name thường đã có trong service object từ API
+      return 'Nhà cung cấp';
+    },
   };
 
-  // ─── TRANSACTIONS ───────────────────────────────────────────────────────
+  // ── TRANSACTIONS ──────────────────────────────────────────────────────────
   const txn = {
     create: async ({ serviceId, date, time, address, note, paymentMethod }) => {
-      const s   = auth.requireAuth();
-      if (!s) return null;
-
+      if (!date || !address) throw new Error('Vui lòng điền ngày và địa chỉ.');
       const selectedDate = new Date(date + 'T00:00:00');
-      const today = new Date();
-      today.setHours(0,0,0,0);
+      const today = new Date(); today.setHours(0,0,0,0);
       if (selectedDate < today) throw new Error('Ngày tổ chức phải từ hôm nay trở đi.');
-      if (!address || address.length < 10) throw new Error('Vui lòng nhập địa chỉ cụ thể (tối thiểu 10 ký tự).');
-
-      const res = await fetch(`${BASE_URL}/transactions`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: s.userId, serviceId, date, time, address, note, paymentMethod })
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Đặt dịch vụ thất bại');
-      return result;
+      if (address.length < 10) throw new Error('Vui lòng nhập địa chỉ cụ thể (tối thiểu 10 ký tự).');
+      const s = auth.requireAuth();
+      if (!s) return null;
+      return await post('/transactions', { serviceId, date, time, address, note, paymentMethod }, true);
     },
+
     getMyOrders: async () => {
       const s = auth.currentSession();
       if (!s) return [];
-      const res = await fetch(`${BASE_URL}/transactions/${s.userId}`);
-      if (!res.ok) return [];
-      const list = await res.json();
-      return list.map(t => ({
-        id: t.Id, customerId: t.CustomerId, providerId: t.ProviderId, serviceId: t.ServiceId,
-        serviceName: t.ServiceName, price: t.Price, date: t.Date, time: t.Time,
-        address: t.Address, status: t.Status, paymentMethod: t.PaymentMethod, paymentStatus: t.PaymentStatus
-      }));
+      return await get('/transactions/' + s.userId, true);
     },
+
     getById: async (id) => {
-      const res = await fetch(`${BASE_URL}/transaction/${id}`);
-      if (!res.ok) return null;
-      const t = await res.json();
-      return {
-        id: t.Id, customerId: t.CustomerId, providerId: t.ProviderId, serviceId: t.ServiceId,
-        serviceName: t.ServiceName, price: t.Price, date: t.Date, time: t.Time,
-        address: t.Address, status: t.Status, paymentMethod: t.PaymentMethod, paymentStatus: t.PaymentStatus,
-        note: t.Note, createdAt: t.CreatedAt
-      };
+      try { return await get('/transaction/' + id, true); }
+      catch { return null; }
     },
-    updateStatus: async (id, status) => {
-      const res = await fetch(`${BASE_URL}/transaction/${id}/status`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      if (!res.ok) throw new Error('Cập nhật trạng thái thất bại');
-      return true;
+
+    updateStatus: async (id, status, extra = {}) => {
+      return await put('/transaction/' + id + '/status', { status, ...extra }, true);
     },
+
     pay: async (txnId, method, amount = 1000000) => {
       if (method === 'vnpay') {
-        const res = await fetch(`${BASE_URL}/payment/create_payment_url`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ txnId, amount, bankCode: '' })
-        });
-        if (!res.ok) throw new Error('Lỗi kết nối Cổng thanh toán VNPay');
-        const data = await res.json();
+        const data = await post('/payment/create_payment_url', { txnId, amount, bankCode: '' }, true);
         window.location.href = data.url;
-        return new Promise(() => {}); // Wait for redirect
+        return new Promise(() => {});
       } else {
-        await new Promise(r => setTimeout(r, 1200)); // simulate delay
-        const res = await fetch(`${BASE_URL}/transaction/${txnId}/status`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'confirmed', paymentMethod: method, paymentStatus: 'paid' })
-        });
-        if (!res.ok) throw new Error('Thanh toán thất bại');
+        await new Promise(r => setTimeout(r, 800));
+        await put('/transaction/' + txnId + '/status',
+          { status: 'confirmed', paymentMethod: method, paymentStatus: 'paid' }, true);
         return true;
       }
     },
   };
 
-  // ─── CHAT ───────────────────────────────────────────────────────────────
+  // ── CHAT ──────────────────────────────────────────────────────────────────
   const chat = {
     getConversations: async () => {
-      const s = auth.currentSession();
-      if (!s) return [];
-      const convs = DB.conversations.findByUser(s.userId);
-      return convs.map(c => {
-        const otherId = c.participants.find(p => p !== s.userId);
-        const other   = DB.users.findById(otherId);
-        const unread  = DB.messages.findByConversation(c.id).filter(m => !m.read && m.senderId !== s.userId).length;
-        return { ...c, otherUser: other, unreadCount: unread };
-      }).sort((a,b) => new Date(b.lastAt) - new Date(a.lastAt));
+      try { return await get('/conversations', true); }
+      catch { return []; }
     },
 
     getMessages: async (convId) => {
-      const s = auth.currentSession();
-      if (!s) return [];
-      DB.messages.markRead(convId, s.userId);
-      return DB.messages.findByConversation(convId).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+      try { return await get('/messages/' + convId, true); }
+      catch { return []; }
     },
 
     sendMessage: async (convId, content) => {
-      const s = auth.currentSession();
-      if (!s || !content.trim()) return null;
-      const msg = DB.messages.create({ conversationId: convId, senderId: s.userId, content: content.trim() });
-      DB.conversations.update(convId, { lastMessage: content.trim(), lastAt: DB.now() });
-      return msg;
+      if (!content?.trim()) return null;
+      return await post('/messages', { conversationId: convId, content }, true);
     },
 
     startConversation: async (providerId, serviceId) => {
       const s = auth.currentSession();
       if (!s) return null;
-      let conv = DB.conversations.findByParticipants(s.userId, providerId);
-      if (!conv) conv = DB.conversations.create({ participants: [s.userId, providerId], serviceId: serviceId||null });
-      return conv;
+      return await post('/conversations', { providerId, serviceId: serviceId || null }, true);
     },
   };
 
-  // ─── REVIEWS ────────────────────────────────────────────────────────────
+  // ── REVIEWS ───────────────────────────────────────────────────────────────
   const review = {
-    getByService: async (sid) => {
-      const revs = DB.reviews.findByService(sid);
-      return revs.map(r => ({ ...r, user: DB.users.findById(r.customerId) }));
+    getByService: async (serviceId) => {
+      try { return await get('/reviews/service/' + serviceId); }
+      catch { return []; }
     },
+
     create: async ({ serviceId, transactionId, rating, comment }) => {
       const s = auth.requireAuth();
       if (!s) return null;
-      if (DB.reviews.findByTxn(transactionId)) throw new Error('Bạn đã đánh giá đơn hàng này rồi.');
-      return DB.reviews.create({ serviceId, transactionId, customerId: s.userId, rating, comment });
+      return await post('/reviews', { serviceId, transactionId, rating, comment }, true);
+    },
+
+    hasReview: async (transactionId) => {
+      try {
+        const r = await get('/reviews/check/' + transactionId, true);
+        return r.hasReview;
+      } catch { return false; }
+    },
+
+    getByProvider: async (providerId) => {
+      try { return await get('/reviews/provider/' + providerId, true); }
+      catch { return []; }
     },
   };
 
-  // ─── USERS ──────────────────────────────────────────────────────────────
-  const users = {
-    getProfile: async (id) => DB.users.findById(id),
-    updateProfile: async (data) => {
+  // ── FAVORITES (Wishlist) ──────────────────────────────────────────────────
+  const favorites = {
+    getAll: async () => {
+      try { return await get('/favorites', true); }
+      catch { return []; }
+    },
+
+    toggle: async (serviceId) => {
       const s = auth.currentSession();
-      if (!s) return null;
-      return DB.users.update(s.userId, data);
+      if (!s) { window.location.href = rootPath() + 'pages/login.html'; return null; }
+      return await post('/favorites/' + serviceId, {}, true);
     },
-    getProviders: async () => DB.users.getAll().filter(u => u.role === 'provider'),
+
+    check: async (serviceId) => {
+      try {
+        const r = await get('/favorites/check/' + serviceId, true);
+        return r.favorited;
+      } catch { return false; }
+    },
   };
 
-  // ─── DASHBOARD STATS ────────────────────────────────────────────────────
+  // ── STATS ─────────────────────────────────────────────────────────────────
   const stats = {
     customer: async () => {
-      const s = auth.currentSession();
-      const orders = DB.transactions.findByCustomer(s.userId);
-      return {
-        total:     orders.length,
-        pending:   orders.filter(o => o.status === 'pending').length,
-        done:      orders.filter(o => o.status === 'done').length,
-        spent:     orders.filter(o => o.paymentStatus === 'paid').reduce((sum,o) => sum + o.price, 0),
-      };
+      try { return await get('/stats/customer', true); }
+      catch { return { total: 0, pending: 0, done: 0, spent: 0 }; }
     },
+
     provider: async () => {
-      const s = auth.currentSession();
-      const orders = DB.transactions.findByProvider(s.userId);
-      const myServices = DB.services.findByProvider(s.userId);
-      return {
-        orders:    orders.length,
-        pending:   orders.filter(o => o.status === 'pending').length,
-        done:      orders.filter(o => o.status === 'done').length,
-        revenue:   orders.filter(o => o.paymentStatus === 'paid').reduce((sum,o) => sum + o.price, 0),
-        services:  myServices.length,
-      };
+      try { return await get('/stats/provider', true); }
+      catch { return { orders: 0, pending: 0, done: 0, revenue: 0, services: 0, monthly: [] }; }
     },
   };
 
-  return { auth, svc, txn, chat, review, users, stats };
+  // ── USERS ─────────────────────────────────────────────────────────────────
+  const users = {
+    getProfile: async (id) => {
+      try { return await get('/services?providerId=' + id); }
+      catch { return null; }
+    },
+  };
+
+  return { auth, svc, txn, chat, review, favorites, stats, users };
 })();
 
 // Helper: get root path relative to current page

@@ -51,15 +51,21 @@
       if (!svc) { location.href = 'services.html'; return; }
 
       document.title = svc.name + ' — BêTráp';
-      const provider = DB.users.findById(svc.providerId);
-      const reviews  = await API.review.getByService(id);
+      const reviews = await API.review.getByService(id);
+
+      // Check wishlist state (non-blocking)
+      let isFav = false;
+      try { isFav = await API.favorites.check(id); } catch(_) {}
 
       document.getElementById('detail-content').innerHTML = `
         <div>
           <img class="main-img animate-fadeIn" src="${svc.image.startsWith('http') ? svc.image : rootPath() + svc.image}" alt="${svc.name}">
           <div style="margin-top:var(--sp-lg)">
             <span style="font-size:.8rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(svc.category)} ${UI.categoryLabel(svc.category)}</span>
-            <h1 style="font-size:2rem;margin:var(--sp-sm) 0">${svc.name}</h1>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap;margin:var(--sp-sm) 0">
+              <h1 style="font-size:2rem;margin:0;flex:1">${svc.name}</h1>
+              <button id="fav-btn" onclick="toggleFav('${svc.id}')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-full);border:1.5px solid ${isFav ? 'var(--pink)' : '#ccc'};background:${isFav ? 'rgba(220,165,174,.12)' : 'transparent'};color:${isFav ? 'var(--pink)' : '#999'};font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0">${isFav ? '♥' : '♡'} Yêu thích</button>
+            </div>
             <div style="display:flex;align-items:center;gap:var(--sp-lg);flex-wrap:wrap;margin-bottom:var(--sp-md)">
               <span class="stars">${UI.stars(svc.rating)}</span>
               <span style="font-size:.875rem;color:var(--text-muted)">${svc.rating} · ${svc.reviewCount} đánh giá</span>
@@ -67,11 +73,10 @@
             </div>
             <div class="tags">${(svc.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
             <div class="provider-card">
-              <div class="navbar-avatar" style="width:52px;height:52px;font-size:1rem;flex-shrink:0">${provider?.avatar||'??'}</div>
+              <div class="navbar-avatar" style="width:52px;height:52px;font-size:1rem;flex-shrink:0">${(svc.providerName||'?')[0].toUpperCase()}</div>
               <div style="flex:1">
-                <div style="font-weight:700">${provider?.name||'Nhà cung cấp'}</div>
-                <div style="font-size:.8rem;color:var(--text-muted)">${provider?.bio||''}</div>
-                <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px"><i class="ri-map-pin-line"></i> ${provider?.location||''}</div>
+                <div style="font-weight:700">${svc.providerName||'Nhà cung cấp'}</div>
+                <div style="font-size:.8rem;color:var(--text-muted)">${svc.providerBio||''}</div>
               </div>
             </div>
             <h3>Mô Tả Dịch Vụ</h3>
@@ -82,8 +87,8 @@
             ${reviews.length ? `<div class="review-grid">${reviews.map(r=>`
               <div class="review-card">
                 <div class="review-header">
-                  <div class="review-avatar">${r.user?.avatar||'?'}</div>
-                  <div><div style="font-weight:700;font-size:.9rem">${r.user?.name||'Khách hàng'}</div>
+                  <div class="review-avatar">${r.customerAvatar||'?'}</div>
+                  <div><div style="font-weight:700;font-size:.9rem">${r.customerName||'Khách hàng'}</div>
                   <div class="stars" style="font-size:.8rem">${UI.stars(r.rating)}</div></div>
                   <div style="margin-left:auto;font-size:.75rem;color:var(--text-muted)">${UI.timeAgo(r.createdAt)}</div>
                 </div>
@@ -114,8 +119,9 @@
               <textarea id="book-note" class="form-control" rows="3" placeholder="Yêu cầu đặc biệt..."></textarea>
             </div>
             <button class="btn btn-primary btn-block btn-lg" onclick="bookNow('${svc.id}')"><i class="ri-calendar-check-line"></i> Đặt Ngay</button>
+            <button onclick="startChat('${svc.providerId}', '${svc.id}')" class="btn btn-ghost btn-block mt-sm" style="margin-top:var(--sp-sm)">💬 Nhắn Tin Với Nhà Cung Cấp</button>
             <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:var(--sp-md)">
-              <i class="ri-shield-check-line" style="color:var(--success)"></i> Thanh toán an toàn · Hoàn tiền nếu huỷ trước 48h
+              <i class="ri-time-line" style="color:var(--gold)"></i> Nhà cung cấp sẽ xác nhận đơn hàng trong thời gian sớm nhất
             </p>
           </div>
         </div>`;
@@ -128,7 +134,6 @@
       const time = document.getElementById('book-time').value;
       const address = document.getElementById('book-address').value;
       if (!date || !address) { UI.toast('Vui lòng điền ngày và địa chỉ!', 'error'); return; }
-      
       try {
         const txn = await API.txn.create({ serviceId, date, time, address, note: document.getElementById('book-note').value });
         location.href = `checkout.html?id=${txn.id}`;
@@ -137,11 +142,34 @@
       }
     }
 
+    async function toggleFav(serviceId) {
+      const sess = API.auth.currentSession();
+      if (!sess) { UI.toast('Vui lòng đăng nhập để lưu yêu thích!', 'warning'); return; }
+      try {
+        const result = await API.favorites.toggle(serviceId);
+        const nowFav = result?.isFavorited ?? result?.favorited ?? !!(result);
+        const btn = document.getElementById('fav-btn');
+        if (btn) {
+          btn.textContent = (nowFav ? '♥' : '♡') + ' Yêu thích';
+          btn.style.color = nowFav ? 'var(--pink)' : '#999';
+          btn.style.borderColor = nowFav ? 'var(--pink)' : '#ccc';
+          btn.style.background = nowFav ? 'rgba(220,165,174,.12)' : 'transparent';
+        }
+        UI.toast(nowFav ? 'Đã thêm vào yêu thích!' : 'Đã bỏ khỏi yêu thích', 'success');
+      } catch(e) {
+        UI.toast(e.message || 'Không thể cập nhật yêu thích', 'error');
+      }
+    }
+
     async function startChat(providerId, serviceId) {
       const sess = API.auth.currentSession();
       if (!sess) { location.href = 'login.html'; return; }
-      const conv = await API.chat.startConversation(providerId, serviceId);
-      location.href = `chat.html?conv=${conv.id}`;
+      try {
+        const conv = await API.chat.startConversation(providerId, serviceId);
+        location.href = `chat.html?conv=${conv.id}`;
+      } catch(e) {
+        UI.toast(e.message || 'Không thể bắt đầu trò chuyện', 'error');
+      }
     }
   </script>
 </body>

@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Lịch Sử Giao Dịch — BêTráp</title>
+  <title>Đơn Hàng Của Tôi — BêTráp</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/main.css">
@@ -11,32 +11,36 @@
   <style>
     .history-filters{display:flex;gap:var(--sp-sm);flex-wrap:wrap;margin:var(--sp-lg) 0}
     .orders-list{display:flex;flex-direction:column;gap:var(--sp-md)}
-    .order-card-full{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);border-left:4px solid var(--gold);transition:box-shadow var(--t-fast);cursor:pointer}
+    .order-card-full{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);border-left:4px solid var(--gold);transition:box-shadow var(--t-fast)}
     .order-card-full:hover{box-shadow:var(--shadow-md)}
     .order-card-full.border-pending{border-left-color:var(--warning)}
     .order-card-full.border-confirmed{border-left-color:var(--info)}
     .order-card-full.border-done{border-left-color:var(--success)}
     .order-card-full.border-cancelled{border-left-color:var(--error)}
     .order-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap}
-    .order-body{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-md);margin-top:var(--sp-md);padding-top:var(--sp-md);border-top:1px solid rgba(220,165,174,.06)}
+    .order-body{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin-top:var(--sp-md);padding-top:var(--sp-md);border-top:1px solid rgba(220,165,174,.06)}
     .order-meta-item{font-size:.8rem;color:var(--text-muted)}
     .order-meta-item strong{display:block;color:var(--text-dark);font-size:.875rem;margin-top:2px}
     .order-actions{display:flex;gap:var(--sp-sm);margin-top:var(--sp-md);flex-wrap:wrap}
-    @media(max-width:768px){.order-body{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:480px){.order-body{grid-template-columns:1fr}}
-
+    /* Status notification banners */
+    .status-banner{border-radius:var(--r-md);padding:var(--sp-md) var(--sp-lg);margin-top:var(--sp-md);font-size:.875rem;display:flex;align-items:flex-start;gap:var(--sp-sm)}
+    .status-banner.waiting{background:#fff8e1;border:1px solid #ffe082;color:#f57f17}
+    .status-banner.confirmed{background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32}
+    .status-banner.cancelled{background:#ffebee;border:1px solid #ef9a9a;color:#c62828}
     /* Review modal star picker */
     .star-picker{display:flex;gap:var(--sp-sm);font-size:2rem;cursor:pointer}
     .star-btn{color:#DDD;transition:color var(--t-fast)}
     .star-btn.active,.star-btn:hover{color:var(--gold-light)}
+    @media(max-width:768px){.order-body{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:480px){.order-body{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div id="nav-container"></div>
   <div class="page-header">
     <div class="container">
-      <h1>Lịch Sử Giao Dịch</h1>
-      <p>Theo dõi tất cả đơn hàng của bạn</p>
+      <h1>Đơn Hàng Của Tôi</h1>
+      <p>Theo dõi trạng thái tất cả đơn hàng của bạn</p>
     </div>
   </div>
 
@@ -46,7 +50,7 @@
       <button class="filter-chip" data-status="pending">Chờ xác nhận</button>
       <button class="filter-chip" data-status="confirmed">Đã xác nhận</button>
       <button class="filter-chip" data-status="done">Hoàn thành</button>
-      <button class="filter-chip" data-status="cancelled">Đã huỷ</button>
+      <button class="filter-chip" data-status="cancelled">Đã huỷ / Từ chối</button>
     </div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-md)">
@@ -68,8 +72,18 @@
   <script src="../js/ui.js"></script>
   <script>
     let allOrders = [];
+    let reviewMap = {};
     let activeStatus = '';
     let reviewRating = 5;
+
+    async function loadOrders() {
+      allOrders = await API.txn.getMyOrders();
+      const reviewChecks = await Promise.all(
+        allOrders.map(o => o.status === 'done' ? API.review.hasReview(o.id) : Promise.resolve(false))
+      );
+      reviewMap = {};
+      allOrders.forEach((o, i) => reviewMap[o.id] = reviewChecks[i]);
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
@@ -77,7 +91,7 @@
       const sess = API.auth.requireAuth();
       if (!sess) return;
 
-      allOrders = await API.txn.getMyOrders();
+      await loadOrders();
 
       document.querySelectorAll('[data-status]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -89,6 +103,37 @@
       });
       render();
     });
+
+    function statusBannerHtml(o) {
+      if (o.status === 'pending') {
+        return `<div class="status-banner waiting">
+          <i class="ri-time-line" style="font-size:1.1rem;flex-shrink:0;margin-top:1px"></i>
+          <div><strong>Đang chờ nhà cung cấp xem xét</strong><br>
+          Nhà cung cấp sẽ xác nhận hoặc từ chối đơn hàng của bạn trong thời gian sớm nhất.</div>
+        </div>`;
+      }
+      if (o.status === 'confirmed') {
+        return `<div class="status-banner confirmed">
+          <i class="ri-checkbox-circle-line" style="font-size:1.1rem;flex-shrink:0;margin-top:1px"></i>
+          <div><strong>Nhà cung cấp đã xác nhận đơn hàng!</strong><br>
+          Sau khi dịch vụ hoàn tất, hãy ấn "Hoàn Thành" để xác nhận và đánh giá.</div>
+        </div>`;
+      }
+      if (o.status === 'cancelled' && o.cancelReason) {
+        return `<div class="status-banner cancelled">
+          <i class="ri-close-circle-line" style="font-size:1.1rem;flex-shrink:0;margin-top:1px"></i>
+          <div><strong>Đơn hàng bị từ chối</strong><br>
+          Lý do: <em>${o.cancelReason}</em></div>
+        </div>`;
+      }
+      if (o.status === 'cancelled') {
+        return `<div class="status-banner cancelled">
+          <i class="ri-close-circle-line" style="font-size:1.1rem;flex-shrink:0;margin-top:1px"></i>
+          <div><strong>Đơn hàng đã bị huỷ</strong></div>
+        </div>`;
+      }
+      return '';
+    }
 
     function render() {
       const sort = document.getElementById('sort-select').value;
@@ -102,17 +147,15 @@
         return;
       }
       el.innerHTML = list.map(o => {
-        const svc = DB.services.findById(o.serviceId);
-        const provider = DB.users.findById(o.providerId);
-        const hasReview = DB.reviews.findByTxn(o.id);
+        const hasReview = reviewMap[o.id];
         return `
-        <div class="order-card-full border-${o.status} animate-fadeInUp" onclick="location.href='checkout.html?id=${o.id}'">
+        <div class="order-card-full border-${o.status} animate-fadeInUp">
           <div class="order-top">
             <div>
               <div class="order-id">${o.id}</div>
               <div style="font-weight:700;font-size:1rem;margin-top:4px">${o.serviceName}</div>
               <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">
-                <i class="ri-store-2-line"></i> ${provider?.name||'Nhà cung cấp'}
+                <i class="ri-store-2-line"></i> Nhà cung cấp
               </div>
             </div>
             <div style="text-align:right;flex-shrink:0">
@@ -120,24 +163,78 @@
               <div style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--gold);margin-top:var(--sp-sm)">${UI.formatCurrency(o.price)}</div>
             </div>
           </div>
+
+          ${statusBannerHtml(o)}
+
           <div class="order-body">
             <div class="order-meta-item">Ngày đặt<strong>${UI.formatDate(o.createdAt)}</strong></div>
             <div class="order-meta-item">Ngày thực hiện<strong>${o.date||'—'}</strong></div>
             <div class="order-meta-item">Giờ<strong>${o.time||'—'}</strong></div>
-            <div class="order-meta-item">Thanh toán<strong>${o.paymentStatus==='paid'?'<span style="color:var(--success)">✓ Đã thanh toán</span>':'<span style="color:var(--warning)">Chờ thanh toán</span>'}</strong></div>
           </div>
+          ${o.address ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:var(--sp-sm)"><i class="ri-map-pin-line"></i> ${o.address}</div>` : ''}
+          ${o.note ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:4px"><i class="ri-file-text-line"></i> Ghi chú: ${o.note}</div>` : ''}
+
           <div class="order-actions" onclick="event.stopPropagation()">
             <a href="checkout.html?id=${o.id}" class="btn btn-outline btn-sm"><i class="ri-eye-line"></i> Xem Chi Tiết</a>
-            ${o.status==='done'&&!hasReview?`<button class="btn btn-gold btn-sm" onclick="openReview('${o.id}','${o.serviceId}')"><i class="ri-star-line"></i> Đánh Giá</button>`:''}
-            ${o.status==='pending'?`<button class="btn btn-danger btn-sm" onclick="cancelOrder('${o.id}')"><i class="ri-close-line"></i> Huỷ Đơn</button>`:''}
+            ${o.status === 'confirmed' ? `
+              <button class="btn btn-primary btn-sm" onclick="markDone('${o.id}', '${o.serviceId}')">
+                <i class="ri-check-double-line"></i> Hoàn Thành & Đánh Giá
+              </button>` : ''}
+            ${o.status === 'done' && !hasReview ? `
+              <button class="btn btn-gold btn-sm" onclick="openReview('${o.id}','${o.serviceId}')">
+                <i class="ri-star-line"></i> Đánh Giá & Nhận Xét
+              </button>` : ''}
+            ${o.status === 'done' && hasReview ? `
+              <span style="font-size:.8rem;color:var(--success);font-weight:600"><i class="ri-star-fill"></i> Đã đánh giá</span>` : ''}
+            ${o.status === 'pending' ? `
+              <button class="btn btn-danger btn-sm" onclick="cancelOrder('${o.id}')">
+                <i class="ri-close-line"></i> Huỷ Đơn
+              </button>` : ''}
           </div>
-        </div>`}).join('');
+        </div>`;
+      }).join('');
     }
 
+    // ── Hoàn Thành & Đánh Giá ────────────────────────────────────────────────
+    function markDone(id, serviceId) {
+      reviewRating = 5;
+      UI.modal({
+        title: '⭐ Xác Nhận Hoàn Thành & Đánh Giá',
+        body: `
+          <p style="color:var(--text-muted);margin-bottom:var(--sp-lg)">Đơn hàng đã thực hiện xong! Bạn cảm thấy thế nào về dịch vụ này?</p>
+          <div class="star-picker" id="star-picker">
+            ${[1,2,3,4,5].map(i=>`<span class="star-btn active" data-val="${i}" onclick="setRating(${i})">★</span>`).join('')}
+          </div>
+          <div id="rating-label" style="margin-top:var(--sp-sm);color:var(--gold);font-weight:600">Xuất sắc</div>
+          <div class="form-group mt-lg">
+            <label class="form-label">Nhận xét của bạn (Không bắt buộc)</label>
+            <textarea id="review-comment" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm của bạn về dịch vụ..."></textarea>
+          </div>`,
+        confirmText: 'Hoàn Thành & Gửi Đánh Giá',
+        confirmClass: 'btn-gold',
+        onConfirm: async () => {
+          const comment = document.getElementById('review-comment').value;
+          try {
+            // Cập nhật trạng thái thành done
+            await API.txn.updateStatus(id, 'done');
+            // Gửi đánh giá
+            await API.review.create({ serviceId, transactionId: id, rating: reviewRating, comment });
+            UI.toast('🎉 Đơn hàng đã hoàn thành! Cảm ơn bạn đã đánh giá.', 'success');
+            await loadOrders();
+            render();
+          } catch(e) {
+            UI.toast(e.message, 'error');
+            return false;
+          }
+        }
+      });
+    }
+
+    // ── Đánh Giá ─────────────────────────────────────────────────────────────
     function openReview(txnId, serviceId) {
       reviewRating = 5;
       UI.modal({
-        title: 'Đánh Giá Dịch Vụ',
+        title: '⭐ Đánh Giá & Nhận Xét Dịch Vụ',
         body: `
           <p style="color:var(--text-muted);margin-bottom:var(--sp-lg)">Bạn cảm thấy thế nào về dịch vụ này?</p>
           <div class="star-picker" id="star-picker">
@@ -146,7 +243,7 @@
           <div id="rating-label" style="margin-top:var(--sp-sm);color:var(--gold);font-weight:600">Xuất sắc</div>
           <div class="form-group mt-lg">
             <label class="form-label">Nhận xét của bạn</label>
-            <textarea id="review-comment" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+            <textarea id="review-comment" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm của bạn về đội bê tráp..."></textarea>
           </div>`,
         confirmText: 'Gửi Đánh Giá',
         confirmClass: 'btn-gold',
@@ -155,7 +252,7 @@
           try {
             await API.review.create({ serviceId, transactionId: txnId, rating: reviewRating, comment });
             UI.toast('Cảm ơn bạn đã đánh giá! ⭐', 'success');
-            allOrders = await API.txn.getMyOrders();
+            await loadOrders();
             render();
           } catch(e) { UI.toast(e.message, 'error'); }
         }
@@ -172,6 +269,7 @@
       if (lbl) lbl.textContent = labels[val];
     }
 
+    // ── Huỷ Đơn ──────────────────────────────────────────────────────────────
     async function cancelOrder(id) {
       UI.modal({
         title: 'Huỷ Đơn Hàng?',

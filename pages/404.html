@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>404 — Trang Không Tìm Thấy | BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    /* ── Reset for full viewport ── */
+    html, body { height: 100%; }
+    body { background: var(--grad-hero); overflow-x: hidden; }
+
+    /* ── Hero section ── */
+    .not-found-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-h) + var(--sp-2xl)) var(--sp-lg) var(--sp-2xl);
+      position: relative;
+    }
+
+    /* ── Giant 404 ── */
+    .error-code {
+      font-family: var(--font-h);
+      font-size: clamp(6rem, 20vw, 14rem);
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--red) 0%, #E57373 35%, var(--gold) 70%, #F3E5AB 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      z-index: 2;
+      animation: pulse404 3s ease-in-out infinite;
+      letter-spacing: -4px;
+      filter: drop-shadow(0 8px 32px rgba(212,175,55,.3));
+    }
+
+    @keyframes pulse404 {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 8px 32px rgba(212,175,55,.3)); }
+      50%       { transform: scale(1.03); filter: drop-shadow(0 12px 48px rgba(200,16,46,.35)); }
+    }
+
+    /* ── Content block ── */
+    .error-content {
+      position: relative;
+      z-index: 2;
+      max-width: 520px;
+    }
+
+    .error-emoji {
+      font-size: 3rem;
+      margin-bottom: var(--sp-md);
+      display: block;
+      animation: wobble 2.5s ease-in-out infinite;
+    }
+
+    @keyframes wobble {
+      0%,100% { transform: rotate(-8deg) scale(1); }
+      50%      { transform: rotate(8deg) scale(1.1); }
+    }
+
+    .error-title {
+      font-family: var(--font-h);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      color: var(--text-dark);
+      margin-bottom: var(--sp-md);
+    }
+
+    .error-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: var(--sp-xl);
+    }
+
+    .error-actions {
+      display: flex;
+      gap: var(--sp-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Decorative divider ── */
+    .error-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      margin: var(--sp-xl) auto;
+      max-width: 300px;
+      color: var(--text-muted);
+      font-size: .8rem;
+    }
+    .error-divider::before,
+    .error-divider::after { content: ''; flex: 1; height: 1px; background: rgba(212,175,55,.3); }
+
+    /* ── Floating petals ── */
+    .petals-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .petal {
+      position: absolute;
+      top: -60px;
+      border-radius: 50% 0 50% 0;
+      animation: petalFall linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes petalFall {
+      0%   { transform: translateY(0) rotate(0deg) scale(1);   opacity: 0; }
+      10%  { opacity: .8; }
+      90%  { opacity: .5; }
+      100% { transform: translateY(110vh) rotate(720deg) scale(.5); opacity: 0; }
+    }
+
+    /* Individual petals with varied colours/sizes/timings */
+    .petal:nth-child(1)  { left: 8%;  width:14px; height:14px; background:rgba(200,16,46,.35);  animation-duration:7s;  animation-delay:0s;   }
+    .petal:nth-child(2)  { left:18%;  width:10px; height:10px; background:rgba(212,175,55,.4);  animation-duration:9s;  animation-delay:1.2s; }
+    .petal:nth-child(3)  { left:28%;  width:18px; height:18px; background:rgba(200,16,46,.25);  animation-duration:6s;  animation-delay:2s;   }
+    .petal:nth-child(4)  { left:38%;  width:12px; height:12px; background:rgba(212,175,55,.5);  animation-duration:11s; animation-delay:0.5s; }
+    .petal:nth-child(5)  { left:48%;  width:8px;  height:8px;  background:rgba(200,16,46,.4);   animation-duration:8s;  animation-delay:3s;   }
+    .petal:nth-child(6)  { left:58%;  width:16px; height:16px; background:rgba(243,229,171,.6); animation-duration:10s; animation-delay:1.8s; }
+    .petal:nth-child(7)  { left:68%;  width:11px; height:11px; background:rgba(200,16,46,.3);   animation-duration:7.5s;animation-delay:0.8s; }
+    .petal:nth-child(8)  { left:78%;  width:14px; height:14px; background:rgba(212,175,55,.45); animation-duration:9.5s;animation-delay:2.5s; }
+    .petal:nth-child(9)  { left:88%;  width:9px;  height:9px;  background:rgba(200,16,46,.35);  animation-duration:6.5s;animation-delay:4s;   }
+    .petal:nth-child(10) { left:95%;  width:13px; height:13px; background:rgba(212,175,55,.3);  animation-duration:8.5s;animation-delay:1.5s; }
+    .petal:nth-child(11) { left:5%;   width:7px;  height:7px;  background:rgba(243,229,171,.5); animation-duration:12s; animation-delay:0.3s; }
+    .petal:nth-child(12) { left:45%;  width:15px; height:15px; background:rgba(200,16,46,.2);   animation-duration:7.2s;animation-delay:3.5s; }
+    .petal:nth-child(13) { left:72%;  width:10px; height:10px; background:rgba(212,175,55,.6);  animation-duration:9.8s;animation-delay:2.2s; }
+    .petal:nth-child(14) { left:32%;  width:12px; height:12px; background:rgba(200,16,46,.45);  animation-duration:6.8s;animation-delay:1s;   }
+    .petal:nth-child(15) { left:55%;  width:8px;  height:8px;  background:rgba(243,229,171,.7); animation-duration:10.5s;animation-delay:4.5s;}
+
+    /* ── Decorative circles ── */
+    .deco-circle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .deco-circle-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(200,16,46,.06) 0%, transparent 70%);
+      top: -100px; left: -150px;
+    }
+    .deco-circle-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(212,175,55,.08) 0%, transparent 70%);
+      bottom: -80px; right: -100px;
+    }
+
+    /* ── Back link ── */
+    .back-to-nav {
+      position: fixed;
+      top: calc(var(--nav-h) + 20px);
+      left: var(--sp-lg);
+      color: var(--text-muted);
+      font-size: .875rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color var(--t-fast);
+      z-index: 10;
+    }
+    .back-to-nav:hover { color: var(--gold); }
+
+    /* ── Suggested links ── */
+    .quick-links {
+      display: flex;
+      gap: var(--sp-sm);
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: var(--sp-md);
+    }
+    .quick-link-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: var(--r-full);
+      background: white;
+      border: 1px solid rgba(212,175,55,.25);
+      font-size: .82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      transition: all var(--t-fast);
+      text-decoration: none;
+      box-shadow: var(--shadow-xs);
+    }
+    .quick-link-chip:hover { background: var(--gold-faint); color: var(--gold-dark); border-color: var(--gold); transform: translateY(-2px); }
+
+    /* ── Responsive ── */
+    @media(max-width:480px) {
+      .error-actions { flex-direction: column; align-items: center; }
+      .error-actions .btn { width: 100%; max-width: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Decorative background -->
+  <div class="deco-circle deco-circle-1"></div>
+  <div class="deco-circle deco-circle-2"></div>
+
+  <!-- Floating petals -->
+  <div class="petals-container" aria-hidden="true">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  </div>
+
+  <!-- Nav -->
+  <div id="nav-container"></div>
+
+  <!-- Main content -->
+  <div class="not-found-page">
+    <!-- Giant 404 -->
+    <div class="error-code" aria-label="Lỗi 404">404</div>
+
+    <!-- Content -->
+    <div class="error-content animate-fadeInUp">
+      <span class="error-emoji" role="img" aria-label="hoa anh đào">🌸</span>
+      <h1 class="error-title">Ôi! Trang này không tồn tại</h1>
+      <p class="error-desc">
+        Trang bạn tìm kiếm có thể đã bị xóa hoặc đường dẫn không đúng.<br>
+        Đừng lo — chúng tôi có thể giúp bạn tìm đúng hướng.
+      </p>
+
+      <!-- Primary actions -->
+      <div class="error-actions">
+        <a href="../index.html" class="btn btn-primary btn-lg">
+          <i class="ri-home-heart-line"></i> Về Trang Chủ
+        </a>
+        <a href="services.html" class="btn btn-gold btn-lg">
+          <i class="ri-search-2-line"></i> Tìm Dịch Vụ
+        </a>
+      </div>
+
+      <!-- Divider -->
+      <div class="error-divider">Hoặc khám phá</div>
+
+      <!-- Quick links -->
+      <div class="quick-links">
+        <a href="login.html" class="quick-link-chip"><i class="ri-login-circle-line"></i> Đăng Nhập</a>
+        <a href="register.html" class="quick-link-chip"><i class="ri-user-add-line"></i> Đăng Ký</a>
+        <a href="dashboard.html" class="quick-link-chip"><i class="ri-dashboard-line"></i> Dashboard</a>
+        <a href="history.html" class="quick-link-chip"><i class="ri-history-line"></i> Lịch Sử</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initPage();
+      UI.renderFooter('footer-container');
+    });
+  </script>
+</body>
+</html>

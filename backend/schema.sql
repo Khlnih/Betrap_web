@@ -1,5 +1,6 @@
 -- BêTráp SQL Server Database Schema & Seed Data
 -- ==========================================================
+-- Version 2.0 — Thêm Favorites, bcrypt password support
 
 -- Tạo Database (Bỏ comment nếu chạy trên SSMS và chưa có DB)
 -- CREATE DATABASE BeTrapDB;
@@ -11,7 +12,7 @@
 CREATE TABLE Users (
     Id VARCHAR(50) PRIMARY KEY,
     Email NVARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL,
+    PasswordHash NVARCHAR(500) NOT NULL, -- bcrypt hash (60 chars) or plain text legacy
     Name NVARCHAR(100) NOT NULL,
     Role VARCHAR(20) DEFAULT 'customer', -- 'customer' hoặc 'provider'
     Phone VARCHAR(20),
@@ -71,13 +72,18 @@ CREATE TABLE Transactions (
     Time TIME NOT NULL,
     Address NVARCHAR(500) NOT NULL,
     Note NVARCHAR(1000),
-    Status VARCHAR(20) DEFAULT 'pending', -- pending, confirmed, active, done, cancelled
+    Status VARCHAR(20) DEFAULT 'pending', -- pending, confirmed, done, cancelled
+    CancelReason NVARCHAR(500) NULL,       -- Lý do từ chối (provider điền khi cancelled)
     PaymentMethod VARCHAR(50),
     PaymentStatus VARCHAR(20) DEFAULT 'unpaid', -- unpaid, paid
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE()
 );
 GO
+
+-- Nếu DB đã tồn tại, chạy lệnh ALTER này thay vì tạo lại bảng:
+-- ALTER TABLE Transactions ADD CancelReason NVARCHAR(500) NULL;
+-- GO
 
 -- 4. Bảng Conversations
 CREATE TABLE Conversations (
@@ -118,6 +124,15 @@ CREATE TABLE Reviews (
     Rating INT NOT NULL CHECK (Rating >= 1 AND Rating <= 5),
     Comment NVARCHAR(1000),
     CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- 7. Bảng Favorites (Wishlist)
+CREATE TABLE Favorites (
+    UserId    VARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Users(Id),
+    ServiceId VARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Services(Id),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    PRIMARY KEY (UserId, ServiceId)
 );
 GO
 

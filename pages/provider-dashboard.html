@@ -8,21 +8,32 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     body{background:var(--cream)}
     .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - var(--nav-h))}
     .dash-sidebar{background:white;padding:var(--sp-lg) 0;position:sticky;top:var(--nav-h);height:calc(100vh - var(--nav-h));overflow-y:auto;border-right:1px solid rgba(220,165,174,.15)}
     .dash-main{padding:var(--sp-xl);overflow-y:auto}
-    .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-md);margin-bottom:var(--sp-xl)}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-md);margin-bottom:var(--sp-xl)}
     .content-tabs{display:flex;gap:0;border-bottom:2px solid rgba(220,165,174,.1);margin-bottom:var(--sp-xl)}
-    .tab-btn{padding:12px 24px;font-size:.875rem;font-weight:600;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all var(--t-fast);cursor:pointer}
+    .tab-btn{padding:12px 24px;font-size:.875rem;font-weight:600;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all var(--t-fast);cursor:pointer;white-space:nowrap}
     .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
     .tab-btn:hover{color:var(--gold-dark)}
     .svc-manage-card{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);display:flex;gap:var(--sp-md);align-items:flex-start;border-left:4px solid var(--gold);transition:box-shadow var(--t-fast)}
     .svc-manage-card:hover{box-shadow:var(--shadow-md)}
-    @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+    .chart-container{background:white;border-radius:var(--r-lg);padding:var(--sp-xl);box-shadow:var(--shadow-sm);margin-bottom:var(--sp-xl)}
+    .chart-title{font-family:var(--font-h);font-size:1.1rem;font-weight:700;color:var(--text-dark);margin-bottom:var(--sp-lg)}
+    .svc-card-inactive{border-left-color:var(--text-muted)!important;opacity:.65}
+    /* Review card */
+    .review-card{background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);margin-bottom:var(--sp-md);border-left:4px solid var(--gold-light)}
+    .review-stars{color:var(--gold);font-size:1.1rem;letter-spacing:2px}
+    .review-meta{font-size:.75rem;color:var(--text-muted);margin-top:4px}
+    .review-svc-badge{display:inline-block;background:var(--gold-faint);color:var(--gold-dark);border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:600;margin-bottom:6px}
+    /* Cancel reason alert */
+    .cancel-reason-box{background:#fff5f5;border:1px solid rgba(231,76,60,.2);border-radius:var(--r-md);padding:var(--sp-md);margin-top:var(--sp-sm);font-size:.8rem;color:#c0392b}
+    @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dash-layout{grid-template-columns:1fr}.dash-sidebar{display:none}}
-    @media(max-width:640px){.stats-grid{grid-template-columns:1fr}}
+    @media(max-width:640px){.stats-grid{grid-template-columns:1fr}.content-tabs{overflow-x:auto}}
   </style>
 </head>
 <body>
@@ -33,15 +44,17 @@
         <div style="padding:var(--sp-lg) var(--sp-xl) var(--sp-xl)">
           <div class="navbar-avatar" id="sidebar-avatar" style="width:52px;height:52px;font-size:1.1rem;margin-bottom:var(--sp-md)"></div>
           <div style="font-weight:700;color:var(--text-dark);font-size:.95rem" id="sidebar-name"></div>
-          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px" id="sidebar-role"></div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px" id="sidebar-role">Nhà cung cấp</div>
         </div>
         <div class="dash-nav-section">Tổng quan</div>
-        <div class="dash-nav-item active" onclick="showTab('overview')"><i class="ri-dashboard-line"></i> Dashboard</div>
+        <div class="dash-nav-item active" id="nav-overview" onclick="showTab('overview')"><i class="ri-dashboard-line"></i> Dashboard</div>
         <div class="dash-nav-section">Quản lý</div>
-        <div class="dash-nav-item" onclick="showTab('orders')"><i class="ri-file-list-3-line"></i> Đơn Hàng</div>
-        <div class="dash-nav-item" onclick="showTab('services')"><i class="ri-apps-line"></i> Dịch Vụ</div>
+        <div class="dash-nav-item" id="nav-orders" onclick="showTab('orders')"><i class="ri-file-list-3-line"></i> Đơn Hàng <span id="sidebar-pending-badge"></span></div>
+        <div class="dash-nav-item" id="nav-reviews" onclick="showTab('reviews')"><i class="ri-star-line"></i> Đánh Giá Sản Phẩm</div>
+        <div class="dash-nav-item" id="nav-services" onclick="showTab('services')"><i class="ri-apps-line"></i> Dịch Vụ</div>
         <div class="dash-nav-item" onclick="location.href='settings.html'"><i class="ri-settings-3-line"></i> Cài Đặt</div>
         <div class="dash-nav-section">Tài khoản</div>
+        <div class="dash-nav-item" id="nav-profile" onclick="showTab('profile')"><i class="ri-user-line"></i> Thông Tin Studio</div>
         <div class="dash-nav-item" onclick="API.auth.logout()" style="color:rgba(231,76,60,.7)"><i class="ri-logout-box-line"></i> Đăng Xuất</div>
       </aside>
 
@@ -55,36 +68,50 @@
         <div class="content-tabs">
           <div class="tab-btn active" id="tab-overview" onclick="showTab('overview')">Tổng Quan</div>
           <div class="tab-btn" id="tab-orders" onclick="showTab('orders')">Đơn Hàng <span id="pending-badge"></span></div>
+          <div class="tab-btn" id="tab-reviews" onclick="showTab('reviews')"><i class="ri-star-line"></i> Đánh Giá</div>
           <div class="tab-btn" id="tab-services" onclick="showTab('services')">Dịch Vụ</div>
           <div class="tab-btn" id="tab-profile" onclick="showTab('profile')">Thông Tin Studio</div>
         </div>
 
-        <!-- Overview -->
+        <!-- ─── Overview Tab ─── -->
         <div id="panel-overview">
           <h4 style="margin-bottom:var(--sp-md)">Đơn Hàng Cần Xử Lý</h4>
           <div id="pending-orders"></div>
         </div>
 
-        <!-- Orders -->
+        <!-- ─── Orders Tab ─── -->
         <div id="panel-orders" class="hidden">
           <div style="display:flex;gap:var(--sp-sm);margin-bottom:var(--sp-lg);flex-wrap:wrap">
             <button class="filter-chip active" data-status="" onclick="filterOrders(this,'')">Tất cả</button>
             <button class="filter-chip" data-status="pending" onclick="filterOrders(this,'pending')">Chờ xác nhận</button>
             <button class="filter-chip" data-status="confirmed" onclick="filterOrders(this,'confirmed')">Đã xác nhận</button>
             <button class="filter-chip" data-status="done" onclick="filterOrders(this,'done')">Hoàn thành</button>
+            <button class="filter-chip" data-status="cancelled" onclick="filterOrders(this,'cancelled')">Đã từ chối</button>
           </div>
           <div id="all-orders-list"></div>
         </div>
 
-        <!-- Services -->
-        <div id="panel-services" class="hidden">
+        <!-- ─── Reviews Tab ─── -->
+        <div id="panel-reviews" class="hidden">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-lg)">
+            <h4>Đánh Giá Sản Phẩm</h4>
+            <div id="review-summary" style="font-size:.875rem;color:var(--text-muted)"></div>
+          </div>
+          <div id="reviews-list"></div>
+        </div>
+
+        <!-- ─── Services Tab ─── -->
+        <div id="panel-services" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-lg);flex-wrap:wrap;gap:var(--sp-sm)">
             <h4>Dịch Vụ Của Tôi</h4>
+            <button class="btn btn-primary btn-sm" onclick="openServiceModal()">
+              <i class="ri-add-line"></i> Thêm Dịch Vụ
+            </button>
           </div>
           <div id="my-services-list" style="display:flex;flex-direction:column;gap:var(--sp-md)"></div>
         </div>
 
-        <!-- Profile Panel -->
+        <!-- ─── Profile Tab ─── -->
         <div id="panel-profile" class="hidden">
           <h2 style="margin-bottom:var(--sp-md);color:var(--text-dark)">Thông Tin Nhà Cung Cấp</h2>
           <div style="background:white;padding:var(--sp-xl);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)">
@@ -120,69 +147,321 @@
       </main>
     </div>
   </div>
+
   <div id="toast-container"></div>
   <div id="modal-overlay"></div>
+
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    let allOrders = [];
+    // ── State ────────────────────────────────────────────────────────────────
+    let allOrders   = [];
+    let myServices  = [];
+    let statsData   = null;
+    let allReviews  = [];
+    const TABS = ['overview','orders','reviews','services','profile'];
+
+    // ── Boot ─────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
       const sess = API.auth.requireAuth();
       if (!sess) return;
       if (sess.role !== 'provider') { location.href = 'dashboard.html'; return; }
 
-      document.getElementById('sidebar-avatar').textContent = sess.avatar;
-      document.getElementById('sidebar-name').textContent = sess.name;
+      document.getElementById('sidebar-avatar').textContent = sess.avatar || sess.name?.[0] || '?';
+      document.getElementById('sidebar-name').textContent   = sess.name;
 
-      const hour = new Date().getHours();
+      const hour  = new Date().getHours();
       const greet = hour < 12 ? 'Chào buổi sáng' : hour < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
       document.getElementById('dash-greeting').textContent = greet + ', ' + sess.name + '!';
 
-      const s = await API.stats.provider();
-      document.getElementById('stats-grid').innerHTML = `
-        <div class="stat-card"><div class="stat-icon gold"><i class="ri-file-list-3-line"></i></div><div><div class="stat-value">${s.orders}</div><div class="stat-label">Tổng đơn</div></div></div>
-        <div class="stat-card"><div class="stat-icon blue"><i class="ri-time-line"></i></div><div><div class="stat-value">${s.pending}</div><div class="stat-label">Chờ xác nhận</div></div></div>
-        <div class="stat-card"><div class="stat-icon green"><i class="ri-checkbox-circle-line"></i></div><div><div class="stat-value">${s.done}</div><div class="stat-label">Hoàn thành</div></div></div>
-        <div class="stat-card"><div class="stat-icon red"><i class="ri-money-cny-circle-line"></i></div><div><div class="stat-value">${UI.formatCurrency(s.revenue)}</div><div class="stat-label">Doanh thu</div></div></div>
-        <div class="stat-card"><div class="stat-icon gold"><i class="ri-apps-line"></i></div><div><div class="stat-value">${s.services}</div><div class="stat-label">Dịch vụ</div></div></div>`;
+      // Load everything in parallel
+      const [s, orders, svcs] = await Promise.all([
+        API.stats.provider(),
+        API.txn.getMyOrders(),
+        API.svc.getAll(),
+      ]);
 
-      allOrders = await API.txn.getMyOrders();
+      statsData   = s;
+      allOrders   = orders;
+      myServices  = svcs.filter(sv => sv.providerId === sess.userId);
+
+      renderStatsGrid(s, 'stats-grid');
+
       const pending = allOrders.filter(o => o.status === 'pending');
-      if (pending.length) document.getElementById('pending-badge').innerHTML = `<span class="badge badge-pending" style="font-size:.65rem">${pending.length}</span>`;
+      updatePendingBadge(pending.length);
 
       renderPendingOrders(pending);
       renderAllOrders(allOrders);
       renderMyServices();
 
-      // Load Profile
-      document.getElementById('prof-name').value = sess.name || '';
-      document.getElementById('prof-email').value = sess.email || '';
-      document.getElementById('prof-phone').value = sess.phone || '';
+      // Profile
+      document.getElementById('prof-name').value     = sess.name     || '';
+      document.getElementById('prof-email').value    = sess.email    || '';
+      document.getElementById('prof-phone').value    = sess.phone    || '';
       document.getElementById('prof-location').value = sess.location || '';
-      document.getElementById('prof-bank').value = sess.bank || '';
-      document.getElementById('prof-bio').value = sess.bio || '';
+      document.getElementById('prof-bank').value     = sess.bank     || '';
+      document.getElementById('prof-bio').value      = sess.bio      || '';
     });
 
-    function showTab(tab) {
-      ['overview','orders','services','profile'].forEach(t => {
-        document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
-        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
-      });
-      document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+    function updatePendingBadge(count) {
+      const badge = `<span class="badge badge-pending" style="font-size:.65rem">${count}</span>`;
+      document.getElementById('pending-badge').innerHTML      = count ? badge : '';
+      document.getElementById('sidebar-pending-badge').innerHTML = count ? badge : '';
     }
 
+    // ── Stats Grid ───────────────────────────────────────────────────────────
+    function renderStatsGrid(s, containerId) {
+      document.getElementById(containerId).innerHTML = `
+        <div class="stat-card"><div class="stat-icon gold"><i class="ri-file-list-3-line"></i></div><div><div class="stat-value">${s.orders}</div><div class="stat-label">Tổng đơn</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="ri-time-line"></i></div><div><div class="stat-value">${s.pending}</div><div class="stat-label">Chờ xác nhận</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="ri-checkbox-circle-line"></i></div><div><div class="stat-value">${s.done}</div><div class="stat-label">Hoàn thành</div></div></div>
+        <div class="stat-card"><div class="stat-icon gold"><i class="ri-apps-line"></i></div><div><div class="stat-value">${s.services}</div><div class="stat-label">Dịch vụ</div></div></div>`;
+    }
+
+    // ── Tab Navigation ────────────────────────────────────────────────────────
+    function showTab(tab) {
+      TABS.forEach(t => {
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+        document.getElementById('tab-'   + t).classList.toggle('active', t === tab);
+        const navEl = document.getElementById('nav-' + t);
+        if (navEl) navEl.classList.toggle('active', t === tab);
+      });
+      if (tab === 'reviews') loadReviews();
+    }
+
+    // ── Pending Orders (Overview) ─────────────────────────────────────────────
+    function renderPendingOrders(orders) {
+      const el = document.getElementById('pending-orders');
+      if (!orders.length) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h3>Không có đơn nào đang chờ</h3><p>Bạn đã xử lý hết tất cả đơn hàng!</p></div>`;
+        return;
+      }
+      el.innerHTML = orders.map(o => `
+        <div class="order-card-full border-pending" style="margin-bottom:var(--sp-md)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap">
+            <div>
+              <div class="order-id">${o.id}</div>
+              <div style="font-weight:700;margin-top:4px;font-size:1rem">${o.serviceName}</div>
+              <div style="font-size:.8rem;color:var(--text-muted);margin-top:4px">
+                <i class="ri-user-line"></i> ${o.customerName || 'Khách hàng'}
+              </div>
+              <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">
+                <i class="ri-calendar-line"></i> ${o.date} ${o.time} · <i class="ri-map-pin-line"></i> ${o.address}
+              </div>
+              ${o.note ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:2px"><i class="ri-file-text-line"></i> Ghi chú: ${o.note}</div>` : ''}
+            </div>
+            <div style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--gold)">${UI.formatCurrency(o.price)}</div>
+          </div>
+          <div style="display:flex;gap:var(--sp-sm);margin-top:var(--sp-md)">
+            <button class="btn btn-primary btn-sm" onclick="confirmOrder('${o.id}')"><i class="ri-check-line"></i> Xác Nhận</button>
+            <button class="btn btn-danger btn-sm" onclick="promptCancelOrder('${o.id}')"><i class="ri-close-line"></i> Từ Chối</button>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── All Orders ────────────────────────────────────────────────────────────
+    function renderAllOrders(orders) {
+      const el = document.getElementById('all-orders-list');
+      if (!orders.length) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>Chưa có đơn hàng nào</h3></div>`;
+        return;
+      }
+      el.innerHTML = orders.map(o => {
+        const borderColor = o.status==='done' ? 'var(--success)' : o.status==='cancelled' ? 'var(--error)' : o.status==='confirmed' ? 'var(--info)' : 'var(--gold)';
+        return `
+        <div style="background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);margin-bottom:var(--sp-md);border-left:4px solid ${borderColor}">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-md)">
+            <div>
+              <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
+              <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
+              <div style="font-size:.8rem;color:var(--text-muted)">${o.customerName || 'Khách hàng'} · ${o.date} ${o.time}</div>
+              <div style="font-size:.8rem;color:var(--text-muted)">${o.address}</div>
+            </div>
+            <div style="text-align:right">
+              ${UI.statusBadge(o.status)}
+              <div style="font-family:var(--font-h);font-weight:700;color:var(--gold);font-size:1.2rem;margin-top:4px">${UI.formatCurrency(o.price)}</div>
+            </div>
+          </div>
+          ${o.status === 'cancelled' && o.cancelReason ? `
+            <div class="cancel-reason-box">
+              <i class="ri-information-line"></i> <strong>Lý do từ chối:</strong> ${o.cancelReason}
+            </div>` : ''}
+          ${o.status === 'confirmed' ? `
+            <div style="margin-top:var(--sp-md)">
+              <button class="btn btn-primary btn-sm" onclick="markDone('${o.id}')">
+                <i class="ri-check-double-line"></i> Đánh Dấu Hoàn Thành
+              </button>
+            </div>` : ''}
+          ${o.status === 'pending' ? `
+            <div style="margin-top:var(--sp-md);display:flex;gap:var(--sp-sm)">
+              <button class="btn btn-primary btn-sm" onclick="confirmOrder('${o.id}')"><i class="ri-check-line"></i> Xác Nhận</button>
+              <button class="btn btn-danger btn-sm" onclick="promptCancelOrder('${o.id}')"><i class="ri-close-line"></i> Từ Chối</button>
+            </div>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    // ── Reviews Tab ───────────────────────────────────────────────────────────
+    async function loadReviews() {
+      const el = document.getElementById('reviews-list');
+      const sess = API.auth.currentSession();
+      el.innerHTML = '<div style="text-align:center;padding:var(--sp-xl)"><span class="spinner"></span></div>';
+      try {
+        allReviews = await API.review.getByProvider(sess.userId);
+        if (!allReviews.length) {
+          el.innerHTML = `<div class="empty-state"><div class="empty-icon">⭐</div><h3>Chưa có đánh giá nào</h3><p>Khi khách hàng đánh giá dịch vụ, chúng sẽ hiển thị tại đây.</p></div>`;
+          document.getElementById('review-summary').textContent = '';
+          return;
+        }
+
+        const avgRating = (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(1);
+        document.getElementById('review-summary').innerHTML =
+          `<span style="color:var(--gold);font-weight:700">★ ${avgRating}</span> · ${allReviews.length} đánh giá`;
+
+        el.innerHTML = allReviews.map(r => `
+          <div class="review-card animate-fadeInUp">
+            <div class="review-svc-badge"><i class="ri-store-2-line"></i> ${r.serviceName || 'Dịch vụ'}</div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:var(--sp-sm)">
+                <div class="navbar-avatar" style="width:36px;height:36px;font-size:.8rem;flex-shrink:0">${r.customerAvatar || r.customerName?.[0] || '?'}</div>
+                <div>
+                  <div style="font-weight:700;font-size:.9rem">${r.customerName || 'Khách hàng'}</div>
+                  <div class="review-meta">${UI.formatDate(r.createdAt)}</div>
+                </div>
+              </div>
+              <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+            </div>
+            ${r.comment ? `<div style="margin-top:var(--sp-sm);font-size:.875rem;color:var(--text-dark);line-height:1.6;background:var(--cream);border-radius:var(--r-sm);padding:var(--sp-sm) var(--sp-md)">"${r.comment}"</div>` : '<div style="margin-top:var(--sp-sm);font-size:.8rem;color:var(--text-muted);font-style:italic">Không có nhận xét</div>'}
+          </div>`).join('');
+      } catch(e) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Không tải được đánh giá</h3><p>${e.message}</p></div>`;
+      }
+    }
+
+    // ── My Services ───────────────────────────────────────────────────────────
+    function renderMyServices() {
+      const el = document.getElementById('my-services-list');
+      if (!myServices.length) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏪</div><h3>Chưa có dịch vụ nào</h3><p>Nhấn "Thêm Dịch Vụ" để tạo dịch vụ đầu tiên của bạn.</p></div>`;
+        return;
+      }
+      el.innerHTML = myServices.map(s => `
+        <div class="svc-manage-card ${s.active === false ? 'svc-card-inactive' : ''}">
+          <img src="${s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || 'assets/placeholder.jpg'))}"
+               alt="${s.name}"
+               style="width:90px;height:68px;object-fit:cover;border-radius:var(--r-sm);flex-shrink:0"
+               onerror="this.src='https://placehold.co/90x68?text=BêTráp'">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+            <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">${UI.categoryLabel ? UI.categoryLabel(s.category) : s.category} · ${s.location || '—'}</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-md);margin-top:4px">
+              <span class="stars" style="font-size:.8rem">${UI.stars ? UI.stars(s.rating || 0) : '★'.repeat(Math.round(s.rating||0))}</span>
+              <span style="font-size:.75rem;color:var(--text-muted)">${s.reviewCount || 0} đánh giá</span>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:var(--font-h);font-weight:700;color:var(--gold)">${UI.formatCurrency(s.price)}</div>
+            <div style="font-size:.75rem;color:var(--text-muted)">/${s.unit || 'buổi'}</div>
+            <span class="${s.active !== false ? 'badge badge-active' : 'badge badge-cancelled'}" style="margin-top:4px;display:inline-block">
+              ${s.active !== false ? 'Hoạt động' : 'Ẩn'}
+            </span>
+            <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm" onclick="openServiceModal('${s.id}')"><i class="ri-edit-line"></i> Sửa</button>
+              <button class="btn btn-sm ${s.active !== false ? 'btn-danger' : 'btn-primary'}" onclick="toggleService('${s.id}')">
+                <i class="ri-${s.active !== false ? 'eye-off' : 'eye'}-line"></i> ${s.active !== false ? 'Ẩn' : 'Hiện'}
+              </button>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── Filter Orders ─────────────────────────────────────────────────────────
+    function filterOrders(btn, status) {
+      document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = status ? allOrders.filter(o => o.status === status) : allOrders;
+      renderAllOrders(filtered);
+    }
+
+    // ── Confirm Order ─────────────────────────────────────────────────────────
+    async function confirmOrder(id) {
+      try {
+        await API.txn.updateStatus(id, 'confirmed');
+        UI.toast('✅ Đã xác nhận đơn hàng!', 'success');
+        await refreshOrders();
+      } catch(e) {
+        UI.toast(e.message, 'error');
+      }
+    }
+
+    // ── Mark Done ─────────────────────────────────────────────────────────────
+    async function markDone(id) {
+      try {
+        await API.txn.updateStatus(id, 'done');
+        UI.toast('✅ Đơn hàng đã hoàn thành!', 'success');
+        await refreshOrders();
+      } catch(e) {
+        UI.toast(e.message, 'error');
+      }
+    }
+
+    // ── Từ Chối Với Lý Do ────────────────────────────────────────────────────
+    function promptCancelOrder(id) {
+      UI.modal({
+        title: '<i class="ri-close-circle-line" style="color:var(--error)"></i> Từ Chối Đơn Hàng',
+        body: `
+          <p style="color:var(--text-muted);margin-bottom:var(--sp-lg)">Vui lòng nhập lý do từ chối để thông báo cho khách hàng.</p>
+          <div class="form-group">
+            <label class="form-label">Lý do từ chối <span style="color:var(--error)">*</span></label>
+            <textarea id="cancel-reason-input" class="form-control" rows="4"
+              placeholder="VD: Ngày đó đội bê tráp đã có lịch kín, vui lòng chọn ngày khác..."></textarea>
+          </div>`,
+        confirmText: 'Xác Nhận Từ Chối',
+        confirmClass: 'btn-danger',
+        cancelText: 'Huỷ',
+        onConfirm: async () => {
+          const reason = document.getElementById('cancel-reason-input')?.value?.trim();
+          if (!reason) {
+            UI.toast('Vui lòng nhập lý do từ chối!', 'error');
+            return false; // keep modal open
+          }
+          try {
+            await API.txn.updateStatus(id, 'cancelled', { cancelReason: reason });
+            UI.toast('❌ Đã từ chối đơn hàng.', 'info');
+            await refreshOrders();
+            return true;
+          } catch(e) {
+            UI.toast(e.message, 'error');
+            return false;
+          }
+        }
+      });
+    }
+
+    // ── Refresh Orders ────────────────────────────────────────────────────────
+    async function refreshOrders() {
+      allOrders = await API.txn.getMyOrders();
+      const pending = allOrders.filter(o => o.status === 'pending');
+      updatePendingBadge(pending.length);
+      renderPendingOrders(pending);
+      renderAllOrders(allOrders);
+      // Refresh stats
+      statsData = await API.stats.provider();
+      renderStatsGrid(statsData, 'stats-grid');
+    }
+
+    // ── Profile Update ────────────────────────────────────────────────────────
     async function updateProfile() {
       const data = {
-        name: document.getElementById('prof-name').value.trim(),
-        phone: document.getElementById('prof-phone').value.trim(),
+        name:     document.getElementById('prof-name').value.trim(),
+        phone:    document.getElementById('prof-phone').value.trim(),
         location: document.getElementById('prof-location').value.trim(),
-        bank: document.getElementById('prof-bank').value.trim(),
-        bio: document.getElementById('prof-bio').value.trim()
+        bank:     document.getElementById('prof-bank').value.trim(),
+        bio:      document.getElementById('prof-bio').value.trim(),
       };
       if (!data.name) { UI.toast('Tên Studio không được để trống.', 'error'); return; }
-      
       try {
         await API.auth.updateProfile(data);
         UI.toast('Cập nhật hồ sơ Studio thành công!', 'success');
@@ -192,81 +471,131 @@
       }
     }
 
-    function renderPendingOrders(orders) {
-      const el = document.getElementById('pending-orders');
-      if (!orders.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h3>Không có đơn nào đang chờ</h3></div>`; return; }
-      el.innerHTML = orders.map(o => `
-        <div class="order-card-full border-pending" style="margin-bottom:var(--sp-md)">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap">
-            <div>
-              <div class="order-id">${o.id}</div>
-              <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
-              <div style="font-size:.8rem;color:var(--text-muted);margin-top:4px"><i class="ri-calendar-line"></i> ${o.date} ${o.time} · <i class="ri-map-pin-line"></i> ${o.address}</div>
+    // ── Service Modal ─────────────────────────────────────────────────────────
+    const CATEGORIES = [
+      { value: 'be-trap',  label: 'Đội Bê Tráp' },
+      { value: 'ao-dai',   label: 'Áo Dài Cô Dâu' },
+      { value: 'lam-trap', label: 'Làm Tráp' },
+      { value: 'media',    label: 'Chụp ảnh / Quay phim' },
+      { value: 'makeup',   label: 'Trang điểm' },
+    ];
+
+    function buildServiceForm(svc) {
+      const catOptions = CATEGORIES.map(c =>
+        `<option value="${c.value}" ${svc && svc.category === c.value ? 'selected' : ''}>${c.label}</option>`
+      ).join('');
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:var(--sp-md);max-height:70vh;overflow-y:auto;padding-right:4px">
+          <div class="form-group">
+            <label class="form-label">Tên dịch vụ *</label>
+            <input id="sf-name" class="form-control" type="text" value="${svc ? escHtml(svc.name) : ''}" placeholder="VD: Đội bê tráp 6 người cao cấp">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Danh mục *</label>
+            <select id="sf-category" class="form-control">
+              <option value="">-- Chọn danh mục --</option>
+              ${catOptions}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mô tả</label>
+            <textarea id="sf-desc" class="form-control" rows="3" placeholder="Mô tả chi tiết dịch vụ...">${svc ? escHtml(svc.description || '') : ''}</textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-md)">
+            <div class="form-group">
+              <label class="form-label">Giá (VND) *</label>
+              <input id="sf-price" class="form-control" type="number" min="0" step="50000" value="${svc ? svc.price : ''}" placeholder="VD: 3500000">
             </div>
-            <div style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--gold)">${UI.formatCurrency(o.price)}</div>
+            <div class="form-group">
+              <label class="form-label">Đơn vị</label>
+              <input id="sf-unit" class="form-control" type="text" value="${svc ? escHtml(svc.unit || 'buổi') : 'buổi'}" placeholder="buổi, gói, ngày...">
+            </div>
           </div>
-          <div style="display:flex;gap:var(--sp-sm);margin-top:var(--sp-md)">
-            <button class="btn btn-primary btn-sm" onclick="updateStatus('${o.id}','confirmed')"><i class="ri-check-line"></i> Xác Nhận</button>
-            <button class="btn btn-danger btn-sm" onclick="updateStatus('${o.id}','cancelled')"><i class="ri-close-line"></i> Từ Chối</button>
+          <div class="form-group">
+            <label class="form-label">URL Ảnh đại diện</label>
+            <input id="sf-image" class="form-control" type="url" value="${svc ? escHtml(svc.image || '') : ''}" placeholder="https://...">
           </div>
-        </div>`).join('');
+          <div class="form-group">
+            <label class="form-label">Khu vực phục vụ</label>
+            <input id="sf-location" class="form-control" type="text" value="${svc ? escHtml(svc.location || '') : ''}" placeholder="VD: TP. Hồ Chí Minh, Bình Dương">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tags (cách nhau bởi dấu phẩy)</label>
+            <input id="sf-tags" class="form-control" type="text" value="${svc && svc.tags ? svc.tags.join(', ') : ''}" placeholder="VD: cưới hỏi, truyền thống, cao cấp">
+          </div>
+        </div>`;
     }
 
-    function renderAllOrders(orders) {
-      const el = document.getElementById('all-orders-list');
-      if (!orders.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>Chưa có đơn hàng nào</h3></div>`; return; }
-      el.innerHTML = orders.map(o => `
-        <div style="background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);margin-bottom:var(--sp-md);border-left:4px solid var(--${o.status==='done'?'success':o.status==='cancelled'?'error':'gold'})">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-md)">
-            <div>
-              <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
-              <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
-              <div style="font-size:.8rem;color:var(--text-muted)">${o.date} ${o.time} · ${o.address}</div>
-            </div>
-            <div style="text-align:right">${UI.statusBadge(o.status)}<div style="font-family:var(--font-h);font-weight:700;color:var(--gold);font-size:1.2rem;margin-top:4px">${UI.formatCurrency(o.price)}</div></div>
-          </div>
-          ${o.status==='confirmed'?`<div style="margin-top:var(--sp-md)"><button class="btn btn-primary btn-sm" onclick="updateStatus('${o.id}','done')"><i class="ri-check-double-line"></i> Đánh dấu Hoàn Thành</button></div>`:''}
-        </div>`).join('');
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    function renderMyServices() {
+    function openServiceModal(serviceId) {
+      const editSvc = serviceId ? myServices.find(s => s.id === serviceId) : null;
+      const title   = editSvc ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới';
+
+      UI.modal({
+        title,
+        body: buildServiceForm(editSvc),
+        confirmText: editSvc ? 'Lưu Thay Đổi' : 'Tạo Dịch Vụ',
+        cancelText: 'Hủy',
+        onConfirm: async () => {
+          const name     = document.getElementById('sf-name').value.trim();
+          const category = document.getElementById('sf-category').value;
+          const description = document.getElementById('sf-desc').value.trim();
+          const price    = parseInt(document.getElementById('sf-price').value) || 0;
+          const unit     = document.getElementById('sf-unit').value.trim() || 'buổi';
+          const image    = document.getElementById('sf-image').value.trim();
+          const location = document.getElementById('sf-location').value.trim();
+          const tagsRaw  = document.getElementById('sf-tags').value;
+          const tags     = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+
+          if (!name)     { UI.toast('Vui lòng nhập tên dịch vụ.', 'error'); return false; }
+          if (!category) { UI.toast('Vui lòng chọn danh mục.', 'error');    return false; }
+          if (price <= 0){ UI.toast('Vui lòng nhập giá hợp lệ.', 'error'); return false; }
+
+          const payload = { category, name, description, price, unit, image, location, tags };
+
+          try {
+            if (editSvc) {
+              await API.svc.update(editSvc.id, payload);
+              UI.toast('✅ Đã cập nhật dịch vụ!', 'success');
+            } else {
+              await API.svc.create(payload);
+              UI.toast('✅ Đã tạo dịch vụ mới!', 'success');
+            }
+            await reloadServices();
+            return true;
+          } catch(e) {
+            UI.toast(e.message, 'error');
+            return false;
+          }
+        }
+      });
+    }
+
+    // ── Toggle Service Active ─────────────────────────────────────────────────
+    async function toggleService(serviceId) {
+      const svc = myServices.find(s => s.id === serviceId);
+      if (!svc) return;
+      try {
+        await API.svc.update(serviceId, { active: !(svc.active !== false) });
+        UI.toast(svc.active !== false ? 'Dịch vụ đã được ẩn.' : 'Dịch vụ đã được hiển thị.', 'success');
+        await reloadServices();
+      } catch(e) {
+        UI.toast(e.message, 'error');
+      }
+    }
+
+    // ── Reload Services from API ──────────────────────────────────────────────
+    async function reloadServices() {
       const sess = API.auth.currentSession();
-      const svcs = DB.services.findByProvider(sess.userId);
-      const el = document.getElementById('my-services-list');
-      if (!svcs.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏪</div><h3>Chưa có dịch vụ nào</h3><p>Hãy liên hệ admin để đăng dịch vụ của bạn.</p></div>`; return; }
-      el.innerHTML = svcs.map(s => `
-        <div class="svc-manage-card">
-          <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--r-sm);flex-shrink:0">
-          <div style="flex:1">
-            <div style="font-weight:700">${s.name}</div>
-            <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">${UI.categoryLabel(s.category)} · ${s.location}</div>
-            <div style="display:flex;align-items:center;gap:var(--sp-md);margin-top:4px">
-              <span class="stars" style="font-size:.8rem">${UI.stars(s.rating)}</span>
-              <span style="font-size:.75rem;color:var(--text-muted)">${s.reviewCount} đánh giá</span>
-            </div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-family:var(--font-h);font-weight:700;color:var(--gold)">${UI.formatCurrency(s.price)}</div>
-            <div style="font-size:.75rem;color:var(--text-muted)">/${s.unit}</div>
-            <span class="${s.active?'badge badge-active':'badge badge-cancelled'}" style="margin-top:4px">${s.active?'Hoạt động':'Ẩn'}</span>
-          </div>
-        </div>`).join('');
-    }
-
-    function filterOrders(btn, status) {
-      document.querySelectorAll('[data-status]').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      const filtered = status ? allOrders.filter(o=>o.status===status) : allOrders;
-      renderAllOrders(filtered);
-    }
-
-    async function updateStatus(id, status) {
-      await API.txn.updateStatus(id, status);
-      UI.toast(status==='confirmed'?'✅ Đã xác nhận đơn hàng!':status==='done'?'✅ Đã hoàn thành!':'❌ Đã từ chối đơn hàng.', status==='cancelled'?'info':'success');
-      allOrders = await API.txn.getMyOrders();
-      const pending = allOrders.filter(o=>o.status==='pending');
-      renderPendingOrders(pending);
-      renderAllOrders(allOrders);
+      const all  = await API.svc.getAll();
+      myServices = all.filter(s => s.providerId === sess.userId);
+      renderMyServices();
+      statsData = await API.stats.provider();
+      renderStatsGrid(statsData, 'stats-grid');
     }
   </script>
 </body>

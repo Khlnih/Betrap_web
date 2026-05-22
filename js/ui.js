@@ -7,7 +7,7 @@ const UI = (() => {
 
   // ─── INIT PAGE ──────────────────────────────────────────────────────────
   function initPage() {
-    DB.SEED.run();
+    // DB.SEED.run() -- Removed: seed data is now handled by SQL Server schema.sql
     renderNav();
     initScrollNav();
     initReveal();
@@ -34,7 +34,7 @@ const UI = (() => {
   function renderNav(options = {}) {
     const container = document.getElementById('nav-container');
     if (!container) return;
-    const sess    = DB.session.get();
+    const sess    = JSON.parse(localStorage.getItem('bt_session') || 'null');
     const root    = rootPath();
     const isLanding = !location.pathname.includes('/pages/');
     const links = isLanding
@@ -43,11 +43,15 @@ const UI = (() => {
 
     const actions = sess
       ? `
+         <a href="${root}pages/chat.html" class="nav-icon-btn" title="Tin nhắn" style="position:relative;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--cream);color:var(--text-dark);text-decoration:none;font-size:1.1rem;transition:all .2s">
+           <i class="ri-chat-3-line"></i>
+         </a>
          <div class="nav-dropdown" id="user-menu">
            <div class="navbar-avatar" onclick="UI.toggleDropdown()" id="nav-avatar">${sess.avatar}</div>
            <div class="nav-dropdown-menu" id="nav-dropdown">
              <div class="nav-dropdown-item" onclick="window.location.href='${root}pages/${sess.role==='provider'?'provider-dashboard':'dashboard'}.html'"><i class="ri-dashboard-line"></i> Dashboard</div>
              <div class="nav-dropdown-item" onclick="window.location.href='${root}pages/history.html'"><i class="ri-history-line"></i> Lịch sử</div>
+             <div class="nav-dropdown-item" onclick="window.location.href='${root}pages/settings.html'"><i class="ri-settings-3-line"></i> Cài đặt</div>
              <div class="nav-dropdown-divider"></div>
              <div class="nav-dropdown-item" style="color:var(--error)" onclick="API.auth.logout()"><i class="ri-logout-box-line"></i> Đăng xuất</div>
            </div>
@@ -144,7 +148,19 @@ const UI = (() => {
       </div>`;
     overlay.classList.add('open');
     if (onConfirm) {
-      document.getElementById('modal-confirm').onclick = () => { onConfirm(); closeModal(); };
+      // Hỗ trợ async: nếu onConfirm trả về false thì KHÔNG đóng modal
+      document.getElementById('modal-confirm').onclick = async () => {
+        const btn = document.getElementById('modal-confirm');
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+        try {
+          const result = await onConfirm();
+          if (result !== false) closeModal();
+        } catch(e) {
+          UI.toast(e.message || 'Đã xảy ra lỗi', 'error');
+        } finally {
+          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+        }
+      };
     }
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   }
@@ -298,11 +314,44 @@ const UI = (() => {
     });
   }
 
+  // ─── SKELETON LOADING ───────────────────────────────────────────────
+  function skeleton(n = 3, type = 'card') {
+    if (type === 'card') {
+      return Array(n).fill(0).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line w-60"></div>
+            <div class="skeleton-line w-80"></div>
+            <div class="skeleton-line w-40"></div>
+          </div>
+        </div>`).join('');
+    }
+    if (type === 'list') {
+      return Array(n).fill(0).map(() => `
+        <div class="skeleton-list-item">
+          <div class="skeleton-circle"></div>
+          <div style="flex:1">
+            <div class="skeleton-line w-60"></div>
+            <div class="skeleton-line w-40"></div>
+          </div>
+        </div>`).join('');
+    }
+    return '';
+  }
+
+  // ─── FAVORITE BUTTON ────────────────────────────────────────────────
+  function favBtn(serviceId, isFav = false) {
+    return `<button id="fav-btn-${serviceId}" onclick="window.__toggleFav && window.__toggleFav('${serviceId}')" class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}">
+      ${isFav ? '♥' : '♡'} ${isFav ? 'Yêu thích' : 'Yêu thích'}
+    </button>`;
+  }
+
   return {
     initPage, renderNav, renderFooter, toggleDropdown, toggleMobile,
     toast, modal, closeModal, showLoading, hideLoading,
     formatCurrency, formatDate, formatDateTime, timeAgo,
     statusLabel, statusBadge, stars, categoryLabel, categoryIcon,
-    animateCounter, launchConfetti, addRipple,
+    animateCounter, launchConfetti, addRipple, skeleton, favBtn,
   };
 })();

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Cài Đặt — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body { background: var(--cream); }
+
+    /* ── Dash layout ── */
+    .dash-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - var(--nav-h)); }
+    .dash-sidebar { background: white; padding: var(--sp-lg) 0; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; border-right: 1px solid rgba(220,165,174,.15); }
+    .dash-main { padding: var(--sp-xl); overflow-y: auto; }
+
+    /* ── Tabs ── */
+    .settings-tabs { display: flex; gap: 4px; background: white; border-radius: var(--r-lg); padding: 6px; box-shadow: var(--shadow-sm); margin-bottom: var(--sp-xl); }
+    .tab-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--sp-sm); padding: 12px 18px; border-radius: var(--r-md); font-size: .9rem; font-weight: 600; color: var(--text-muted); transition: all var(--t-normal); cursor: pointer; border: none; background: none; }
+    .tab-btn i { font-size: 1.1rem; }
+    .tab-btn.active { background: var(--grad-primary); color: white; box-shadow: var(--shadow-gold); }
+    .tab-btn:not(.active):hover { background: var(--cream); color: var(--text-dark); }
+
+    /* ── Settings card ── */
+    .settings-card { background: white; border-radius: var(--r-lg); box-shadow: var(--shadow-sm); padding: var(--sp-xl); }
+    .settings-card + .settings-card { margin-top: var(--sp-lg); }
+    .settings-section-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+    .settings-section-desc { font-size: .85rem; color: var(--text-muted); margin-bottom: var(--sp-xl); }
+
+    /* ── Password strength bar ── */
+    .strength-bar-wrap { height: 4px; background: rgba(200,16,46,.1); border-radius: var(--r-full); margin-top: var(--sp-sm); overflow: hidden; }
+    .strength-bar { height: 100%; width: 0; border-radius: var(--r-full); transition: all .4s ease; }
+
+    /* ── Toggle switch ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-md) 0; border-bottom: 1px solid rgba(220,165,174,.08); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info { display: flex; align-items: center; gap: var(--sp-md); }
+    .toggle-icon { width: 42px; height: 42px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .toggle-icon.gold { background: var(--gold-faint); color: var(--gold); }
+    .toggle-icon.blue { background: rgba(41,128,185,.1); color: var(--info); }
+    .toggle-icon.red { background: rgba(231,76,60,.1); color: var(--error); }
+    .toggle-label { font-size: .95rem; font-weight: 600; color: var(--text-dark); }
+    .toggle-sub { font-size: .8rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* toggle switch CSS */
+    .toggle-switch { position: relative; width: 50px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track { position: absolute; inset: 0; background: rgba(200,16,46,.15); border-radius: var(--r-full); cursor: pointer; transition: background var(--t-normal); }
+    .toggle-track::after { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform var(--t-normal); box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+    .toggle-switch input:checked + .toggle-track { background: var(--grad-gold); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(24px); }
+
+    /* ── Account info ── */
+    .account-info-row { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-md) 0; border-bottom: 1px solid rgba(220,165,174,.07); }
+    .account-info-row:last-of-type { border-bottom: none; }
+    .account-info-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+    .account-info-value { font-size: .95rem; font-weight: 600; color: var(--text-dark); }
+    .account-avatar-block { text-align: center; padding: var(--sp-lg) 0 var(--sp-xl); }
+    .account-big-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--grad-primary); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; font-weight: 700; margin: 0 auto var(--sp-md); box-shadow: var(--shadow-gold); }
+
+    /* ── Role badge ── */
+    .role-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: var(--r-full); font-size: .8rem; font-weight: 700; }
+    .role-pill.customer { background: rgba(41,128,185,.12); color: var(--info); }
+    .role-pill.provider { background: var(--gold-faint); color: var(--gold-dark); }
+
+    /* ── Danger zone ── */
+    .danger-zone { border: 1.5px solid rgba(231,76,60,.2); border-radius: var(--r-lg); padding: var(--sp-xl); background: rgba(231,76,60,.03); }
+    .danger-title { font-weight: 700; color: var(--error); margin-bottom: var(--sp-sm); display: flex; align-items: center; gap: var(--sp-sm); }
+
+    /* ── Panel hidden ── */
+    .tab-panel.hidden { display: none !important; }
+
+    /* ── Responsive ── */
+    @media(max-width:1024px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .dash-sidebar { display: none; }
+    }
+    @media(max-width:640px) {
+      .settings-tabs { flex-direction: column; }
+      .dash-main { padding: var(--sp-md); }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div style="padding-top:var(--nav-h)">
+    <div class="dash-layout">
+
+      <!-- ══ Sidebar ══ -->
+      <aside class="dash-sidebar">
+        <div style="padding:var(--sp-lg) var(--sp-xl) var(--sp-xl)">
+          <div class="navbar-avatar" id="sidebar-avatar" style="width:52px;height:52px;font-size:1.1rem;margin-bottom:var(--sp-md)"></div>
+          <div style="font-weight:700;color:var(--text-dark);font-size:.95rem" id="sidebar-name"></div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px" id="sidebar-role"></div>
+        </div>
+        <div class="dash-nav-section">Tổng quan</div>
+        <div class="dash-nav-item" onclick="location.href='dashboard.html'"><i class="ri-dashboard-line"></i> Dashboard</div>
+        <div class="dash-nav-item" onclick="location.href='services.html'"><i class="ri-search-line"></i> Tìm Dịch Vụ</div>
+        <div class="dash-nav-section">Quản lý</div>
+        <div class="dash-nav-item" onclick="location.href='history.html'"><i class="ri-history-line"></i> Lịch Sử Đơn Hàng</div>
+        <div class="dash-nav-item active"><i class="ri-settings-3-line"></i> Cài Đặt</div>
+        <div class="dash-nav-section">Tài khoản</div>
+        <div class="dash-nav-item" onclick="API.auth.logout()" style="color:rgba(231,76,60,.7)"><i class="ri-logout-box-line"></i> Đăng Xuất</div>
+      </aside>
+
+      <!-- ══ Main ══ -->
+      <main class="dash-main">
+        <h2 style="margin-bottom:var(--sp-sm);color:var(--text-dark)">Cài Đặt</h2>
+        <p style="color:var(--text-muted);margin-bottom:var(--sp-xl)">Quản lý bảo mật và tuỳ chọn tài khoản của bạn.</p>
+
+        <!-- Tab buttons -->
+        <div class="settings-tabs" role="tablist">
+          <button class="tab-btn active" id="tab-password" onclick="switchTab('password')" role="tab">
+            <i class="ri-lock-password-line"></i> Đổi Mật Khẩu
+          </button>
+          <button class="tab-btn" id="tab-notify" onclick="switchTab('notify')" role="tab">
+            <i class="ri-notification-3-line"></i> Thông Báo
+          </button>
+          <button class="tab-btn" id="tab-account" onclick="switchTab('account')" role="tab">
+            <i class="ri-user-line"></i> Về Tài Khoản
+          </button>
+        </div>
+
+        <!-- ── Tab 1: Đổi Mật Khẩu ── -->
+        <div class="tab-panel animate-fadeInUp" id="panel-password">
+          <div class="settings-card">
+            <div class="settings-section-title"><i class="ri-shield-keyhole-line" style="color:var(--gold)"></i> Đổi Mật Khẩu</div>
+            <div class="settings-section-desc">Để bảo mật tài khoản, hãy sử dụng mật khẩu mạnh và không chia sẻ với ai.</div>
+
+            <div class="form-group">
+              <label class="form-label">Mật khẩu hiện tại</label>
+              <div class="input-group">
+                <i class="ri-lock-line input-icon" style="color:var(--text-muted)"></i>
+                <input type="password" id="old-pass" class="form-control" placeholder="Nhập mật khẩu hiện tại">
+                <i class="ri-eye-off-line input-icon-right" id="toggle-old" onclick="toggleVis('old-pass','toggle-old')"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mật khẩu mới</label>
+              <div class="input-group">
+                <i class="ri-lock-2-line input-icon" style="color:var(--text-muted)"></i>
+                <input type="password" id="new-pass" class="form-control" placeholder="Tối thiểu 6 ký tự, 1 in hoa, 1 ký tự đặc biệt" oninput="evalStrength()">
+                <i class="ri-eye-off-line input-icon-right" id="toggle-new" onclick="toggleVis('new-pass','toggle-new')"></i>
+              </div>
+              <div class="strength-bar-wrap"><div class="strength-bar" id="strength-bar"></div></div>
+              <div id="strength-label" style="font-size:.75rem;margin-top:4px;color:var(--text-muted)"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Xác nhận mật khẩu mới</label>
+              <div class="input-group">
+                <i class="ri-lock-check-line input-icon" style="color:var(--text-muted)"></i>
+                <input type="password" id="confirm-pass" class="form-control" placeholder="Nhập lại mật khẩu mới">
+                <i class="ri-eye-off-line input-icon-right" id="toggle-confirm" onclick="toggleVis('confirm-pass','toggle-confirm')"></i>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:var(--sp-md);flex-wrap:wrap">
+              <button class="btn btn-primary" id="change-pw-btn" onclick="changePassword()">
+                <i class="ri-shield-check-line"></i> Đổi Mật Khẩu
+              </button>
+              <button class="btn btn-ghost" onclick="clearPwForm()">
+                <i class="ri-refresh-line"></i> Xoá trắng
+              </button>
+            </div>
+          </div>
+
+          <!-- Tips card -->
+          <div class="settings-card" style="border-left:4px solid var(--gold);background:var(--cream)">
+            <div style="font-size:.85rem;color:var(--text-dark);font-weight:700;margin-bottom:var(--sp-sm)">
+              <i class="ri-lightbulb-line" style="color:var(--gold)"></i> Mật khẩu mạnh gồm:
+            </div>
+            <ul style="font-size:.82rem;color:var(--text-muted);display:flex;flex-direction:column;gap:4px;list-style:disc;padding-left:18px">
+              <li>Ít nhất 6 ký tự</li>
+              <li>Ít nhất 1 chữ cái in hoa (A–Z)</li>
+              <li>Ít nhất 1 ký tự đặc biệt (!@#$%^&*…)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ── Tab 2: Thông Báo ── -->
+        <div class="tab-panel hidden" id="panel-notify">
+          <div class="settings-card">
+            <div class="settings-section-title"><i class="ri-notification-3-line" style="color:var(--gold)"></i> Thông Báo</div>
+            <div class="settings-section-desc">Chọn loại thông báo bạn muốn nhận. Cài đặt sẽ được áp dụng ngay.</div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-icon gold"><i class="ri-file-list-3-line"></i></div>
+                <div>
+                  <div class="toggle-label">Đơn hàng mới</div>
+                  <div class="toggle-sub">Thông báo khi có đơn hàng hoặc cập nhật trạng thái</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked id="notif-orders">
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-icon blue"><i class="ri-message-3-line"></i></div>
+                <div>
+                  <div class="toggle-label">Tin nhắn</div>
+                  <div class="toggle-sub">Thông báo khi nhận được tin nhắn từ nhà cung cấp</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked id="notif-chat">
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-icon red"><i class="ri-price-tag-3-line"></i></div>
+                <div>
+                  <div class="toggle-label">Khuyến mãi</div>
+                  <div class="toggle-sub">Nhận thông tin ưu đãi, chương trình khuyến mãi đặc biệt</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-promo">
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+
+            <div style="margin-top:var(--sp-xl)">
+              <button class="btn btn-primary" onclick="saveNotifSettings()">
+                <i class="ri-save-line"></i> Lưu Cài Đặt
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-card" style="margin-top:var(--sp-lg)">
+            <div class="settings-section-title"><i class="ri-mail-settings-line" style="color:var(--gold)"></i> Kênh Thông Báo</div>
+            <div class="settings-section-desc">Chọn kênh bạn muốn nhận thông báo.</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-icon gold"><i class="ri-mail-line"></i></div>
+                <div>
+                  <div class="toggle-label">Email</div>
+                  <div class="toggle-sub">Nhận thông báo qua địa chỉ email đăng ký</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked id="channel-email">
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-icon blue"><i class="ri-smartphone-line"></i></div>
+                <div>
+                  <div class="toggle-label">SMS</div>
+                  <div class="toggle-sub">Nhận thông báo qua tin nhắn điện thoại</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="channel-sms">
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tab 3: Về Tài Khoản ── -->
+        <div class="tab-panel hidden" id="panel-account">
+          <div class="settings-card">
+            <div class="account-avatar-block">
+              <div class="account-big-avatar" id="acct-avatar"></div>
+              <div style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--text-dark)" id="acct-name"></div>
+              <div style="margin-top:var(--sp-sm)" id="acct-role-pill"></div>
+            </div>
+
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="ri-mail-line"></i> Email</span>
+              <span class="account-info-value" id="acct-email">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="ri-phone-line"></i> Số điện thoại</span>
+              <span class="account-info-value" id="acct-phone">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="ri-map-pin-2-line"></i> Khu vực</span>
+              <span class="account-info-value" id="acct-location">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="ri-calendar-check-line"></i> Ngày tham gia</span>
+              <span class="account-info-value" id="acct-joined">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="ri-shield-user-line"></i> Vai trò</span>
+              <span id="acct-role-text" class="account-info-value">—</span>
+            </div>
+
+            <div style="margin-top:var(--sp-xl);padding-top:var(--sp-lg);border-top:1px solid rgba(220,165,174,.1)">
+              <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:var(--sp-md)">
+                Muốn thay đổi thông tin cá nhân? Hãy đến trang Dashboard.
+              </p>
+              <a href="dashboard.html" class="btn btn-ghost btn-sm">
+                <i class="ri-edit-line"></i> Chỉnh Sửa Hồ Sơ
+              </a>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="danger-zone mt-lg">
+            <div class="danger-title"><i class="ri-error-warning-line"></i> Khu vực nguy hiểm</div>
+            <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:var(--sp-lg)">
+              Đăng xuất sẽ xoá phiên làm việc hiện tại. Bạn sẽ cần đăng nhập lại để tiếp tục.
+            </p>
+            <button class="btn btn-danger" onclick="confirmLogout()">
+              <i class="ri-logout-box-r-line"></i> Đăng Xuất
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <div id="modal-overlay"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    const PASS_REGEX = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      const sess = API.auth.requireAuth();
+      if (!sess) return;
+
+      // Sidebar
+      document.getElementById('sidebar-avatar').textContent = sess.avatar || sess.name?.[0]?.toUpperCase() || '?';
+      document.getElementById('sidebar-name').textContent = sess.name;
+      document.getElementById('sidebar-role').textContent = sess.role === 'provider' ? 'Nhà cung cấp' : 'Khách hàng';
+
+      // Account tab
+      document.getElementById('acct-avatar').textContent = sess.avatar || sess.name?.[0]?.toUpperCase() || '?';
+      document.getElementById('acct-name').textContent = sess.name || '—';
+      document.getElementById('acct-email').textContent = sess.email || '—';
+      document.getElementById('acct-phone').textContent = sess.phone || 'Chưa cập nhật';
+      document.getElementById('acct-location').textContent = sess.location || 'Chưa cập nhật';
+
+      // Joined date
+      const joined = sess.createdAt ? UI.formatDate(sess.createdAt) : 'Không rõ';
+      document.getElementById('acct-joined').textContent = joined;
+
+      // Role
+      const isProvider = sess.role === 'provider';
+      document.getElementById('acct-role-text').textContent = isProvider ? 'Nhà Cung Cấp' : 'Khách Hàng';
+      document.getElementById('acct-role-pill').innerHTML = `
+        <span class="role-pill ${isProvider ? 'provider' : 'customer'}">
+          <i class="ri-${isProvider ? 'store-2' : 'user-heart'}-line"></i>
+          ${isProvider ? 'Nhà Cung Cấp' : 'Khách Hàng'}
+        </span>`;
+
+      // Tab from URL hash
+      const hash = location.hash.replace('#', '');
+      if (['password', 'notify', 'account'].includes(hash)) switchTab(hash);
+    });
+
+    /* ─── Tab switching ─── */
+    function switchTab(name) {
+      ['password', 'notify', 'account'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('active', t === name);
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== name);
+      });
+      location.hash = name;
+    }
+
+    /* ─── Password visibility toggle ─── */
+    function toggleVis(inputId, iconId) {
+      const inp = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.className = inp.type === 'password' ? 'ri-eye-off-line input-icon-right' : 'ri-eye-line input-icon-right';
+    }
+
+    /* ─── Password strength ─── */
+    function evalStrength() {
+      const val = document.getElementById('new-pass').value;
+      const bar = document.getElementById('strength-bar');
+      const lbl = document.getElementById('strength-label');
+      if (!val) { bar.style.width = '0'; lbl.textContent = ''; return; }
+
+      let score = 0;
+      if (val.length >= 6)  score++;
+      if (val.length >= 10) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) score++;
+
+      const levels = [
+        { color: 'var(--error)',   w: '20%', text: 'Rất yếu' },
+        { color: 'var(--warning)', w: '40%', text: 'Yếu' },
+        { color: 'var(--warning)', w: '60%', text: 'Trung bình' },
+        { color: 'var(--success)', w: '80%', text: 'Mạnh' },
+        { color: 'var(--success)', w: '100%', text: 'Rất mạnh' },
+      ];
+      const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+      bar.style.width = lvl.w;
+      bar.style.background = lvl.color;
+      lbl.textContent = lvl.text;
+      lbl.style.color = lvl.color;
+    }
+
+    /* ─── Change password ─── */
+    async function changePassword() {
+      const oldPw  = document.getElementById('old-pass').value;
+      const newPw  = document.getElementById('new-pass').value;
+      const confPw = document.getElementById('confirm-pass').value;
+      const btn    = document.getElementById('change-pw-btn');
+
+      if (!oldPw)  { UI.toast('Vui lòng nhập mật khẩu hiện tại.', 'error'); return; }
+      if (!newPw)  { UI.toast('Vui lòng nhập mật khẩu mới.', 'error'); return; }
+      if (!PASS_REGEX.test(newPw)) {
+        UI.toast('Mật khẩu mới phải từ 6 ký tự, gồm 1 chữ in hoa và 1 ký tự đặc biệt.', 'error');
+        return;
+      }
+      if (newPw !== confPw) {
+        UI.toast('Mật khẩu xác nhận không khớp.', 'error');
+        document.getElementById('confirm-pass').classList.add('error');
+        return;
+      }
+      document.getElementById('confirm-pass').classList.remove('error');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px"></span> Đang xử lý…';
+
+      try {
+        await API.auth.changePassword({ oldPassword: oldPw, newPassword: newPw });
+        UI.toast('Đổi mật khẩu thành công! 🎉', 'success');
+        clearPwForm();
+      } catch (e) {
+        UI.toast(e.message || 'Đổi mật khẩu thất bại.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ri-shield-check-line"></i> Đổi Mật Khẩu';
+      }
+    }
+
+    function clearPwForm() {
+      ['old-pass', 'new-pass', 'confirm-pass'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('strength-bar').style.width = '0';
+      document.getElementById('strength-label').textContent = '';
+    }
+
+    /* ─── Save notification settings ─── */
+    function saveNotifSettings() {
+      // Static UI only — simulate save
+      UI.toast('Đã lưu cài đặt thông báo!', 'success');
+    }
+
+    /* ─── Confirm logout ─── */
+    function confirmLogout() {
+      UI.modal({
+        title: 'Đăng Xuất?',
+        body: '<p style="color:var(--text-muted)">Bạn có chắc muốn đăng xuất khỏi BêTráp?</p>',
+        confirmText: 'Đăng Xuất',
+        confirmClass: 'btn-danger',
+        onConfirm: () => API.auth.logout()
+      });
+    }
+  </script>
+</body>
+</html>

@@ -88,9 +88,8 @@
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    DB.SEED.run();
     // Redirect if already logged in
-    const s = DB.session.get();
+    const s = API.auth.currentSession();
     if (s) window.location.href = s.role === 'provider' ? 'provider-dashboard.html' : 'dashboard.html';
 
     document.getElementById('login-form').addEventListener('submit', async e => {
