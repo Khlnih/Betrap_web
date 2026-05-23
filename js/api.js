@@ -7,7 +7,7 @@
 const API = (() => {
 
   // ── Cấu hình (thay đổi URL khi deploy) ───────────────────────────────────
-  const BASE_URL = window.BT_API_URL || 'http://localhost:3000/api';
+  const BASE_URL = 'https://betrap-web.onrender.com/api';
 
   // ── Token helpers ─────────────────────────────────────────────────────────
   const getToken  = ()      => localStorage.getItem('bt_token');
