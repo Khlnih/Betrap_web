@@ -72,6 +72,19 @@
       display:flex;gap:var(--sp-md);margin-top:var(--sp-lg);padding-top:var(--sp-md);
       border-top:1px solid rgba(220,165,174,.15);flex-shrink:0;justify-content:flex-end;
     }
+    
+    /* ── Decline Overlay ─── */
+    #decline-overlay{
+      position:fixed;inset:0;z-index:9999;
+      background:rgba(50,40,40,.75);
+      backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      padding:var(--sp-lg);
+      opacity:0;pointer-events:none;
+      transition:opacity .3s ease;
+    }
+    #decline-overlay.open{opacity:1;pointer-events:all}
+    #decline-overlay.open .service-dialog{transform:translateY(0) scale(1)}
   </style>
 </head>
 <body>
@@ -244,6 +257,28 @@
       <div class="service-dialog-footer">
         <button class="btn btn-ghost" onclick="closeServiceModal()">Hủy</button>
         <button class="btn btn-primary" id="so-submit-btn" onclick="submitServiceModal()">Tạo Dịch Vụ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Decline Overlay ─────────────────────────────────────────────────── -->
+  <div id="decline-overlay">
+    <div class="service-dialog" style="max-width:480px">
+      <div class="service-dialog-header" style="border-bottom:none;padding-bottom:0;margin-bottom:var(--sp-sm)">
+        <div class="service-dialog-title"><i class="ri-close-circle-line" style="color:var(--error)"></i> Từ Chối Đơn Hàng</div>
+        <button class="service-close-btn" onclick="closeDeclineOverlay()" title="Đóng">&times;</button>
+      </div>
+      <div class="service-dialog-body">
+        <p style="color:var(--text-muted);margin-bottom:var(--sp-lg)">Vui lòng nhập lý do từ chối để thông báo cho khách hàng.</p>
+        <div class="form-group">
+          <label class="form-label">Lý do từ chối <span style="color:var(--error)">*</span></label>
+          <textarea id="decline-reason-input" class="form-control" rows="4"
+            placeholder="VD: Ngày đó đội bê tráp đã có lịch kín, vui lòng chọn ngày khác..."></textarea>
+        </div>
+      </div>
+      <div class="service-dialog-footer" style="border-top:none;margin-top:0">
+        <button class="btn btn-ghost" onclick="closeDeclineOverlay()">Hủy</button>
+        <button class="btn btn-danger" id="submit-decline-btn" onclick="submitDeclineOrder()">Xác Nhận Từ Chối</button>
       </div>
     </div>
   </div>
@@ -501,36 +536,43 @@
     }
 
     // ── Từ Chối Với Lý Do ────────────────────────────────────────────────────
+    let currentDeclineId = null;
+
     function promptCancelOrder(id) {
-      UI.modal({
-        title: '<i class="ri-close-circle-line" style="color:var(--error)"></i> Từ Chối Đơn Hàng',
-        body: `
-          <p style="color:var(--text-muted);margin-bottom:var(--sp-lg)">Vui lòng nhập lý do từ chối để thông báo cho khách hàng.</p>
-          <div class="form-group">
-            <label class="form-label">Lý do từ chối <span style="color:var(--error)">*</span></label>
-            <textarea id="cancel-reason-input" class="form-control" rows="4"
-              placeholder="VD: Ngày đó đội bê tráp đã có lịch kín, vui lòng chọn ngày khác..."></textarea>
-          </div>`,
-        confirmText: 'Xác Nhận Từ Chối',
-        confirmClass: 'btn-danger',
-        cancelText: 'Huỷ',
-        onConfirm: async () => {
-          const reason = document.getElementById('cancel-reason-input')?.value?.trim();
-          if (!reason) {
-            UI.toast('Vui lòng nhập lý do từ chối!', 'error');
-            return false; // keep modal open
-          }
-          try {
-            await API.txn.updateStatus(id, 'cancelled', { cancelReason: reason });
-            UI.toast('❌ Đã từ chối đơn hàng.', 'info');
-            await refreshOrders();
-            return true;
-          } catch(e) {
-            UI.toast(e.message, 'error');
-            return false;
-          }
-        }
-      });
+      currentDeclineId = id;
+      document.getElementById('decline-reason-input').value = '';
+      document.getElementById('decline-overlay').classList.add('open');
+    }
+
+    function closeDeclineOverlay() {
+      document.getElementById('decline-overlay').classList.remove('open');
+      currentDeclineId = null;
+    }
+
+    async function submitDeclineOrder() {
+      if (!currentDeclineId) return;
+      const reason = document.getElementById('decline-reason-input').value.trim();
+      if (!reason) {
+        UI.toast('Vui lòng nhập lý do từ chối!', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('submit-decline-btn');
+      const oldText = btn.textContent;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;border-color:white transparent white transparent"></span> Đang xử lý...';
+
+      try {
+        await API.txn.updateStatus(currentDeclineId, 'cancelled', { cancelReason: reason });
+        UI.toast('❌ Đã từ chối đơn hàng.', 'info');
+        closeDeclineOverlay();
+        await refreshOrders();
+      } catch(e) {
+        UI.toast(e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
     }
 
     // ── Refresh Orders ────────────────────────────────────────────────────────
