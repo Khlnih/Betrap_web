@@ -100,8 +100,20 @@
         <!-- Booking Card -->
         <div>
           <div class="booking-card animate-fadeInRight">
-            <div style="font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--gold)">${UI.formatCurrency(svc.price)}<span style="font-size:.6em;font-weight:400;color:var(--text-muted)">/${svc.unit}</span></div>
-            <div class="divider"></div>
+            <h3 style="margin-bottom:var(--sp-md);color:var(--gold)">Thông Tin Đặt Dịch Vụ</h3>
+            <div class="form-group">
+              <label class="form-label">Số lượng (Tuỳ chọn)</label>
+              <select id="book-quantity" class="form-control">
+                <option value="">-- Theo mặc định dịch vụ --</option>
+                <option value="1">1 người</option>
+                <option value="3">3 người</option>
+                <option value="5">5 người</option>
+                <option value="7">7 người</option>
+                <option value="9">9 người</option>
+                <option value="11">11 người</option>
+                <option value="other">Số lượng khác (Ghi chú thêm)</option>
+              </select>
+            </div>
             <div class="form-group">
               <label class="form-label">Ngày tổ chức</label>
               <input type="date" id="book-date" class="form-control" min="${new Date().toISOString().split('T')[0]}">
@@ -134,8 +146,16 @@
       const time = document.getElementById('book-time').value;
       const address = document.getElementById('book-address').value;
       if (!date || !address) { UI.toast('Vui lòng điền ngày và địa chỉ!', 'error'); return; }
+      
+      let note = document.getElementById('book-note').value.trim();
+      const qty = document.getElementById('book-quantity').value;
+      if (qty) {
+        const prefix = 'Số lượng: ' + (qty === 'other' ? 'Khác' : qty + ' người');
+        note = note ? prefix + ' - ' + note : prefix;
+      }
+      
       try {
-        const txn = await API.txn.create({ serviceId, date, time, address, note: document.getElementById('book-note').value });
+        const txn = await API.txn.create({ serviceId, date, time, address, note });
         location.href = `checkout.html?id=${txn.id}`;
       } catch (e) {
         UI.toast(e.message, 'error');

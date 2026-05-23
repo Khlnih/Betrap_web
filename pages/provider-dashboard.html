@@ -34,6 +34,44 @@
     @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dash-layout{grid-template-columns:1fr}.dash-sidebar{display:none}}
     @media(max-width:640px){.stats-grid{grid-template-columns:1fr}.content-tabs{overflow-x:auto}}
+    /* ── Service Overlay ─── */
+    #service-overlay{
+      position:fixed;inset:0;z-index:9999;
+      background:rgba(50,40,40,.75);
+      backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      padding:var(--sp-lg);
+      opacity:0;pointer-events:none;
+      transition:opacity .3s ease;
+    }
+    #service-overlay.open{opacity:1;pointer-events:all}
+    .service-dialog{
+      background:white;border-radius:var(--r-xl);padding:var(--sp-xl);
+      max-width:560px;width:100%;
+      box-shadow:0 25px 60px rgba(0,0,0,.3);
+      transform:translateY(30px) scale(.96);
+      transition:transform .3s ease;
+      display:flex;flex-direction:column;
+      max-height:92vh;
+    }
+    #service-overlay.open .service-dialog{transform:translateY(0) scale(1)}
+    .service-dialog-header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:var(--sp-lg);padding-bottom:var(--sp-md);
+      border-bottom:2px solid rgba(220,165,174,.15);flex-shrink:0;
+    }
+    .service-dialog-title{font-family:var(--font-h);font-size:1.3rem;font-weight:800;color:var(--text-dark)}
+    .service-close-btn{
+      background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text-muted);
+      width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      transition:background .2s;
+    }
+    .service-close-btn:hover{background:var(--cream);color:var(--text-dark)}
+    .service-dialog-body{overflow-y:auto;padding-right:8px;}
+    .service-dialog-footer{
+      display:flex;gap:var(--sp-md);margin-top:var(--sp-lg);padding-top:var(--sp-md);
+      border-top:1px solid rgba(220,165,174,.15);flex-shrink:0;justify-content:flex-end;
+    }
   </style>
 </head>
 <body>
@@ -151,6 +189,65 @@
   <div id="toast-container"></div>
   <div id="modal-overlay"></div>
 
+  <!-- ── Service Overlay ─────────────────────────────────────────────────── -->
+  <div id="service-overlay">
+    <div class="service-dialog">
+      <div class="service-dialog-header">
+        <div class="service-dialog-title" id="so-title">Thêm Dịch Vụ Mới</div>
+        <button class="service-close-btn" onclick="closeServiceModal()" title="Đóng">&times;</button>
+      </div>
+      <div class="service-dialog-body">
+        <input type="hidden" id="so-id" value="">
+        <div class="form-group">
+          <label class="form-label">Tên dịch vụ *</label>
+          <input id="so-name" class="form-control" type="text" placeholder="VD: Đội bê tráp 6 người cao cấp">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Danh mục *</label>
+          <select id="so-category" class="form-control">
+            <option value="">-- Chọn danh mục --</option>
+            <option value="be-trap">Đội Bê Tráp</option>
+            <option value="ao-dai">Áo Dài Cô Dâu</option>
+            <option value="lam-trap">Làm Tráp</option>
+            <option value="media">Chụp ảnh / Quay phim</option>
+            <option value="makeup">Trang điểm</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả</label>
+          <textarea id="so-desc" class="form-control" rows="3" placeholder="Mô tả chi tiết dịch vụ..."></textarea>
+        </div>
+        <div style="display:none;">
+          <input id="so-price" class="form-control" type="number" min="0" value="0">
+          <input id="so-unit" class="form-control" type="text" value="buổi">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ảnh đại diện dịch vụ</label>
+          <div style="display:flex;gap:var(--sp-md);align-items:center;">
+            <img id="so-image-preview" src="" alt="Preview" style="width:80px;height:80px;object-fit:cover;border-radius:var(--r-md);display:none;background:#f0f0f0;">
+            <div style="flex:1">
+              <input id="so-image-file" class="form-control" type="file" accept="image/*" onchange="previewServiceImage(this)">
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Định dạng hỗ trợ: JPG, PNG, WEBP.</div>
+            </div>
+          </div>
+          <input type="hidden" id="so-image-url" value="">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Khu vực phục vụ</label>
+          <input id="so-location" class="form-control" type="text" placeholder="VD: TP. Hồ Chí Minh, Bình Dương">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags (cách nhau bởi dấu phẩy)</label>
+          <input id="so-tags" class="form-control" type="text" placeholder="VD: cưới hỏi, truyền thống, cao cấp">
+        </div>
+      </div>
+      <div class="service-dialog-footer">
+        <button class="btn btn-ghost" onclick="closeServiceModal()">Hủy</button>
+        <button class="btn btn-primary" id="so-submit-btn" onclick="submitServiceModal()">Tạo Dịch Vụ</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
@@ -180,12 +277,12 @@
       const [s, orders, svcs] = await Promise.all([
         API.stats.provider(),
         API.txn.getMyOrders(),
-        API.svc.getAll(),
+        API.svc.getMyServices(),
       ]);
 
       statsData   = s;
       allOrders   = orders;
-      myServices  = svcs.filter(sv => sv.providerId === sess.userId);
+      myServices  = svcs;  // getMyServices đã lọc sẵn theo providerId
 
       renderStatsGrid(s, 'stats-grid');
 
@@ -252,7 +349,6 @@
               </div>
               ${o.note ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:2px"><i class="ri-file-text-line"></i> Ghi chú: ${o.note}</div>` : ''}
             </div>
-            <div style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--gold)">${UI.formatCurrency(o.price)}</div>
           </div>
           <div style="display:flex;gap:var(--sp-sm);margin-top:var(--sp-md)">
             <button class="btn btn-primary btn-sm" onclick="confirmOrder('${o.id}')"><i class="ri-check-line"></i> Xác Nhận</button>
@@ -281,7 +377,6 @@
             </div>
             <div style="text-align:right">
               ${UI.statusBadge(o.status)}
-              <div style="font-family:var(--font-h);font-weight:700;color:var(--gold);font-size:1.2rem;margin-top:4px">${UI.formatCurrency(o.price)}</div>
             </div>
           </div>
           ${o.status === 'cancelled' && o.cancelReason ? `
@@ -362,8 +457,6 @@
             </div>
           </div>
           <div style="text-align:right;flex-shrink:0">
-            <div style="font-family:var(--font-h);font-weight:700;color:var(--gold)">${UI.formatCurrency(s.price)}</div>
-            <div style="font-size:.75rem;color:var(--text-muted)">/${s.unit || 'buổi'}</div>
             <span class="${s.active !== false ? 'badge badge-active' : 'badge badge-cancelled'}" style="margin-top:4px;display:inline-block">
               ${s.active !== false ? 'Hoạt động' : 'Ẩn'}
             </span>
@@ -472,116 +565,112 @@
     }
 
     // ── Service Modal ─────────────────────────────────────────────────────────
-    const CATEGORIES = [
-      { value: 'be-trap',  label: 'Đội Bê Tráp' },
-      { value: 'ao-dai',   label: 'Áo Dài Cô Dâu' },
-      { value: 'lam-trap', label: 'Làm Tráp' },
-      { value: 'media',    label: 'Chụp ảnh / Quay phim' },
-      { value: 'makeup',   label: 'Trang điểm' },
-    ];
-
-    function buildServiceForm(svc) {
-      const catOptions = CATEGORIES.map(c =>
-        `<option value="${c.value}" ${svc && svc.category === c.value ? 'selected' : ''}>${c.label}</option>`
-      ).join('');
-
-      return `
-        <div style="display:flex;flex-direction:column;gap:var(--sp-md);max-height:70vh;overflow-y:auto;padding-right:4px">
-          <div class="form-group">
-            <label class="form-label">Tên dịch vụ *</label>
-            <input id="sf-name" class="form-control" type="text" value="${svc ? escHtml(svc.name) : ''}" placeholder="VD: Đội bê tráp 6 người cao cấp">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Danh mục *</label>
-            <select id="sf-category" class="form-control">
-              <option value="">-- Chọn danh mục --</option>
-              ${catOptions}
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mô tả</label>
-            <textarea id="sf-desc" class="form-control" rows="3" placeholder="Mô tả chi tiết dịch vụ...">${svc ? escHtml(svc.description || '') : ''}</textarea>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-md)">
-            <div class="form-group">
-              <label class="form-label">Giá (VND) *</label>
-              <input id="sf-price" class="form-control" type="number" min="0" step="50000" value="${svc ? svc.price : ''}" placeholder="VD: 3500000">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Đơn vị</label>
-              <input id="sf-unit" class="form-control" type="text" value="${svc ? escHtml(svc.unit || 'buổi') : 'buổi'}" placeholder="buổi, gói, ngày...">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">URL Ảnh đại diện</label>
-            <input id="sf-image" class="form-control" type="url" value="${svc ? escHtml(svc.image || '') : ''}" placeholder="https://...">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Khu vực phục vụ</label>
-            <input id="sf-location" class="form-control" type="text" value="${svc ? escHtml(svc.location || '') : ''}" placeholder="VD: TP. Hồ Chí Minh, Bình Dương">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tags (cách nhau bởi dấu phẩy)</label>
-            <input id="sf-tags" class="form-control" type="text" value="${svc && svc.tags ? svc.tags.join(', ') : ''}" placeholder="VD: cưới hỏi, truyền thống, cao cấp">
-          </div>
-        </div>`;
-    }
-
-    function escHtml(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
     function openServiceModal(serviceId) {
       const editSvc = serviceId ? myServices.find(s => s.id === serviceId) : null;
-      const title   = editSvc ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới';
+      
+      document.getElementById('so-title').textContent = editSvc ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới';
+      document.getElementById('so-submit-btn').textContent = editSvc ? 'Lưu Thay Đổi' : 'Tạo Dịch Vụ';
+      
+      document.getElementById('so-id').value       = editSvc ? editSvc.id : '';
+      document.getElementById('so-name').value     = editSvc ? editSvc.name : '';
+      document.getElementById('so-category').value = editSvc ? editSvc.category : '';
+      document.getElementById('so-desc').value     = editSvc ? (editSvc.description || '') : '';
+      document.getElementById('so-price').value    = editSvc ? (editSvc.price || 1) : 1;
+      
+      const imgPreview = document.getElementById('so-image-preview');
+      const imgFile    = document.getElementById('so-image-file');
+      const imgUrl     = document.getElementById('so-image-url');
+      
+      imgFile.value = '';
+      if (editSvc && editSvc.image) {
+        imgUrl.value = editSvc.image;
+        imgPreview.src = editSvc.image;
+        imgPreview.style.display = 'block';
+      } else {
+        imgUrl.value = '';
+        imgPreview.src = '';
+        imgPreview.style.display = 'none';
+      }
 
-      UI.modal({
-        title,
-        body: buildServiceForm(editSvc),
-        confirmText: editSvc ? 'Lưu Thay Đổi' : 'Tạo Dịch Vụ',
-        cancelText: 'Hủy',
-        onConfirm: async () => {
-          const name     = document.getElementById('sf-name').value.trim();
-          const category = document.getElementById('sf-category').value;
-          const description = document.getElementById('sf-desc').value.trim();
-          const price    = parseInt(document.getElementById('sf-price').value) || 0;
-          const unit     = document.getElementById('sf-unit').value.trim() || 'buổi';
-          const image    = document.getElementById('sf-image').value.trim();
-          const location = document.getElementById('sf-location').value.trim();
-          const tagsRaw  = document.getElementById('sf-tags').value;
-          const tags     = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+      document.getElementById('so-location').value = editSvc ? (editSvc.location || '') : '';
+      document.getElementById('so-tags').value     = editSvc && editSvc.tags ? editSvc.tags.join(', ') : '';
 
-          if (!name)     { UI.toast('Vui lòng nhập tên dịch vụ.', 'error'); return false; }
-          if (!category) { UI.toast('Vui lòng chọn danh mục.', 'error');    return false; }
-          if (price <= 0){ UI.toast('Vui lòng nhập giá hợp lệ.', 'error'); return false; }
+      document.getElementById('service-overlay').classList.add('open');
+    }
 
-          const payload = { category, name, description, price, unit, image, location, tags };
+    function closeServiceModal() {
+      document.getElementById('service-overlay').classList.remove('open');
+    }
 
-          try {
-            if (editSvc) {
-              await API.svc.update(editSvc.id, payload);
-              UI.toast('✅ Đã cập nhật dịch vụ!', 'success');
-            } else {
-              await API.svc.create(payload);
-              UI.toast('✅ Đã tạo dịch vụ mới!', 'success');
-            }
-            await reloadServices();
-            return true;
-          } catch(e) {
-            UI.toast(e.message, 'error');
-            return false;
-          }
+    function previewServiceImage(input) {
+      const preview = document.getElementById('so-image-preview');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
         }
-      });
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.style.display = 'none';
+        preview.src = '';
+      }
+    }
+
+    async function submitServiceModal() {
+      const id       = document.getElementById('so-id').value;
+      const name     = document.getElementById('so-name').value.trim();
+      const category = document.getElementById('so-category').value;
+      const description = document.getElementById('so-desc').value.trim();
+      const price    = parseInt(document.getElementById('so-price').value) || 1;
+      const unit     = document.getElementById('so-unit').value.trim() || 'buổi';
+      const location = document.getElementById('so-location').value.trim();
+      const tagsRaw  = document.getElementById('so-tags').value;
+      const tags     = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+
+      if (!name)     { UI.toast('Vui lòng nhập tên dịch vụ.', 'error'); return; }
+      if (!category) { UI.toast('Vui lòng chọn danh mục.', 'error'); return; }
+
+      const btn = document.getElementById('so-submit-btn');
+      const oldText = btn.textContent;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Đang lưu...';
+
+      try {
+        let image = document.getElementById('so-image-url').value;
+        const fileInput = document.getElementById('so-image-file');
+        if (fileInput.files && fileInput.files[0]) {
+          btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Đang tải ảnh...';
+          image = await API.utils.uploadImage(fileInput.files[0]);
+        }
+
+        const payload = { category, name, description, price, unit, image, location, tags };
+        
+        if (id) {
+          await API.svc.update(id, payload);
+          UI.toast('✅ Đã cập nhật dịch vụ!', 'success');
+        } else {
+          await API.svc.create(payload);
+          UI.toast('✅ Đã tạo dịch vụ mới!', 'success');
+        }
+        closeServiceModal();
+        await reloadServices();
+      } catch(e) {
+        UI.toast(e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
     }
 
     // ── Toggle Service Active ─────────────────────────────────────────────────
     async function toggleService(serviceId) {
       const svc = myServices.find(s => s.id === serviceId);
       if (!svc) return;
+      const willHide = svc.active !== false;
       try {
-        await API.svc.update(serviceId, { active: !(svc.active !== false) });
-        UI.toast(svc.active !== false ? 'Dịch vụ đã được ẩn.' : 'Dịch vụ đã được hiển thị.', 'success');
+        await API.svc.toggle(serviceId);
+        UI.toast(willHide ? '🙈 Dịch vụ đã được ẩn khỏi danh sách công khai.' : '👁️ Dịch vụ đã được hiển thị trở lại!', 'success');
         await reloadServices();
       } catch(e) {
         UI.toast(e.message, 'error');
@@ -590,9 +679,7 @@
 
     // ── Reload Services from API ──────────────────────────────────────────────
     async function reloadServices() {
-      const sess = API.auth.currentSession();
-      const all  = await API.svc.getAll();
-      myServices = all.filter(s => s.providerId === sess.userId);
+      myServices = await API.svc.getMyServices();
       renderMyServices();
       statsData = await API.stats.provider();
       renderStatsGrid(statsData, 'stats-grid');

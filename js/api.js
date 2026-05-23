@@ -42,6 +42,22 @@ const API = (() => {
   const put  = (path, body, auth) => req('PUT',    path, body, auth);
   const del  = (path, auth)       => req('DELETE', path, null, auth);
 
+  // ── Upload ────────────────────────────────────────────────────────────────
+  const uploadFile = async (path, file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const headers = {};
+    const token = getToken();
+    if (!token) throw new Error('Chưa đăng nhập.');
+    headers['Authorization'] = 'Bearer ' + token;
+    
+    const res = await fetch(BASE_URL + path, { method: 'POST', headers, body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  };
+
   // ── AUTH ──────────────────────────────────────────────────────────────────
   const auth = {
     currentSession: getSession,
@@ -121,6 +137,7 @@ const API = (() => {
       if (filters.search)   params.set('search', filters.search);
       if (filters.sort)     params.set('sort', filters.sort);
       if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
+      if (filters.all)      params.set('all', '1');
       const qs = params.toString();
       return await get('/services' + (qs ? '?' + qs : ''));
     },
@@ -140,6 +157,16 @@ const API = (() => {
 
     remove: async (id) => {
       return await del('/services/' + id, true);
+    },
+
+    // Lấy dịch vụ của chính nhà cung cấp (bao gồm cả đang ẩn)
+    getMyServices: async () => {
+      return await get('/provider/services', true);
+    },
+
+    // Bật/tắt ẩn dịch vụ
+    toggle: async (id) => {
+      return await req('PATCH', '/services/' + id + '/toggle', null, true);
     },
 
     getProviderName: (providerId) => {
@@ -282,7 +309,14 @@ const API = (() => {
     },
   };
 
-  return { auth, svc, txn, chat, review, favorites, stats, users };
+  const utils = {
+    uploadImage: async (file) => {
+      const res = await uploadFile('/upload', file);
+      return res.url;
+    }
+  };
+
+  return { auth, svc, txn, chat, review, favorites, stats, users, utils };
 })();
 
 // Helper: get root path relative to current page

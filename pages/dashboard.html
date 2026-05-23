@@ -168,7 +168,6 @@
               ${o.status === 'cancelled' && o.cancelReason ? `<div style="font-size:.75rem;color:var(--error);margin-top:2px"><i class="ri-information-line"></i> ${o.cancelReason}</div>` : ''}
             </div>
             <div>${UI.statusBadge(o.status)}</div>
-            <div style="font-weight:700;color:var(--gold)">${UI.formatCurrency(o.price)}</div>
             <a href="checkout.html?id=${o.id}" class="btn btn-ghost btn-sm"><i class="ri-eye-line"></i></a>
           </div>`).join('');
       }
@@ -217,7 +216,6 @@
             <div class="wish-card-body">
               <div class="wish-card-cat">${svc.category || ''}</div>
               <div class="wish-card-title">${svc.name}</div>
-              <div class="wish-card-price">${UI.formatCurrency(svc.price)}</div>
             </div>
           </a>`;
         }).join('');

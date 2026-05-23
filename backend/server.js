@@ -5,11 +5,33 @@ const sql     = require('mssql');
 const bcrypt  = require('bcrypt');
 const jwt     = require('jsonwebtoken');
 const vnpay   = require('./vnpay');
+const multer  = require('multer');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'betrap_secret_key_2024';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+
+// ── Cấu hình Cloudinary ──────────────────────────────────────────────────────
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const uploadStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'betrap',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+});
+const upload = multer({ 
+  storage: uploadStorage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
@@ -55,10 +77,11 @@ const uid = () => Math.random().toString(36).substr(2, 9);
 // GET all services (with filters)
 app.get('/api/services', async (req, res) => {
     try {
-        const { category, location, search, sort, maxPrice } = req.query;
+        const { category, location, search, sort, maxPrice, all } = req.query;
         let query = `SELECT s.*, u.Name AS ProviderName FROM Services s
                      LEFT JOIN Users u ON s.ProviderId = u.Id
-                     WHERE s.Active = 1`;
+                     WHERE 1=1`;
+        if (!all) query += ` AND s.Active = 1`;
         if (category) query += ` AND s.Category = '${category.replace(/'/g,"''")}'`;
         if (location) query += ` AND s.Location LIKE N'%${location.replace(/'/g,"''").replace(/[%_]/g,'')}%'`;
         if (search)   query += ` AND (s.Name LIKE N'%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%' OR s.Description LIKE N'%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%')`;
@@ -134,6 +157,46 @@ app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
             Active=${active !== undefined ? active : 1}, UpdatedAt=GETDATE()
             WHERE Id=${req.params.id}`;
         res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// POST upload image (lưu lên Cloudinary)
+app.post('/api/upload', authMiddleware, upload.single('image'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'Không có file được tải lên.' });
+    res.json({ url: req.file.path });
+});
+
+// PATCH toggle service active (provider only) — bật/tắt hiển thị dịch vụ
+app.patch('/api/services/:id/toggle', authMiddleware, providerOnly, async (req, res) => {
+    try {
+        const check = await sql.query`SELECT ProviderId, Active FROM Services WHERE Id = ${req.params.id}`;
+        if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
+        if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
+        const currentActive = check.recordset[0].Active;
+        const newActive = currentActive ? 0 : 1;
+        await sql.query`UPDATE Services SET Active=${newActive}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
+        res.json({ success: true, active: newActive === 1 });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// GET provider's own services — bao gồm cả dịch vụ đang ẩn
+app.get('/api/provider/services', authMiddleware, providerOnly, async (req, res) => {
+    try {
+        const result = await sql.query`
+            SELECT s.*, u.Name AS ProviderName FROM Services s
+            LEFT JOIN Users u ON s.ProviderId = u.Id
+            WHERE s.ProviderId = ${req.user.userId}
+            ORDER BY s.CreatedAt DESC`;
+        const services = result.recordset.map(s => ({
+            id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
+            category: s.Category, name: s.Name, description: s.Description,
+            price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
+            active: s.Active === 1 || s.Active === true,
+            rating: s.Rating, reviewCount: s.ReviewCount,
+            tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
+            createdAt: s.CreatedAt
+        }));
+        res.json(services);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
