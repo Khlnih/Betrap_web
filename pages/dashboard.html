@@ -54,6 +54,7 @@
         <div class="dash-nav-item" onclick="location.href='services.html'"><i class="ri-search-line"></i> Tìm Dịch Vụ</div>
         <div class="dash-nav-section">Quản lý</div>
         <div class="dash-nav-item" onclick="location.href='history.html'"><i class="ri-history-line"></i> Lịch Sử Đơn Hàng</div>
+        <div class="dash-nav-item" onclick="showSection('consultation')" id="nav-consultation"><i class="ri-customer-service-2-line"></i> Lịch Tư Vấn</div>
         <div class="dash-nav-item" onclick="showSection('wishlist')" id="nav-wishlist"><i class="ri-heart-line"></i> Dịch Vụ Yêu Thích</div>
         <div class="dash-nav-item" onclick="location.href='settings.html'"><i class="ri-settings-3-line"></i> Cài Đặt</div>
         <div class="dash-nav-section">Tài khoản</div>
@@ -113,6 +114,20 @@
             <button class="btn btn-primary mt-lg" onclick="updateProfile()"><i class="ri-save-line"></i> Lưu Thay Đổi</button>
           </div>
         </div>
+        
+        <!-- Consultations Panel -->
+        <div id="panel-consultation" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-xl)">
+            <div>
+              <h2 style="color:var(--text-dark);margin-bottom:4px">Lịch Tư Vấn</h2>
+              <p style="color:var(--text-muted);font-size:.875rem">Danh sách các yêu cầu tư vấn bạn đã gửi</p>
+            </div>
+          </div>
+          <div class="orders-table">
+            <div id="consultation-list"></div>
+          </div>
+        </div>
+
         <!-- Wishlist Panel -->
         <div id="panel-wishlist" class="hidden">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-xl)">
@@ -181,14 +196,52 @@
     });
 
     function showSection(sec) {
-      const sections = ['overview', 'profile', 'wishlist'];
+      const sections = ['overview', 'profile', 'wishlist', 'consultation'];
       sections.forEach(s => {
         document.getElementById('panel-' + s).classList.toggle('hidden', sec !== s);
       });
       document.getElementById('nav-overview').classList.toggle('active', sec === 'overview');
       document.getElementById('nav-profile').classList.toggle('active', sec === 'profile');
       document.getElementById('nav-wishlist').classList.toggle('active', sec === 'wishlist');
+      const navConsult = document.getElementById('nav-consultation');
+      if (navConsult) navConsult.classList.toggle('active', sec === 'consultation');
+      
       if (sec === 'wishlist') loadWishlist();
+      if (sec === 'consultation') loadConsultations();
+    }
+
+    async function loadConsultations() {
+      const el = document.getElementById('consultation-list');
+      el.innerHTML = '<div style="padding:var(--sp-xl);text-align:center"><span class="spinner"></span></div>';
+      try {
+        const list = await API.consultation.getCustomer();
+        if (!list || !list.length) {
+          el.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><h3>Chưa có yêu cầu tư vấn</h3><p>Bạn chưa gửi yêu cầu tư vấn nào.</p></div>`;
+          return;
+        }
+        el.innerHTML = list.map(c => `
+          <div class="order-row">
+            <div>
+              <div style="font-weight:600;font-size:.95rem;color:var(--text-dark)">${c.serviceName}</div>
+              <div style="font-size:.8rem;color:var(--text-muted);margin-top:4px">
+                <i class="ri-store-2-line"></i> Nhà cung cấp: ${c.providerName || 'BêTráp'}
+              </div>
+              <div style="font-size:.85rem;color:var(--text-muted);margin-top:4px">
+                <i class="ri-calendar-line"></i> Ngày: ${c.date}<br>
+                <i class="ri-time-line"></i> Giờ: ${c.time ? c.time.substring(0,5) : ''}<br>
+                <i class="ri-map-pin-line"></i> Tại: ${c.address}
+              </div>
+              ${c.providerNote ? `<div style="font-size:.85rem;color:var(--primary);margin-top:6px;background:rgba(220,165,174,.05);padding:8px;border-radius:4px;"><i class="ri-message-2-line"></i> Lời nhắn từ NCC: <strong>${c.providerNote}</strong></div>` : ''}
+            </div>
+            <div style="text-align:right">
+              ${UI.statusBadge(c.status)}
+              <div style="font-size:.75rem;color:var(--text-muted);margin-top:6px">Tạo lúc: ${UI.formatDate(c.createdAt)}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Không thể tải danh sách</h3><p>${e.message}</p></div>`;
+      }
     }
 
     async function loadWishlist() {

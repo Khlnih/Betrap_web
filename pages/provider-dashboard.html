@@ -101,6 +101,7 @@
         <div class="dash-nav-item active" id="nav-overview" onclick="showTab('overview')"><i class="ri-dashboard-line"></i> Dashboard</div>
         <div class="dash-nav-section">Quản lý</div>
         <div class="dash-nav-item" id="nav-orders" onclick="showTab('orders')"><i class="ri-file-list-3-line"></i> Đơn Hàng <span id="sidebar-pending-badge"></span></div>
+        <div class="dash-nav-item" id="nav-consultations" onclick="showTab('consultations')"><i class="ri-customer-service-2-line"></i> Yêu Cầu Tư Vấn</div>
         <div class="dash-nav-item" id="nav-reviews" onclick="showTab('reviews')"><i class="ri-star-line"></i> Đánh Giá Sản Phẩm</div>
         <div class="dash-nav-item" id="nav-services" onclick="showTab('services')"><i class="ri-apps-line"></i> Dịch Vụ</div>
         <div class="dash-nav-item" onclick="location.href='settings.html'"><i class="ri-settings-3-line"></i> Cài Đặt</div>
@@ -119,6 +120,7 @@
         <div class="content-tabs">
           <div class="tab-btn active" id="tab-overview" onclick="showTab('overview')">Tổng Quan</div>
           <div class="tab-btn" id="tab-orders" onclick="showTab('orders')">Đơn Hàng <span id="pending-badge"></span></div>
+          <div class="tab-btn" id="tab-consultations" onclick="showTab('consultations')">Yêu Cầu Tư Vấn</div>
           <div class="tab-btn" id="tab-reviews" onclick="showTab('reviews')"><i class="ri-star-line"></i> Đánh Giá</div>
           <div class="tab-btn" id="tab-services" onclick="showTab('services')">Dịch Vụ</div>
           <div class="tab-btn" id="tab-profile" onclick="showTab('profile')">Thông Tin Studio</div>
@@ -128,6 +130,12 @@
         <div id="panel-overview">
           <h4 style="margin-bottom:var(--sp-md)">Đơn Hàng Cần Xử Lý</h4>
           <div id="pending-orders"></div>
+        </div>
+
+        <!-- ─── Consultations Tab ─── -->
+        <div id="panel-consultations" class="hidden">
+          <h4 style="margin-bottom:var(--sp-md)">Danh Sách Yêu Cầu Tư Vấn</h4>
+          <div id="consultations-list"></div>
         </div>
 
         <!-- ─── Orders Tab ─── -->
@@ -283,6 +291,22 @@
     </div>
   </div>
 
+  <!-- ── Order Detail Overlay ─────────────────────────────────────────────────── -->
+  <div id="order-detail-overlay" style="position:fixed;inset:0;z-index:9999;background:rgba(50,40,40,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
+    <div class="service-dialog" style="max-width:500px">
+      <div class="service-dialog-header" style="border-bottom:none;padding-bottom:0;margin-bottom:var(--sp-sm)">
+        <div class="service-dialog-title" style="font-size:1.2rem"><i class="ri-file-info-line"></i> Chi Tiết Yêu Cầu</div>
+        <button class="service-close-btn" onclick="closeOrderDetail()" title="Đóng">&times;</button>
+      </div>
+      <div class="service-dialog-body" id="order-detail-content" style="padding-top:var(--sp-md);">
+        <!-- populated dynamically -->
+      </div>
+      <div class="service-dialog-footer" style="border-top:none;margin-top:0">
+        <button class="btn btn-primary" onclick="closeOrderDetail()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
@@ -292,7 +316,7 @@
     let myServices  = [];
     let statsData   = null;
     let allReviews  = [];
-    const TABS = ['overview','orders','reviews','services','profile'];
+    const TABS = ['overview','orders','consultations','reviews','services','profile'];
 
     // ── Boot ─────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
@@ -361,6 +385,7 @@
         if (navEl) navEl.classList.toggle('active', t === tab);
       });
       if (tab === 'reviews') loadReviews();
+      if (tab === 'consultations') loadConsultations();
     }
 
     // ── Pending Orders (Overview) ─────────────────────────────────────────────
@@ -380,7 +405,7 @@
                 <i class="ri-user-line"></i> ${o.customerName || 'Khách hàng'}
               </div>
               <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">
-                <i class="ri-calendar-line"></i> ${o.date} ${o.time} · <i class="ri-map-pin-line"></i> ${o.address}
+                <i class="ri-calendar-line"></i> ${o.date} · <i class="ri-map-pin-line"></i> ${o.address}
               </div>
               ${o.note ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:2px"><i class="ri-file-text-line"></i> Ghi chú: ${o.note}</div>` : ''}
             </div>
@@ -388,6 +413,7 @@
           <div style="display:flex;gap:var(--sp-sm);margin-top:var(--sp-md)">
             <button class="btn btn-primary btn-sm" onclick="confirmOrder('${o.id}')"><i class="ri-check-line"></i> Xác Nhận</button>
             <button class="btn btn-danger btn-sm" onclick="promptCancelOrder('${o.id}')"><i class="ri-close-line"></i> Từ Chối</button>
+            <button class="btn btn-ghost btn-sm" onclick="showOrderDetail('${o.id}')"><i class="ri-eye-line"></i> Xem Chi Tiết</button>
           </div>
         </div>`).join('');
     }
@@ -407,7 +433,7 @@
             <div>
               <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
               <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
-              <div style="font-size:.8rem;color:var(--text-muted)">${o.customerName || 'Khách hàng'} · ${o.date} ${o.time}</div>
+              <div style="font-size:.8rem;color:var(--text-muted)">${o.customerName || 'Khách hàng'} · ${o.date}</div>
               <div style="font-size:.8rem;color:var(--text-muted)">${o.address}</div>
             </div>
             <div style="text-align:right">
@@ -419,18 +445,93 @@
               <i class="ri-information-line"></i> <strong>Lý do từ chối:</strong> ${o.cancelReason}
             </div>` : ''}
           ${o.status === 'confirmed' ? `
-            <div style="margin-top:var(--sp-md)">
+            <div style="margin-top:var(--sp-md);display:flex;gap:var(--sp-sm)">
               <button class="btn btn-primary btn-sm" onclick="markDone('${o.id}')">
                 <i class="ri-check-double-line"></i> Đánh Dấu Hoàn Thành
               </button>
+              <button class="btn btn-ghost btn-sm" onclick="showOrderDetail('${o.id}')"><i class="ri-eye-line"></i> Xem Chi Tiết</button>
             </div>` : ''}
           ${o.status === 'pending' ? `
             <div style="margin-top:var(--sp-md);display:flex;gap:var(--sp-sm)">
               <button class="btn btn-primary btn-sm" onclick="confirmOrder('${o.id}')"><i class="ri-check-line"></i> Xác Nhận</button>
               <button class="btn btn-danger btn-sm" onclick="promptCancelOrder('${o.id}')"><i class="ri-close-line"></i> Từ Chối</button>
+              <button class="btn btn-ghost btn-sm" onclick="showOrderDetail('${o.id}')"><i class="ri-eye-line"></i> Xem Chi Tiết</button>
+            </div>` : ''}
+          ${o.status !== 'confirmed' && o.status !== 'pending' ? `
+            <div style="margin-top:var(--sp-md);display:flex;gap:var(--sp-sm)">
+              <button class="btn btn-ghost btn-sm" onclick="showOrderDetail('${o.id}')"><i class="ri-eye-line"></i> Xem Chi Tiết</button>
             </div>` : ''}
         </div>`;
       }).join('');
+    }
+
+    // ── Consultations Tab ─────────────────────────────────────────────────────
+    async function loadConsultations() {
+      const el = document.getElementById('consultations-list');
+      el.innerHTML = '<div style="text-align:center;padding:var(--sp-xl)"><span class="spinner"></span></div>';
+      try {
+        const list = await API.consultation.getProvider();
+        if (!list || !list.length) {
+          el.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><h3>Chưa có yêu cầu tư vấn</h3></div>`;
+          return;
+        }
+        el.innerHTML = list.map(c => `
+          <div class="order-card-full ${c.status === 'pending' ? 'border-pending' : ''}" style="margin-bottom:var(--sp-md)">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap">
+              <div>
+                <div style="font-weight:700;margin-top:4px;font-size:1.1rem">${c.serviceName}</div>
+                <div style="font-size:.85rem;color:var(--text-muted);margin-top:4px">
+                  <i class="ri-user-line"></i> <strong>${c.customerName || 'Khách hàng'}</strong> - <a href="tel:${c.customerPhone}" style="color:var(--primary)"><i class="ri-phone-line"></i> ${c.customerPhone || 'Không có SĐT'}</a>
+                </div>
+                <div style="font-size:.85rem;color:var(--text-muted);margin-top:4px">
+                  <i class="ri-calendar-line"></i> Ngày: ${c.date}<br>
+                  <i class="ri-time-line"></i> Giờ: ${c.time ? c.time.substring(0,5) : ''}<br>
+                  <i class="ri-map-pin-line"></i> Tại: ${c.address}
+                </div>
+                ${c.note ? `<div style="background:var(--cream);padding:8px;border-radius:4px;margin-top:8px;font-size:.85rem"><i class="ri-file-text-line"></i> <strong>Câu hỏi:</strong> ${c.note}</div>` : ''}
+                ${c.providerNote ? `<div class="cancel-reason-box" style="border-color:var(--gold);color:var(--gold-dark);background:var(--gold-faint)"><i class="ri-message-2-line"></i> Lời nhắn của bạn: ${c.providerNote}</div>` : ''}
+              </div>
+              <div style="text-align:right">
+                ${UI.statusBadge(c.status)}
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:8px">Tạo lúc: ${UI.formatDate(c.createdAt)}</div>
+              </div>
+            </div>
+            ${c.status === 'pending' ? `
+            <div style="margin-top:var(--sp-md);display:flex;gap:var(--sp-sm);border-top:1px solid rgba(220,165,174,.1);padding-top:var(--sp-md)">
+              <button class="btn btn-primary btn-sm" onclick="promptConsultationStatus('${c.id}', 'confirmed', 'Xác nhận lịch')"><i class="ri-check-line"></i> Xác Nhận</button>
+              <button class="btn btn-outline btn-sm" onclick="promptConsultationStatus('${c.id}', 'cancelled', 'Từ chối lịch hẹn')" style="color:var(--error);border-color:var(--error)"><i class="ri-close-line"></i> Từ Chối</button>
+            </div>` : c.status === 'confirmed' ? `
+            <div style="margin-top:var(--sp-md);display:flex;gap:var(--sp-sm);border-top:1px solid rgba(220,165,174,.1);padding-top:var(--sp-md)">
+              <button class="btn btn-primary btn-sm" onclick="promptConsultationStatus('${c.id}', 'done', 'Hoàn thành')"><i class="ri-checkbox-circle-line"></i> Đã Tư Vấn Xong</button>
+            </div>` : ''}
+          </div>
+        `).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Lỗi</h3><p>${e.message}</p></div>`;
+      }
+    }
+
+    function promptConsultationStatus(id, newStatus, actionName) {
+      UI.modal({
+        title: actionName,
+        body: `
+          <p style="margin-bottom:12px;color:var(--text-muted);font-size:.9rem">Bạn có muốn gửi lời nhắn (hoặc lý do) cho khách hàng không?</p>
+          <textarea id="consult-reply-note" class="form-control" rows="3" placeholder="Nhập lời nhắn..."></textarea>
+        `,
+        confirmText: actionName,
+        onConfirm: async () => {
+          const note = document.getElementById('consult-reply-note').value.trim();
+          try {
+            await API.consultation.updateStatus(id, newStatus, note);
+            UI.toast('Đã cập nhật trạng thái tư vấn!', 'success');
+            loadConsultations();
+            return true;
+          } catch(e) {
+            UI.toast(e.message, 'error');
+            return false;
+          }
+        }
+      });
     }
 
     // ── Reviews Tab ───────────────────────────────────────────────────────────
@@ -573,6 +674,40 @@
         btn.disabled = false;
         btn.textContent = oldText;
       }
+    }
+
+    // ── Order Detail ──────────────────────────────────────────────────────────
+    function showOrderDetail(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      const content = `
+        <div style="margin-bottom:12px;font-size:0.95rem">
+          <strong><i class="ri-user-line" style="color:var(--gold)"></i> Khách hàng:</strong> ${o.customerName || 'Khách hàng'}
+        </div>
+        <div style="margin-bottom:12px;font-size:0.95rem">
+          <strong><i class="ri-phone-line" style="color:var(--gold)"></i> SĐT liên hệ:</strong> ${o.customerPhone ? `<a href="tel:${o.customerPhone}" style="color:var(--primary)">${o.customerPhone}</a>` : 'Chưa cung cấp'}
+        </div>
+        <div style="margin-bottom:12px;font-size:0.95rem">
+          <strong><i class="ri-calendar-line" style="color:var(--gold)"></i> Ngày tổ chức:</strong> ${o.date || 'Chưa cung cấp'}
+        </div>
+        <div style="margin-bottom:12px;font-size:0.95rem">
+          <strong><i class="ri-map-pin-line" style="color:var(--gold)"></i> Nơi tổ chức:</strong> ${o.address || 'Chưa cung cấp'}
+        </div>
+        <div style="margin-bottom:12px;font-size:0.95rem">
+          <strong><i class="ri-file-text-line" style="color:var(--gold)"></i> Ghi chú/Yêu cầu:</strong>
+          <div style="background:var(--cream);padding:var(--sp-md);border-radius:var(--r-md);margin-top:8px;line-height:1.5;">
+            ${o.note ? o.note.replace(/\n/g, '<br>') : '<em style="color:var(--text-muted)">Không có yêu cầu đặc biệt</em>'}
+          </div>
+        </div>
+      `;
+      document.getElementById('order-detail-content').innerHTML = content;
+      document.getElementById('order-detail-overlay').style.opacity = '1';
+      document.getElementById('order-detail-overlay').style.pointerEvents = 'all';
+    }
+    
+    function closeOrderDetail() {
+      document.getElementById('order-detail-overlay').style.opacity = '0';
+      document.getElementById('order-detail-overlay').style.pointerEvents = 'none';
     }
 
     // ── Refresh Orders ────────────────────────────────────────────────────────

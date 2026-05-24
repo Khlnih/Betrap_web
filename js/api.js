@@ -7,7 +7,7 @@
 const API = (() => {
 
   // ── Cấu hình (thay đổi URL khi deploy) ───────────────────────────────────
-  const BASE_URL = 'https://betrap-web.onrender.com/api';
+  const BASE_URL = 'http://localhost:3000/api';
 
   // ── Token helpers ─────────────────────────────────────────────────────────
   const getToken  = ()      => localStorage.getItem('bt_token');
@@ -217,6 +217,16 @@ const API = (() => {
     },
   };
 
+  // ── CONSULTATIONS ──────────────────────────────────────────────────────────
+  const consultation = {
+    create: async (data) => await post('/consultations', data, true),
+    getCustomer: async () => await get('/consultations/customer', true),
+    getProvider: async () => await get('/consultations/provider', true),
+    updateStatus: async (id, status, providerNote) => {
+      return await put('/consultations/' + id + '/status', { status, providerNote }, true);
+    }
+  };
+
   // ── CHAT ──────────────────────────────────────────────────────────────────
   const chat = {
     getConversations: async () => {
@@ -316,7 +326,7 @@ const API = (() => {
     }
   };
 
-  return { auth, svc, txn, chat, review, favorites, stats, users, utils };
+  return { auth, svc, txn, consultation, chat, review, favorites, stats, users, utils };
 })();
 
 // Helper: get root path relative to current page

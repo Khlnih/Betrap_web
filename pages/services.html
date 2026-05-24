@@ -94,6 +94,33 @@
 
   <div id="footer-container"></div>
   <div id="toast-container"></div>
+  
+  <!-- Notice Overlay -->
+  <div id="notice-overlay" style="position:fixed;inset:0;z-index:9999;background:rgba(20,15,15,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:1;transition:opacity .4s ease;">
+    <div style="background:#fffefc;border-radius:24px;padding:var(--sp-2xl);max-width:460px;width:100%;position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.15);transform:translateY(0);animation:fadeInUp .5s ease;">
+      <button onclick="closeNotice()" style="position:absolute;top:20px;right:20px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;transition:color 0.2s;"><i class="ri-close-line"></i></button>
+      <h2 style="font-family:var(--font-h);color:#8a6a5c;font-size:1.8rem;margin-bottom:var(--sp-xl)">Lưu ý khi đặt lịch</h2>
+      <div style="display:flex;flex-direction:column;gap:var(--sp-lg);">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
+          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Đặt lịch trước ít nhất 1 tháng để được tư vấn tốt nhất</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
+          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Cọc 30% để giữ chỗ đội bê tráp</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
+          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Tư vấn miễn phí qua điện thoại hoặc trực tiếp</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
+          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Báo giá chi tiết trong vòng 24 giờ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
@@ -101,6 +128,15 @@
     document.addEventListener('DOMContentLoaded', () => {
       UI.initPage();
       UI.renderFooter('footer-container');
+
+      window.closeNotice = function() {
+        const el = document.getElementById('notice-overlay');
+        if(el) {
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+          setTimeout(() => el.remove(), 400);
+        }
+      };
 
       // Read URL param
       const cat = new URLSearchParams(location.search).get('cat') || '';

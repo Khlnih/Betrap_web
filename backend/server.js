@@ -359,7 +359,7 @@ app.get('/api/transactions/:userId', authMiddleware, async (req, res) => {
         return res.status(403).json({ error: 'Forbidden' });
     try {
         const result = await sql.query`
-            SELECT t.*, u.Name AS CustomerName FROM Transactions t
+            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone FROM Transactions t
             LEFT JOIN Users u ON t.CustomerId = u.Id
             WHERE t.CustomerId=${req.params.userId} OR t.ProviderId=${req.params.userId}
             ORDER BY t.CreatedAt DESC`;
@@ -369,7 +369,10 @@ app.get('/api/transactions/:userId', authMiddleware, async (req, res) => {
 
 app.get('/api/transaction/:id', authMiddleware, async (req, res) => {
     try {
-        const result = await sql.query`SELECT * FROM Transactions WHERE Id=${req.params.id}`;
+        const result = await sql.query`
+            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone FROM Transactions t
+            LEFT JOIN Users u ON t.CustomerId = u.Id
+            WHERE t.Id=${req.params.id}`;
         if (!result.recordset.length) return res.status(404).json({ error: 'Not found' });
         const t = result.recordset[0];
         if (t.CustomerId !== req.user.userId && t.ProviderId !== req.user.userId)
@@ -410,6 +413,7 @@ function mapTxn(t) {
         cancelReason: t.CancelReason || null,
         paymentMethod: t.PaymentMethod, paymentStatus: t.PaymentStatus,
         customerName: t.CustomerName || null,
+        customerPhone: t.CustomerPhone || null,
         createdAt: t.CreatedAt, updatedAt: t.UpdatedAt
     };
 }
@@ -681,6 +685,83 @@ app.get('/api/favorites/check/:serviceId', authMiddleware, async (req, res) => {
         res.json({ favorited: r.recordset.length > 0 });
     } catch (err) { res.status(500).json({ error: 'Server error' }); }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 9. CONSULTATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+app.post('/api/consultations', authMiddleware, async (req, res) => {
+    const { serviceId, date, time, address, note } = req.body;
+    const selectedDate = new Date(date + 'T00:00:00');
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (selectedDate < today) return res.status(400).json({ error: 'Ngày hẹn phải từ hôm nay trở đi.' });
+    if (!address || address.length < 5) return res.status(400).json({ error: 'Vui lòng nhập địa chỉ cụ thể.' });
+    try {
+        const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=1`;
+        if (!svcRes.recordset.length) return res.status(404).json({ error: 'Dịch vụ không tồn tại.' });
+        const svc = svcRes.recordset[0];
+        const id = 'CON_' + uid().toUpperCase();
+        await sql.query`
+            INSERT INTO Consultations (Id, CustomerId, ProviderId, ServiceId, ServiceName, Date, Time, Address, Note)
+            VALUES (${id}, ${req.user.userId}, ${svc.ProviderId}, ${serviceId}, ${svc.Name},
+                    ${date}, ${time}, ${address}, ${note||null})`;
+        res.json({ id });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/consultations/customer', authMiddleware, async (req, res) => {
+    try {
+        const result = await sql.query`
+            SELECT c.*, u.Name AS ProviderName, u.Phone AS ProviderPhone FROM Consultations c
+            LEFT JOIN Users u ON c.ProviderId = u.Id
+            WHERE c.CustomerId=${req.user.userId}
+            ORDER BY c.CreatedAt DESC`;
+        res.json(result.recordset.map(mapConsultation));
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/consultations/provider', authMiddleware, providerOnly, async (req, res) => {
+    try {
+        const result = await sql.query`
+            SELECT c.*, u.Name AS CustomerName, u.Phone AS CustomerPhone FROM Consultations c
+            LEFT JOIN Users u ON c.CustomerId = u.Id
+            WHERE c.ProviderId=${req.user.userId}
+            ORDER BY c.CreatedAt DESC`;
+        res.json(result.recordset.map(mapConsultation));
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.put('/api/consultations/:id/status', authMiddleware, async (req, res) => {
+    const { status, providerNote } = req.body;
+    const allowed = ['pending','confirmed','done','cancelled'];
+    if (!allowed.includes(status)) return res.status(400).json({ error: 'Trạng thái không hợp lệ.' });
+    try {
+        const check = await sql.query`SELECT CustomerId, ProviderId FROM Consultations WHERE Id=${req.params.id}`;
+        if (!check.recordset.length) return res.status(404).json({ error: 'Not found' });
+        const { CustomerId, ProviderId } = check.recordset[0];
+        if (req.user.userId !== CustomerId && req.user.userId !== ProviderId)
+            return res.status(403).json({ error: 'Forbidden' });
+            
+        await sql.query`UPDATE Consultations SET Status=${status}, ProviderNote=${providerNote||null}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+function mapConsultation(c) {
+    return {
+        id: c.Id, customerId: c.CustomerId, providerId: c.ProviderId,
+        serviceId: c.ServiceId, serviceName: c.ServiceName,
+        date: c.Date ? (c.Date instanceof Date ? c.Date.toISOString().split('T')[0] : c.Date) : null,
+        time: c.Time ? (c.Time instanceof Date ? c.Time.toISOString().substring(11, 16) : c.Time.toString().substring(0, 5)) : null,
+        address: c.Address, note: c.Note, status: c.Status,
+        providerNote: c.ProviderNote || null,
+        customerName: c.CustomerName || null,
+        customerPhone: c.CustomerPhone || null,
+        providerName: c.ProviderName || null,
+        providerPhone: c.ProviderPhone || null,
+        createdAt: c.CreatedAt, updatedAt: c.UpdatedAt
+    };
+}
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'BêTráp API v2.0 — Running ✅' }));

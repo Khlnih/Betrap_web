@@ -130,10 +130,10 @@ const UI = (() => {
     let overlay = document.getElementById('modal-overlay');
     if (!overlay) {
       overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
       overlay.id = 'modal-overlay';
       document.body.appendChild(overlay);
     }
+    overlay.classList.add('modal-overlay');
     overlay.innerHTML = `
       <div class="modal">
         <div class="modal-header">

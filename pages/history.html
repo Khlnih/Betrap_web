@@ -18,7 +18,7 @@
     .order-card-full.border-done{border-left-color:var(--success)}
     .order-card-full.border-cancelled{border-left-color:var(--error)}
     .order-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap}
-    .order-body{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin-top:var(--sp-md);padding-top:var(--sp-md);border-top:1px solid rgba(220,165,174,.06)}
+    .order-body{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md);margin-top:var(--sp-md);padding-top:var(--sp-md);border-top:1px solid rgba(220,165,174,.06)}
     .order-meta-item{font-size:.8rem;color:var(--text-muted)}
     .order-meta-item strong{display:block;color:var(--text-dark);font-size:.875rem;margin-top:2px}
     .order-actions{display:flex;gap:var(--sp-sm);margin-top:var(--sp-md);flex-wrap:wrap}
@@ -168,7 +168,6 @@
           <div class="order-body">
             <div class="order-meta-item">Ngày đặt<strong>${UI.formatDate(o.createdAt)}</strong></div>
             <div class="order-meta-item">Ngày thực hiện<strong>${o.date||'—'}</strong></div>
-            <div class="order-meta-item">Giờ<strong>${o.time||'—'}</strong></div>
           </div>
           ${o.address ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:var(--sp-sm)"><i class="ri-map-pin-line"></i> ${o.address}</div>` : ''}
           ${o.note ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:4px"><i class="ri-file-text-line"></i> Ghi chú: ${o.note}</div>` : ''}

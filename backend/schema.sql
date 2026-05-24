@@ -136,6 +136,24 @@ CREATE TABLE Favorites (
 );
 GO
 
+-- 8. Bảng Consultations (Đặt lịch tư vấn)
+CREATE TABLE Consultations (
+    Id VARCHAR(50) PRIMARY KEY,
+    CustomerId VARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Users(Id),
+    ProviderId VARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Users(Id),
+    ServiceId VARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Services(Id),
+    ServiceName NVARCHAR(200),
+    Date DATE NOT NULL,
+    Time TIME NOT NULL,
+    Address NVARCHAR(500) NOT NULL,
+    Note NVARCHAR(1000),
+    Status VARCHAR(20) DEFAULT 'pending', -- pending, confirmed, cancelled, done
+    ProviderNote NVARCHAR(1000) NULL,      -- Lời nhắn/Lý do của nhà cung cấp
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
 -- ==========================================================
 -- DỮ LIỆU MẪU (SEED DATA)
 -- ==========================================================
