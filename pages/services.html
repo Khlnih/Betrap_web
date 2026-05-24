@@ -167,13 +167,39 @@
       applyFilters();
     });
 
+    let lastCat = null;
+
     async function applyFilters() {
       const cat      = document.querySelector('input[name="cat"]:checked')?.value || '';
       const location = document.getElementById('location-filter').value;
       const sort     = document.getElementById('sort-filter').value;
       const search   = document.getElementById('search-input').value;
+      
+      showCategoryModal(cat);
+
       const svcs = await API.svc.getAll({ category:cat, location, sort, search });
       renderServices(svcs);
+    }
+
+    function showCategoryModal(cat) {
+      if (cat === lastCat) return; // Only show when category changes
+      lastCat = cat;
+
+      if (cat === 'be-trap') {
+        if (typeof closeNotice === 'function') closeNotice();
+        UI.modal({
+          title: 'Đội Bê Tráp',
+          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Đội bê tráp chuyên nghiệp với phong cách trẻ trung, lịch sự và chỉn chu trong từng nghi thức cưới hỏi. Nam mặc quần âu, giày tây lịch lãm; nữ duyên dáng với áo dài nhiều mẫu đẹp, đi giày bệt hoặc cao gót theo yêu cầu concept của khách hàng.<br><br>Đội hình được sắp xếp đồng đều, tác phong chuyên nghiệp, đúng giờ và hỗ trợ tận tâm trong suốt buổi lễ. Không chỉ bê tráp, đội còn hỗ trợ rót nước, mời khách và phối hợp nghi lễ để ngày vui diễn ra trọn vẹn, trang trọng và mang đậm nét đẹp truyền thống Việt Nam.</div>',
+          confirmText: 'Đã hiểu'
+        });
+      } else if (cat === 'ao-dai') {
+        if (typeof closeNotice === 'function') closeNotice();
+        UI.modal({
+          title: 'Thuê Áo Dài',
+          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Cho thuê áo dài dành cho đội bê trap với nhiều mẫu mã đa dạng, từ truyền thống đến hiện đại, phù hợp cho lễ ăn hỏi, cưới hỏi và các sự kiện đặc biệt. Áo dài được chuẩn bị sạch sẽ, chỉn chu, chất liệu đẹp và lên form tôn dáng, giúp đội hình đồng đều và nổi bật trong ngày lễ.<br><br>Có nhiều tone màu và concept để lựa chọn. Trang phục dành cho cả nam và nữ, dễ phối phụ kiện và phù hợp với nhiều phong cách nghi lễ Việt Nam. Cam kết chuẩn bị đúng mẫu, đúng size và đúng thời gian để mang đến hình ảnh chuyên nghiệp và đẹp mắt cho ngày vui của khách hàng.</div>',
+          confirmText: 'Đã hiểu'
+        });
+      }
     }
 
     function renderServices(svcs) {
