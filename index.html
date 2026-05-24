@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/animations.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
     :root {
       --pink: #FF6B9D;
@@ -166,15 +167,15 @@
     .hero-stat .lbl { font-size: .78rem; color: #9CA3AF; margin-top: 2px; }
 
     /* ─── SECTION SHARED ───────────────────────────────────── */
-    .section-v2 { padding: 100px 0; }
+    .section-v2 { padding: 120px 0; }
     .section-pill {
       display: inline-flex; align-items: center; gap: 6px;
       background: linear-gradient(135deg,#FFE4EE,#FFE9D0);
       color: #C9184A; padding: 6px 16px; border-radius: 100px;
-      font-size: .8rem; font-weight: 700; margin-bottom: 16px;
+      font-size: .8rem; font-weight: 700; margin-bottom: 20px;
     }
-    .section-title-v2 { font-size: clamp(1.8rem,3.5vw,2.8rem); font-weight: 800; color: #1a0a14; line-height: 1.2; margin-bottom: 16px; }
-    .section-sub-v2 { font-size: 1rem; color: #6B7280; max-width: 520px; line-height: 1.7; }
+    .section-title-v2 { font-size: clamp(1.8rem,3.5vw,2.8rem); font-weight: 800; color: #1a0a14; line-height: 1.25; margin-bottom: 16px; }
+    .section-sub-v2 { font-size: 1.05rem; color: #6B7280; max-width: 520px; line-height: 1.8; }
 
     /* ─── CATEGORIES BENTO ────────────────────────────────── */
     .bento-bg { background: #FAFAFA; }
@@ -188,11 +189,11 @@
     @media(max-width:900px) { .bento-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 180px); } }
     @media(max-width:560px) { .bento-grid { grid-template-columns: 1fr; grid-template-rows: repeat(5, 180px); } }
     .bento-item {
-      border-radius: 24px; overflow: hidden; position: relative;
+      border-radius: 32px; overflow: hidden; position: relative;
       cursor: pointer; text-decoration: none;
-      transition: transform .35s ease, box-shadow .35s ease;
+      transition: transform .4s cubic-bezier(.22,.68,0,1.2), box-shadow .4s ease;
     }
-    .bento-item:hover { transform: scale(1.03); box-shadow: 0 24px 60px rgba(0,0,0,.15); }
+    .bento-item:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 32px 70px rgba(0,0,0,.18); }
     .bento-item.big { grid-column: span 2; }
     .bento-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
     .bento-item:hover .bento-img { transform: scale(1.08); }
@@ -230,20 +231,21 @@
       opacity: .3; z-index: 0;
     }
     @media(max-width:768px) { .steps-v2::before { display: none; } }
-    .step-v2 { text-align: center; position: relative; z-index: 1; }
+    .step-v2 { text-align: center; position: relative; z-index: 1; transition: transform .3s ease; }
+    .step-v2:hover { transform: translateY(-10px); }
     .step-v2-num {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 64px; height: 64px; border-radius: 50%;
       background: linear-gradient(135deg, #FF6B9D, #FF9472);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; font-weight: 800; color: white;
-      margin: 0 auto 20px;
-      box-shadow: 0 8px 24px rgba(255,107,157,.4);
+      font-size: 1.4rem; font-weight: 800; color: white;
+      margin: 0 auto 24px;
+      box-shadow: 0 12px 32px rgba(255,107,157,.5);
     }
-    .step-v2 h4 { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-    .step-v2 p { color: rgba(255,255,255,.5); font-size: .85rem; line-height: 1.7; }
+    .step-v2 h4 { color: white; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
+    .step-v2 p { color: rgba(255,255,255,.6); font-size: .9rem; line-height: 1.8; }
 
     /* ─── FEATURED SERVICES ────────────────────────────────── */
-    .services-grid-v2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+    .services-grid-v2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 56px; }
     @media(max-width:900px) { .services-grid-v2 { grid-template-columns: 1fr; } }
 
     /* ─── TESTIMONIALS ─────────────────────────────────────── */
@@ -433,7 +435,7 @@
     <div class="container">
       <div class="hero-v2-inner">
         <!-- LEFT -->
-        <div class="hero-left">
+        <div class="hero-left" data-aos="fade-right" data-aos-duration="1000">
           <div class="hero-tag">
             <span>🌸</span> Nền Tảng Đám Hỏi #1 Việt Nam
           </div>
@@ -461,10 +463,6 @@
               <div class="lbl">Nhà cung cấp</div>
             </div>
             <div class="hero-stat">
-              <div class="num" data-count="63">0</div>
-              <div class="lbl">Tỉnh thành</div>
-            </div>
-            <div class="hero-stat">
               <div class="num" data-count="98">0</div>
               <div class="lbl">% Hài lòng</div>
             </div>
@@ -472,7 +470,7 @@
         </div>
 
         <!-- RIGHT – floating cards + image -->
-        <div class="hero-right">
+        <div class="hero-right" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
           <img class="hero-main-img" src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=700&q=80" alt="Đám hỏi đẹp">
 
           <div class="float-card">
@@ -504,15 +502,15 @@
   </section>
 
   <!-- ═══ CATEGORIES BENTO ═════════════════════════════════════ -->
-  <section class="section-v2 bento-bg" id="services">
-    <div class="container">
-      <div style="text-align:center">
+  <section class="section-v2 bento-bg" id="categories">
+    <div class="container" data-aos="fade-up">
+      <div style="text-align:center;margin-bottom:40px">
         <div class="section-pill">🎁 Danh Mục Dịch Vụ</div>
         <h2 class="section-title-v2">Tất Cả Những Gì Bạn Cần<br>Cho Ngày Trọng Đại</h2>
         <p class="section-sub-v2" style="margin:0 auto">Từ đội bê tráp đến áo dài, chụp ảnh và trang điểm — chúng tôi có tất cả.</p>
       </div>
       <div class="bento-grid">
-        <a href="pages/services.html?cat=be-trap" class="bento-item big">
+        <a href="pages/services.html?cat=be-trap" class="bento-item big" data-aos="fade-up" data-aos-delay="100">
           <img class="bento-img" src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=900&q=80" alt="Bê Tráp">
           <div class="bento-overlay"></div>
           <div class="bento-tag">Phổ biến</div>
@@ -522,7 +520,7 @@
             <div class="bento-count">12 gói dịch vụ</div>
           </div>
         </a>
-        <a href="pages/services.html?cat=ao-dai" class="bento-item">
+        <a href="pages/services.html?cat=ao-dai" class="bento-item" data-aos="fade-up" data-aos-delay="200">
           <img class="bento-img" src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&q=80" alt="Áo Dài">
           <div class="bento-overlay"></div>
           <div class="bento-label">
@@ -531,7 +529,7 @@
             <div class="bento-count">28 mẫu</div>
           </div>
         </a>
-        <a href="pages/services.html?cat=lam-trap" class="bento-item">
+        <a href="pages/services.html?cat=lam-trap" class="bento-item" data-aos="fade-up" data-aos-delay="300">
           <img class="bento-img" src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80" alt="Làm Tráp">
           <div class="bento-overlay"></div>
           <div class="bento-label">
@@ -540,7 +538,7 @@
             <div class="bento-count">15 phong cách</div>
           </div>
         </a>
-        <a href="pages/services.html?cat=media" class="bento-item">
+        <a href="pages/services.html?cat=media" class="bento-item" data-aos="fade-up" data-aos-delay="400">
           <img class="bento-img" src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80" alt="Media">
           <div class="bento-overlay"></div>
           <div class="bento-label">
@@ -549,7 +547,7 @@
             <div class="bento-count">20 studio</div>
           </div>
         </a>
-        <a href="pages/services.html?cat=makeup" class="bento-item">
+        <a href="pages/services.html?cat=makeup" class="bento-item" data-aos="fade-up" data-aos-delay="500">
           <img class="bento-img" src="https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600&q=80" alt="Make Up">
           <div class="bento-overlay"></div>
           <div class="bento-label">
@@ -564,7 +562,7 @@
 
   <!-- ═══ HOW IT WORKS ══════════════════════════════════════════ -->
   <section class="section-v2 how-v2-bg" id="about">
-    <div class="container">
+    <div class="container" data-aos="fade-up">
       <div style="text-align:center">
         <div class="section-pill" style="background:rgba(255,107,157,.15);color:#FF6B9D">⚡ Cách Hoạt Động</div>
         <h2 class="section-title-v2" style="color:white">Đơn Giản — Nhanh Chóng<br>Tin Cậy</h2>
@@ -597,8 +595,8 @@
 
   <!-- ═══ FEATURED SERVICES ══════════════════════════════════════ -->
   <section class="section-v2" id="featured">
-    <div class="container">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:0">
+    <div class="container" data-aos="fade-up">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:0">
         <div>
           <div class="section-pill">🔥 Được Yêu Thích</div>
           <h2 class="section-title-v2" style="margin-bottom:0">Dịch Vụ Nổi Bật</h2>
@@ -611,8 +609,8 @@
 
   <!-- ═══ TESTIMONIALS ══════════════════════════════════════════ -->
   <section class="section-v2 reviews-bg" id="testimonials">
-    <div class="container">
-      <div style="text-align:center">
+    <div class="container" data-aos="fade-up">
+      <div style="text-align:center;margin-bottom:48px">
         <div class="section-pill">💬 Khách Hàng Nói Gì</div>
         <h2 class="section-title-v2">Hàng Trăm Đôi Uyên Ương<br>Tin Tưởng BêTráp</h2>
       </div>
@@ -655,8 +653,8 @@
   </section>
 
   <!-- ═══ CTA / FORM ════════════════════════════════════════════ -->
-  <section class="section-v2 section-pad-bottom" id="contact">
-    <div class="container">
+  <section class="section-v2 section-pad-bottom" id="contact" style="display: none;">
+    <div class="container" data-aos="zoom-in">
       <div class="cta-v2">
         <div class="cta-v2-grid">
           <div>
@@ -715,9 +713,12 @@
   <script src="js/api.js"></script>
   <script src="js/ui.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
       UI.renderFooter('footer-container');
+
+      // Compute actual stats from data
+      await calculateHeroStats();
 
       // Counter animation
       const counters = document.querySelectorAll('[data-count]');
@@ -735,6 +736,34 @@
       renderFeatured();
     });
 
+    async function calculateHeroStats() {
+      try {
+        const txns = DB.transactions.getAll() || [];
+        const doneTxns = txns.filter(t => t.status === 'completed').length || 15; // fallback
+        
+        const users = DB.users.getAll() || [];
+        const providers = users.filter(u => u.role === 'provider').length || 8;
+        
+        let sat = 98;
+        
+        const svcs = await API.svc.getAll();
+        if (svcs && svcs.length > 0) {
+          const totalRating = svcs.reduce((sum, s) => sum + (s.rating || 5), 0);
+          const avgRating = totalRating / svcs.length;
+          sat = Math.round((avgRating / 5) * 100);
+        }
+
+        const statEls = document.querySelectorAll('.hero-stat .num');
+        if (statEls.length === 3) {
+          statEls[0].dataset.count = doneTxns;
+          statEls[1].dataset.count = providers;
+          statEls[2].dataset.count = sat;
+        }
+      } catch(e) {
+        console.error('Error computing stats:', e);
+      }
+    }
+
     async function renderFeatured() {
       const svcs = await API.svc.getAll({ sort: 'rating' });
       const top = svcs.slice(0, 3);
@@ -749,8 +778,7 @@
             <div class="service-card-title">${s.name}</div>
             <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location} · ${s.providerName || API.svc.getProviderName(s.providerId)}</div>
             <div class="stars">${UI.stars(s.rating)}</div>
-            <div class="service-card-footer">
-              <div class="service-card-price">${UI.formatCurrency(s.price)}<span style="font-size:.7em;font-weight:400;color:var(--text-muted)">/${s.unit}</span></div>
+            <div class="service-card-footer" style="justify-content: flex-end;">
               <span class="btn btn-primary btn-sm">Đặt ngay</span>
             </div>
           </div>
@@ -805,6 +833,14 @@
         </svg>`;
         hero.appendChild(petal);
       }
+    });
+  </script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 800,
+      once: true,
+      offset: 50
     });
   </script>
 </body>

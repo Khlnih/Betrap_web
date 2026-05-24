@@ -1,28 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 :root {
-  --gold: #D4AF37; --gold-light: #F3E5AB; --gold-dark: #C5A059;
-  --gold-faint: rgba(212,175,55,0.15);
-  --red: #C8102E; --red-light: #E53935; --red-dark: #A31621;
-  --red-faint: rgba(200,16,46,0.15);
-  --cream: #FCF9F2; --cream-dark: #F3EBE1;
+  --gold: #D4AF37; --gold-light: #F9E596; --gold-dark: #B5952F;
+  --gold-faint: rgba(212,175,55,0.12);
+  --red: #C1121F; --red-light: #E63946; --red-dark: #780000;
+  --red-faint: rgba(193,18,31,0.1);
+  --cream: #FCF9F5; --cream-dark: #F3EBE1;
   --dark: #1F2937; --dark-2: #374151; --dark-3: #4B5563;
   --text-dark: #111827; --text-light: #FFFFFF; --text-muted: #6B7280;
   --text-body: #374151;
-  --text-muted-light: rgba(255,255,255,0.7);
-  --success: #27AE60; --warning: #F39C12; --error: #E74C3C; --info: #2980B9;
-  --grad-primary: linear-gradient(135deg, #E53935 0%, #C8102E 100%);
-  --grad-gold: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 100%);
+  --text-muted-light: rgba(255,255,255,0.75);
+  --success: #2A9D8F; --warning: #E9C46A; --error: #E63946; --info: #457B9D;
+  --grad-primary: linear-gradient(135deg, #E63946 0%, #C1121F 100%);
+  --grad-gold: linear-gradient(135deg, #F9E596 0%, #D4AF37 100%);
   --grad-dark: linear-gradient(135deg, #4B5563 0%, #111827 100%);
-  --grad-hero: linear-gradient(135deg, #FFFFFF 0%, #FCF9F2 60%, #F3EBE1 100%);
-  --shadow-xs: 0 1px 4px rgba(0,0,0,.04); --shadow-sm: 0 2px 10px rgba(0,0,0,.06);
-  --shadow-md: 0 4px 24px rgba(0,0,0,.08); --shadow-lg: 0 8px 48px rgba(0,0,0,.12);
-  --shadow-gold: 0 4px 24px rgba(212,175,55,.25); --shadow-red: 0 4px 24px rgba(200,16,46,.25);
-  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 32px; --r-full: 9999px;
+  --grad-hero: linear-gradient(135deg, #FFFFFF 0%, #FCF9F5 60%, #F3EBE1 100%);
+  --shadow-xs: 0 2px 8px rgba(31,41,55,.04);
+  --shadow-sm: 0 4px 16px rgba(31,41,55,.06);
+  --shadow-md: 0 12px 32px rgba(31,41,55,.08);
+  --shadow-lg: 0 24px 64px rgba(31,41,55,.12);
+  --shadow-gold: 0 12px 32px rgba(212,175,55,.35);
+  --shadow-red: 0 12px 32px rgba(193,18,31,.35);
+  --r-sm: 8px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px; --r-full: 9999px;
   --sp-xs:4px;--sp-sm:8px;--sp-md:16px;--sp-lg:24px;--sp-xl:40px;--sp-2xl:64px;--sp-3xl:96px;
   --font: 'Plus Jakarta Sans', sans-serif; --font-h: 'Playfair Display', serif;
-  --t-fast:150ms ease;--t-normal:260ms ease;--t-slow:420ms ease;
-  --nav-h:72px; --z-nav:100; --z-dropdown:200; --z-modal:300; --z-toast:400;
+  --t-fast:150ms cubic-bezier(0.4, 0, 0.2, 1);--t-normal:300ms cubic-bezier(0.4, 0, 0.2, 1);--t-slow:500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-h:76px; --z-nav:100; --z-dropdown:200; --z-modal:300; --z-toast:400;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -44,9 +47,9 @@ p{line-height:1.75}
 .section-sm{padding:var(--sp-2xl) 0}
 
 /* NAVBAR */
-.navbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:var(--z-nav);display:flex;align-items:center;padding:0 var(--sp-xl);transition:background var(--t-normal),box-shadow var(--t-normal)}
-.navbar.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);box-shadow:0 2px 24px rgba(0,0,0,.08)}
-.navbar.solid{background:white;box-shadow:0 2px 24px rgba(0,0,0,.08)}
+.navbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:var(--z-nav);display:flex;align-items:center;padding:0 var(--sp-xl);transition:all var(--t-normal)}
+.navbar.scrolled{background:rgba(255,255,255,.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 12px 40px rgba(0,0,0,.05);border-bottom:1px solid rgba(255,255,255,.4)}
+.navbar.solid{background:white;box-shadow:0 12px 40px rgba(0,0,0,.05)}
 .navbar-brand{display:flex;align-items:center;gap:var(--sp-sm);font-family:var(--font-h);font-size:1.5rem;font-weight:700;color:var(--text-dark);letter-spacing:.01em}
 .navbar-brand .brand-icon{width:40px;height:40px;background:var(--grad-primary);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white;box-shadow:var(--shadow-md)}
 .navbar-links{display:flex;align-items:center;gap:var(--sp-xl);margin:0 auto}
@@ -67,14 +70,16 @@ p{line-height:1.75}
 .nav-dropdown-divider{height:1px;background:rgba(212,175,55,.15);margin:var(--sp-sm) 0}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-sm);padding:12px 28px;border-radius:var(--r-full);font-size:.95rem;font-weight:600;transition:all var(--t-normal);white-space:nowrap;position:relative;overflow:hidden}
-.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:opacity var(--t-fast)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-sm);padding:14px 32px;border-radius:var(--r-full);font-size:1rem;font-weight:700;transition:all var(--t-normal);white-space:nowrap;position:relative;overflow:hidden;z-index:1}
+.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.2);opacity:0;transition:opacity var(--t-normal);z-index:-1}
+.btn::after{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(to right,rgba(255,255,255,0) 0%,rgba(255,255,255,.4) 50%,rgba(255,255,255,0) 100%);transform:skewX(-25deg);transition:none;z-index:-1}
 .btn:hover::before{opacity:1}
+.btn:hover::after{left:150%;transition:left .6s cubic-bezier(.22,.68,0,1.2)}
 .btn:active{transform:scale(.97)}
-.btn-primary{background:var(--grad-primary);color:white;box-shadow:var(--shadow-gold)}
-.btn-primary:hover{box-shadow:0 6px 32px rgba(212,175,55,.5);transform:translateY(-2px)}
-.btn-gold{background:var(--grad-gold);color:var(--dark);font-weight:700;box-shadow:var(--shadow-gold)}
-.btn-gold:hover{box-shadow:0 6px 32px rgba(234,216,211,.5);transform:translateY(-2px)}
+.btn-primary{background:var(--grad-primary);color:white;box-shadow:var(--shadow-red)}
+.btn-primary:hover{box-shadow:0 16px 40px rgba(193,18,31,.4);transform:translateY(-3px)}
+.btn-gold{background:var(--grad-gold);color:var(--dark);font-weight:800;box-shadow:var(--shadow-gold)}
+.btn-gold:hover{box-shadow:0 16px 40px rgba(212,175,55,.4);transform:translateY(-3px)}
 .btn-outline{background:transparent;color:var(--text-dark);border:2px solid var(--text-dark)}
 .btn-outline:hover{background:var(--text-dark);color:white}
 .btn-outline-light{background:transparent;color:white;border:2px solid rgba(255,255,255,.4)}

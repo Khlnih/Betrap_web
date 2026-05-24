@@ -8,12 +8,13 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
-    .detail-layout{display:grid;grid-template-columns:1fr 380px;gap:var(--sp-xl);padding:var(--sp-xl) 0}
-    .main-img{width:100%;height:420px;object-fit:cover;border-radius:var(--r-xl)}
+    .detail-layout{display:grid;grid-template-columns:1fr 400px;gap:var(--sp-2xl);padding:var(--sp-2xl) 0}
+    .main-img{width:100%;height:480px;object-fit:cover;border-radius:var(--r-xl);box-shadow:var(--shadow-md)}
     .tags{display:flex;gap:var(--sp-sm);flex-wrap:wrap;margin:var(--sp-md) 0}
-    .tag{background:var(--gold-faint);color:var(--gold-dark);border:1px solid rgba(191,167,162,.25);padding:4px 14px;border-radius:var(--r-full);font-size:.8rem;font-weight:600}
-    .booking-card{background:white;border-radius:var(--r-xl);box-shadow:var(--shadow-md);padding:var(--sp-xl);position:sticky;top:calc(var(--nav-h) + var(--sp-lg));border:1px solid rgba(191,167,162,.1)}
+    .tag{background:var(--gold-faint);color:var(--gold-dark);border:1px solid rgba(212,175,55,.2);padding:6px 16px;border-radius:var(--r-full);font-size:.8rem;font-weight:700}
+    .booking-card{background:rgba(255,255,255,.8);backdrop-filter:blur(24px);border-radius:var(--r-xl);box-shadow:var(--shadow-lg);padding:var(--sp-xl);position:sticky;top:calc(var(--nav-h) + var(--sp-lg));border:1px solid rgba(255,255,255,.6)}
     .provider-card{background:var(--cream-dark);border-radius:var(--r-lg);padding:var(--sp-lg);display:flex;align-items:center;gap:var(--sp-md);margin-bottom:var(--sp-xl)}
     .reviews-section{margin-top:var(--sp-xl)}
     .review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md);margin-top:var(--sp-lg)}
@@ -40,7 +41,9 @@
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
+    AOS.init({duration:800, once:true});
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
       UI.renderFooter('footer-container');
@@ -58,7 +61,7 @@
       try { isFav = await API.favorites.check(id); } catch(_) {}
 
       document.getElementById('detail-content').innerHTML = `
-        <div>
+        <div data-aos="fade-right">
           <img class="main-img animate-fadeIn" src="${svc.image.startsWith('http') ? svc.image : rootPath() + svc.image}" alt="${svc.name}">
           <div style="margin-top:var(--sp-lg)">
             <span style="font-size:.8rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(svc.category)} ${UI.categoryLabel(svc.category)}</span>
@@ -98,7 +101,7 @@
         </div>
 
         <!-- Booking Card -->
-        <div>
+        <div data-aos="fade-left" data-aos-delay="100">
           <div class="booking-card animate-fadeInRight">
             <h3 style="margin-bottom:var(--sp-md);color:var(--gold)">Thông Tin Đặt Dịch Vụ</h3>
             <div class="form-group">
