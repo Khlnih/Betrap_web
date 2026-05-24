@@ -747,7 +747,7 @@
           </div>
           <div class="service-card-body">
             <div class="service-card-title">${s.name}</div>
-            <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location}</div>
+            <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location} · ${s.providerName || API.svc.getProviderName(s.providerId)}</div>
             <div class="stars">${UI.stars(s.rating)}</div>
             <div class="service-card-footer">
               <div class="service-card-price">${UI.formatCurrency(s.price)}<span style="font-size:.7em;font-weight:400;color:var(--text-muted)">/${s.unit}</span></div>
