@@ -122,7 +122,10 @@
       <div style="flex:1;padding:40px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center">
         <h2 id="bd-name" style="font-family:var(--font-h);color:var(--text-dark);font-size:2rem;line-height:1.2;margin-bottom:20px"></h2>
         <div id="bd-desc" style="font-size:1.05rem;line-height:1.7;color:var(--text-muted);margin-bottom:40px"></div>
-        <button id="bd-book-btn" class="btn btn-primary btn-block" style="padding:16px;font-size:1.1rem">Đặt dịch vụ ngay</button>
+        <div style="display:flex;gap:16px;margin-top:auto">
+          <button id="bd-consult-btn" class="btn btn-outline" style="flex:1;padding:16px;font-size:1.1rem;color:var(--gold);border-color:var(--gold)"><i class="ri-customer-service-2-line"></i> Tư vấn</button>
+          <button id="bd-book-btn" class="btn btn-primary" style="flex:1;padding:16px;font-size:1.1rem"><i class="ri-calendar-check-line"></i> Đăng ký</button>
+        </div>
       </div>
     </div>
   </div>
@@ -321,6 +324,7 @@
       document.getElementById('bd-name').textContent = svc.name;
       document.getElementById('bd-desc').innerHTML = svc.description.replace(/\n/g, '<br>');
       document.getElementById('bd-book-btn').onclick = () => { closeBetrapDetail(); openQuickBook(id); };
+      document.getElementById('bd-consult-btn').onclick = () => { closeBetrapDetail(); showConsultModal(id); };
       
       const el = document.getElementById('betrap-detail-modal');
       el.style.opacity = '1'; el.style.pointerEvents = 'auto';
@@ -346,6 +350,60 @@
       const el = document.getElementById('betrap-book-modal');
       el.style.opacity = '0'; el.style.pointerEvents = 'none';
       el.firstElementChild.style.transform = 'translateY(20px)';
+    }
+
+    function showConsultModal(serviceId) {
+      const sess = API.auth.currentSession();
+      if (!sess) { UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đăng ký tư vấn.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' }); return; }
+      if (!sess.phone) { 
+        UI.modal({ 
+          title: 'Yêu Cầu Số Điện Thoại', 
+          body: 'Tính năng này yêu cầu bạn phải có số điện thoại. Vui lòng vào Cài đặt (Dashboard) để cập nhật số điện thoại trước khi đăng ký tư vấn!', 
+          confirmText: 'Đi tới Cập nhật', 
+          onConfirm: () => { location.href = 'dashboard.html'; return true; } 
+        }); 
+        return; 
+      }
+
+      const body = `
+        <div class="form-group" style="text-align:left">
+          <label class="form-label">Ngày muốn tư vấn</label>
+          <input type="date" id="consult-date" class="form-control" min="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group" style="text-align:left">
+          <label class="form-label">Giờ hẹn</label>
+          <input type="time" id="consult-time" class="form-control" value="09:00">
+        </div>
+        <div class="form-group" style="text-align:left">
+          <label class="form-label">Địa chỉ (hoặc Phương thức)</label>
+          <input type="text" id="consult-address" class="form-control" placeholder="Gặp trực tiếp, hoặc Qua điện thoại/Zalo...">
+        </div>
+        <div class="form-group" style="text-align:left">
+          <label class="form-label">Câu hỏi/Ghi chú thêm</label>
+          <textarea id="consult-note" class="form-control" rows="3" placeholder="Ví dụ: Tôi muốn hỏi thêm về các gói dịch vụ..."></textarea>
+        </div>
+      `;
+      UI.modal({
+        title: 'Đăng Ký Tư Vấn',
+        body: body,
+        confirmText: 'Gửi yêu cầu',
+        onConfirm: async () => {
+          const date = document.getElementById('consult-date').value;
+          const time = document.getElementById('consult-time').value;
+          const address = document.getElementById('consult-address').value;
+          const note = document.getElementById('consult-note').value;
+          if (!date || !address) { UI.toast('Vui lòng nhập đầy đủ ngày và địa chỉ/phương thức', 'error'); return false; }
+
+          try {
+            await API.consultation.create({ serviceId, date, time, address, note });
+            UI.toast('Đã gửi yêu cầu tư vấn thành công!', 'success');
+            return true;
+          } catch(e) {
+            UI.toast(e.message || 'Lỗi khi gửi yêu cầu', 'error');
+            return false;
+          }
+        }
+      });
     }
 
     function resetFilters() {
