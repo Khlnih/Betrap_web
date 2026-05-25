@@ -131,14 +131,28 @@
   <div id="betrap-book-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
     <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:400px;position:relative;transform:translateY(20px);transition:transform .3s ease;">
       <button onclick="closeQuickBook()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
-      <h3 style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:20px;color:var(--text-dark)">Chọn Ngày Giờ</h3>
-      <div class="form-group" style="margin-bottom:16px">
-        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Ngày diễn ra</label>
-        <input type="date" id="qb-date" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
-      </div>
-      <div class="form-group" style="margin-bottom:24px">
-        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Giờ chuẩn bị</label>
-        <input type="time" id="qb-time" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+      <h3 style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:20px;color:var(--text-dark)">Thông Tin Đặt Lịch</h3>
+      <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-bottom: 20px;">
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Ngày diễn ra</label>
+          <input type="date" id="qb-date" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Giờ chuẩn bị</label>
+          <input type="time" id="qb-time" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Số lượng (Tuỳ chọn)</label>
+          <input type="text" id="qb-quantity" class="form-control" placeholder="Ví dụ: 7 bộ, 7 người..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Địa chỉ tổ chức</label>
+          <input type="text" id="qb-address" class="form-control" placeholder="Số nhà, tên đường..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Ghi chú thêm</label>
+          <textarea id="qb-note" class="form-control" rows="2" placeholder="Yêu cầu đặc biệt..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px"></textarea>
+        </div>
       </div>
       <button id="qb-submit" class="btn btn-primary btn-block" style="padding:12px">Tiếp tục thanh toán</button>
     </div>
@@ -188,13 +202,30 @@
 
       applyFilters();
 
-      document.getElementById('qb-submit').addEventListener('click', () => {
+      document.getElementById('qb-submit').addEventListener('click', async () => {
+        const sess = API.auth.currentSession();
+        if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
+        
         const date = document.getElementById('qb-date').value;
         const time = document.getElementById('qb-time').value;
-        if (!date || !time) return UI.toast('Vui lòng chọn ngày và giờ', 'error');
-        sessionStorage.setItem('qb_date', date);
-        sessionStorage.setItem('qb_time', time);
-        location.href = `checkout.html?id=${activeBookId}`;
+        const address = document.getElementById('qb-address').value;
+        if (!date || !time || !address) return UI.toast('Vui lòng điền ngày, giờ và địa chỉ', 'error');
+        
+        const qty = document.getElementById('qb-quantity').value;
+        let note = document.getElementById('qb-note').value;
+        if (qty) {
+          note = note ? `Số lượng: ${qty} - ${note}` : `Số lượng: ${qty}`;
+        }
+        
+        const btn = document.getElementById('qb-submit');
+        btn.disabled = true; btn.textContent = 'Đang xử lý...';
+        try {
+          const txn = await API.txn.create({ serviceId: activeBookId, date, time, address, note });
+          location.href = `checkout.html?id=${txn.id}`;
+        } catch (e) {
+          UI.toast(e.message, 'error');
+          btn.disabled = false; btn.textContent = 'Tiếp tục thanh toán';
+        }
       });
     });
 
@@ -249,7 +280,7 @@
         return;
       }
       grid.innerHTML = svcs.map(s => {
-        if (s.category === 'be-trap') {
+        if (s.category === 'be-trap' || s.category === 'ao-dai') {
           return `
             <div class="service-card">
               <div style="overflow:hidden;height:240px">
@@ -304,6 +335,9 @@
     let activeBookId = null;
     function openQuickBook(id) {
       activeBookId = id;
+      const sess = API.auth.currentSession();
+      if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
+      
       const el = document.getElementById('betrap-book-modal');
       el.style.opacity = '1'; el.style.pointerEvents = 'auto';
       el.firstElementChild.style.transform = 'translateY(0)';
