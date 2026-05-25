@@ -56,6 +56,8 @@
       document.title = svc.name + ' — BêTráp';
       const reviews = await API.review.getByService(id);
 
+      const unit = (svc.category === 'ao-dai' || svc.category === 'lam-trap') ? 'bộ' : 'người';
+
       // Check wishlist state (non-blocking)
       let isFav = false;
       try { isFav = await API.favorites.check(id); } catch(_) {}
@@ -108,12 +110,12 @@
               <label class="form-label">Số lượng (Tuỳ chọn)</label>
               <select id="book-quantity" class="form-control">
                 <option value="">-- Theo mặc định dịch vụ --</option>
-                <option value="1">1 người</option>
-                <option value="3">3 người</option>
-                <option value="5">5 người</option>
-                <option value="7">7 người</option>
-                <option value="9">9 người</option>
-                <option value="11">11 người</option>
+                <option value="1">1 ${unit}</option>
+                <option value="3">3 ${unit}</option>
+                <option value="5">5 ${unit}</option>
+                <option value="7">7 ${unit}</option>
+                <option value="9">9 ${unit}</option>
+                <option value="11">11 ${unit}</option>
                 <option value="other">Số lượng khác (Ghi chú thêm)</option>
               </select>
             </div>
@@ -150,9 +152,11 @@
       if (!date || !address) { UI.toast('Vui lòng điền ngày và địa chỉ!', 'error'); return; }
       
       let note = document.getElementById('book-note').value.trim();
-      const qty = document.getElementById('book-quantity').value;
+      const qtySelect = document.getElementById('book-quantity');
+      const qty = qtySelect.value;
       if (qty) {
-        const prefix = 'Số lượng: ' + (qty === 'other' ? 'Khác' : qty + ' người');
+        const qtyText = qtySelect.options[qtySelect.selectedIndex].text;
+        const prefix = 'Số lượng: ' + (qty === 'other' ? 'Khác' : qtyText);
         note = note ? prefix + ' - ' + note : prefix;
       }
       
