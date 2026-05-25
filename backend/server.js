@@ -135,10 +135,10 @@ app.get('/api/services', async (req, res) => {
         let query = `SELECT s.*, u.Name AS ProviderName FROM Services s
                      LEFT JOIN Users u ON s.ProviderId = u.Id
                      WHERE 1=1`;
-        if (!all) query += ` AND s.Active = 1`;
+        if (!all) query += ` AND s.Active = true`;
         if (category) query += ` AND s.Category = '${category.replace(/'/g,"''")}'`;
-        if (location) query += ` AND s.Location LIKE N'%${location.replace(/'/g,"''").replace(/[%_]/g,'')}%'`;
-        if (search)   query += ` AND (s.Name LIKE N'%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%' OR s.Description LIKE N'%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%')`;
+        if (location) query += ` AND s.Location LIKE '%${location.replace(/'/g,"''").replace(/[%_]/g,'')}%'`;
+        if (search)   query += ` AND (s.Name LIKE '%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%' OR s.Description LIKE '%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%')`;
         if (maxPrice) query += ` AND s.Price <= ${parseInt(maxPrice) || 0}`;
         if (sort === 'price_asc')  query += ' ORDER BY s.Price ASC';
         else if (sort === 'price_desc') query += ' ORDER BY s.Price DESC';
@@ -260,7 +260,7 @@ app.delete('/api/services/:id', authMiddleware, providerOnly, async (req, res) =
         const check = await sql.query`SELECT ProviderId FROM Services WHERE Id = ${req.params.id}`;
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
         if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
-        await sql.query`UPDATE Services SET Active=0, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
+        await sql.query`UPDATE Services SET Active=false, UpdatedAt=CURRENT_TIMESTAMP WHERE Id=${req.params.id}`;
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -396,7 +396,7 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
     if (selectedDate < today) return res.status(400).json({ error: 'Ngày tổ chức phải từ hôm nay trở đi.' });
     if (!address || address.length < 10) return res.status(400).json({ error: 'Vui lòng nhập địa chỉ cụ thể (tối thiểu 10 ký tự).' });
     try {
-        const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=1`;
+        const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=true`;
         if (!svcRes.recordset.length) return res.status(404).json({ error: 'Dịch vụ không tồn tại.' });
         const svc = svcRes.recordset[0];
         const id = 'TXN_' + uid().toUpperCase();
@@ -612,7 +612,7 @@ app.get('/api/stats/provider', authMiddleware, providerOnly, async (req, res) =>
                 COUNT(*) AS Orders
                 FROM Transactions WHERE ProviderId=${uid}
                 GROUP BY FORMAT(CreatedAt,'yyyy-MM') ORDER BY Month DESC`,
-            sql.query`SELECT COUNT(*) AS Total FROM Services WHERE ProviderId=${uid} AND Active=1`
+            sql.query`SELECT COUNT(*) AS Total FROM Services WHERE ProviderId=${uid} AND Active=true`
         ]);
         const s = orders.recordset[0];
         res.json({
@@ -707,7 +707,7 @@ app.get('/api/favorites', authMiddleware, async (req, res) => {
             SELECT s.*, u.Name AS ProviderName FROM Favorites f
             JOIN Services s ON s.Id=f.ServiceId
             LEFT JOIN Users u ON u.Id=s.ProviderId
-            WHERE f.UserId=${req.user.userId} AND s.Active=1 ORDER BY f.CreatedAt DESC`;
+            WHERE f.UserId=${req.user.userId} AND s.Active=true ORDER BY f.CreatedAt DESC`;
         res.json(result.recordset.map(s => ({
             id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
             category: s.Category, name: s.Name, description: s.Description,
@@ -756,7 +756,7 @@ app.post('/api/consultations', authMiddleware, async (req, res) => {
         let sId = null;
         
         if (serviceId) {
-            const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=1`;
+            const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=true`;
             if (!svcRes.recordset.length) return res.status(404).json({ error: 'Dịch vụ không tồn tại.' });
             const svc = svcRes.recordset[0];
             providerId = svc.ProviderId;
