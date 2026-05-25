@@ -124,6 +124,38 @@ app.get('/api/setup-db', async (req, res) => {
     }
 });
 
+// ── Seed New Endpoint ──────────────────────────────────────────────────────────
+app.get('/api/seed-new', async (req, res) => {
+    try {
+        await pool.query("DELETE FROM Services WHERE Category = 'be-trap'");
+        const newServices = [
+            { id: 'be1', providerId: 'p1', name: 'Bộ 1 - Hồng Nhạt Thanh Khiết', desc: 'Nam: Áo dài tay cổ đứng màu hồng nhạt trơn, chất liệu lụa satin. Nữ: Áo dài tay rộng màu hồng nhạt, thân áo có hoa văn chìm, phần ngực trang trí hoa 3D đỏ nổi bật. Đặc điểm nổi bật: Phong cách thanh lịch, dịu dàng', img: 'https://i.imgur.com/uLvQP.jpg' },
+            { id: 'be2', providerId: 'p2', name: 'Bộ 2 - Hồng Cam Lấp Lánh', desc: 'Nam: Áo dài tay cổ đứng màu hồng nhạt trơn, chất liệu lụa satin, áo hồng nhạt. Nữ: Áo màu hồng cam ánh kim (shimmer), họa tiết hoa chìm tinh tế, viền cổ trang trí tua rua. Đặc điểm nổi bật: Áo nữ có độ óng ánh đẹp dưới nắng, sang trọng và hiện đại.', img: 'https://i.imgur.com/F19vC.jpg' },
+            { id: 'be3', providerId: 'p3', name: 'Bộ 3 - Hồng Phấn Hoa Văn', desc: 'Nam: Áo hồng nhạt. Nữ: Áo hồng nhạt họa tiết hoa lớn nổi, cổ cao đính ngọc trai/đá, tay rộng. Đặc điểm nổi bật: Họa tiết nổi bật hơn, mang cảm giác quý phái, cổ điển.', img: 'https://i.imgur.com/ihBST.jpg' },
+            { id: 'be4', providerId: 'p1', name: 'Bộ 4 - Ngà Kem Truyền Thống', desc: 'Nam & Nữ: Cùng tone kem ngà (ivory), chất liệu satin bóng nhẹ. Nữ: Áo có họa tiết hoa chìm, cầm hoa sen vàng. Đặc điểm nổi bật: Sang trọng, tinh khiết, rất hợp chụp ảnh cưới hoặc lễ trọng.', img: 'https://i.imgur.com/MJUzT.jpg' },
+            { id: 'be5', providerId: 'p2', name: 'Bộ 5 - Trắng Đỏ Kiêu Sa', desc: 'Nam: Kem ngà. Nữ: Áo trắng trong suốt nhẹ, viền cổ đỏ, buộc nơ đỏ, mặc cùng quần đỏ. Đặc điểm nổi bật: Phong cách hiện đại, nổi bật nhờ điểm nhấn đỏ, trẻ trung và cá tính.', img: 'https://i.imgur.com/UFDcv.jpg' },
+            { id: 'be6', providerId: 'p3', name: 'Bộ 6 - Ngà Voan Mỏng', desc: 'Nam: Kem ngà. Nữ: Áo voan kem mỏng nhẹ, lớp trong, cầm hoa vàng. Đặc điểm nổi bật: Rất nhẹ nhàng, bay bổng, phù hợp phong cách nhẹ nhàng, thơ mộng.', img: 'https://i.imgur.com/wDXbI.jpg' },
+            { id: 'be7', providerId: 'p1', name: 'Bộ 7 - Trắng Đỏ May Mắn', desc: 'Nam: Kem ngà. Nữ: Áo trắng viền đỏ, quần đỏ, đầu đội bờm đỏ. Đặc điểm nổi bật: Mang đậm màu sắc truyền thống, tượng trưng cho may mắn, hạnh phúc.', img: 'https://i.imgur.com/s3CFq.jpg' },
+            { id: 'be8', providerId: 'p2', name: 'Bộ 8 - Xanh Olive Thanh Bình', desc: 'Nam: Xanh olive nhạt. Nữ: Xanh lá nhạt thêu hoa nhỏ, tay voan, cầm hoa trắng-vàng. Đặc điểm nổi bật: Tone màu mát mẻ, tươi mới', img: 'https://i.imgur.com/Zn8W6.jpg' },
+            { id: 'be9', providerId: 'p3', name: 'Bộ 9 - Hồng Sen Đỏ', desc: 'Nam: Hồng nhạt. Nữ: Áo hồng nhạt họa tiết, mặc quần đỏ. Đặc điểm nổi bật: Kết hợp hồng - đỏ hài hòa, sang trọng và rực rỡ.', img: 'https://i.imgur.com/gngKs.jpg' },
+            { id: 'be10', providerId: 'p1', name: 'Bộ 10 - Hồng Gradient', desc: 'Nam: Hồng nhạt. Nữ: Áo hồng gradient (phần trên đậm, dưới nhạt chuyển sang xanh ngọc), họa tiết óng ánh. Đặc điểm nổi bật: Thiết kế hiện đại, gradient độc đáo, cực kỳ bắt mắt.', img: 'https://i.imgur.com/tvhhB.jpg' }
+        ];
+        for (const s of newServices) {
+            const price = 1500000 + Math.floor(Math.random() * 2000000);
+            const rating = (4.5 + Math.random() * 0.5).toFixed(1);
+            const reviews = 10 + Math.floor(Math.random() * 40);
+            await pool.query(`
+                INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Rating, ReviewCount, Tags)
+                VALUES ($1, $2, 'be-trap', $3, $4, $5, 'buổi', $6, 'Hà Nội', $7, $8, '[]')
+            `, [s.id, s.providerId, s.name, s.desc, price, s.img, rating, reviews]);
+        }
+        res.send('✅ Đã cập nhật 10 bộ Bê Tráp mới thành công!');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('❌ Error: ' + err.message);
+    }
+});
+
 // ── Auth Middleware ──────────────────────────────────────────────────────────
 function authMiddleware(req, res, next) {
     const header = req.headers.authorization;
