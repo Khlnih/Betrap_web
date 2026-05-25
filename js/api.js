@@ -7,7 +7,7 @@
 const API = (() => {
 
   // ── Cấu hình (thay đổi URL khi deploy) ───────────────────────────────────
-  const BASE_URL = 'http://localhost:3000/api';
+  const BASE_URL = 'https://khnilh-001-site1.mtempurl.com/api';
 
   // ── Token helpers ─────────────────────────────────────────────────────────
   const getToken  = ()      => localStorage.getItem('bt_token');
