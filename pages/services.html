@@ -112,6 +112,38 @@
     </div>
   </div>
 
+  <!-- Modal Chi Tiết Bê Tráp -->
+  <div id="betrap-detail-modal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
+    <div style="background:#fff;border-radius:24px;width:100%;max-width:900px;height:80vh;display:flex;overflow:hidden;position:relative;transform:scale(0.95);transition:transform .3s ease;">
+      <button onclick="closeBetrapDetail()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.8);border:none;width:40px;height:40px;border-radius:50%;font-size:1.5rem;color:var(--text-dark);cursor:pointer;z-index:10;"><i class="ri-close-line"></i></button>
+      <div style="flex:1.2;background:#f5f5f5">
+        <img id="bd-img" src="" style="width:100%;height:100%;object-fit:cover">
+      </div>
+      <div style="flex:1;padding:40px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center">
+        <h2 id="bd-name" style="font-family:var(--font-h);color:var(--text-dark);font-size:2rem;line-height:1.2;margin-bottom:20px"></h2>
+        <div id="bd-desc" style="font-size:1.05rem;line-height:1.7;color:var(--text-muted);margin-bottom:40px"></div>
+        <button id="bd-book-btn" class="btn btn-primary btn-block" style="padding:16px;font-size:1.1rem">Đặt dịch vụ ngay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Đặt Nhanh -->
+  <div id="betrap-book-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
+    <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:400px;position:relative;transform:translateY(20px);transition:transform .3s ease;">
+      <button onclick="closeQuickBook()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
+      <h3 style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:20px;color:var(--text-dark)">Chọn Ngày Giờ</h3>
+      <div class="form-group" style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Ngày diễn ra</label>
+        <input type="date" id="qb-date" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+      </div>
+      <div class="form-group" style="margin-bottom:24px">
+        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Giờ chuẩn bị</label>
+        <input type="time" id="qb-time" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+      </div>
+      <button id="qb-submit" class="btn btn-primary btn-block" style="padding:12px">Tiếp tục thanh toán</button>
+    </div>
+  </div>
+
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
@@ -155,9 +187,19 @@
       document.getElementById('search-input').addEventListener('input', debounce(applyFilters, 400));
 
       applyFilters();
+
+      document.getElementById('qb-submit').addEventListener('click', () => {
+        const date = document.getElementById('qb-date').value;
+        const time = document.getElementById('qb-time').value;
+        if (!date || !time) return UI.toast('Vui lòng chọn ngày và giờ', 'error');
+        sessionStorage.setItem('qb_date', date);
+        sessionStorage.setItem('qb_time', time);
+        location.href = `checkout.html?id=${activeBookId}`;
+      });
     });
 
     let lastCat = null;
+    let currentSvcs = [];
 
     async function applyFilters() {
       const cat      = document.querySelector('input[name="cat"]:checked')?.value || '';
@@ -168,6 +210,7 @@
       showCategoryModal(cat);
 
       const svcs = await API.svc.getAll({ category:cat, location, sort, search });
+      currentSvcs = svcs;
       renderServices(svcs);
     }
 
@@ -205,21 +248,70 @@
           </div>`;
         return;
       }
-      grid.innerHTML = svcs.map(s => `
-        <a href="service-detail.html?id=${s.id}" class="service-card">
-          <div style="overflow:hidden;height:200px">
-            <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease">
-          </div>
-          <div class="service-card-body">
-            <span style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(s.category)} ${UI.categoryLabel(s.category)}</span>
-            <div class="service-card-title mt-xs">${s.name}</div>
-            <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location} · ${s.providerName || API.svc.getProviderName(s.providerId)}</div>
-            <div class="stars">${UI.stars(s.rating)} <span style="font-size:.75rem;color:var(--text-muted)">(${s.reviewCount})</span></div>
-            <div class="service-card-footer">
-              <span class="btn btn-primary btn-sm">Xem chi tiết</span>
-            </div>
-          </div>
-        </a>`).join('');
+      grid.innerHTML = svcs.map(s => {
+        if (s.category === 'be-trap') {
+          return `
+            <div class="service-card">
+              <div style="overflow:hidden;height:240px">
+                <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease">
+              </div>
+              <div class="service-card-body" style="text-align:center;padding:24px">
+                <div class="service-card-title mt-xs" style="font-size:1.15rem;margin-bottom:20px">${s.name}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <button class="btn btn-ghost" onclick="openBetrapDetail('${s.id}')" style="padding:10px;font-size:.9rem">Xem chi tiết</button>
+                  <button class="btn btn-primary" onclick="openQuickBook('${s.id}')" style="padding:10px;font-size:.9rem">Đặt ngay</button>
+                </div>
+              </div>
+            </div>`;
+        } else {
+          return `
+            <a href="service-detail.html?id=${s.id}" class="service-card">
+              <div style="overflow:hidden;height:200px">
+                <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease">
+              </div>
+              <div class="service-card-body">
+                <span style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(s.category)} ${UI.categoryLabel(s.category)}</span>
+                <div class="service-card-title mt-xs">${s.name}</div>
+                <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location} · ${s.providerName || API.svc.getProviderName(s.providerId)}</div>
+                <div class="stars">${UI.stars(s.rating)} <span style="font-size:.75rem;color:var(--text-muted)">(${s.reviewCount})</span></div>
+                <div class="service-card-footer">
+                  <span class="btn btn-primary btn-sm">Xem chi tiết</span>
+                </div>
+              </div>
+            </a>`;
+        }
+      }).join('');
+    }
+
+    function openBetrapDetail(id) {
+      const svc = currentSvcs.find(s => s.id === id);
+      if (!svc) return;
+      document.getElementById('bd-img').src = svc.image.startsWith('http') ? svc.image : rootPath() + svc.image;
+      document.getElementById('bd-name').textContent = svc.name;
+      document.getElementById('bd-desc').innerHTML = svc.description.replace(/\n/g, '<br>');
+      document.getElementById('bd-book-btn').onclick = () => { closeBetrapDetail(); openQuickBook(id); };
+      
+      const el = document.getElementById('betrap-detail-modal');
+      el.style.opacity = '1'; el.style.pointerEvents = 'auto';
+      el.firstElementChild.style.transform = 'scale(1)';
+    }
+    function closeBetrapDetail() {
+      const el = document.getElementById('betrap-detail-modal');
+      el.style.opacity = '0'; el.style.pointerEvents = 'none';
+      el.firstElementChild.style.transform = 'scale(0.95)';
+    }
+
+    let activeBookId = null;
+    function openQuickBook(id) {
+      activeBookId = id;
+      const el = document.getElementById('betrap-book-modal');
+      el.style.opacity = '1'; el.style.pointerEvents = 'auto';
+      el.firstElementChild.style.transform = 'translateY(0)';
+    }
+    function closeQuickBook() {
+      const el = document.getElementById('betrap-book-modal');
+      el.style.opacity = '0'; el.style.pointerEvents = 'none';
+      el.firstElementChild.style.transform = 'translateY(20px)';
     }
 
     function resetFilters() {
