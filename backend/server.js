@@ -54,7 +54,16 @@ const sql = {
         if (typeof strings === 'string') {
             let q = strings.replace(/GETDATE\(\)/g, 'CURRENT_TIMESTAMP');
             const res = await pool.query(q);
-            return { recordset: res.rows };
+            const proxiedRows = res.rows.map(row => new Proxy(row, {
+                get(target, prop) {
+                    if (typeof prop === 'string') {
+                        const lowerProp = prop.toLowerCase();
+                        if (lowerProp in target) return target[lowerProp];
+                    }
+                    return Reflect.get(target, prop);
+                }
+            }));
+            return { recordset: proxiedRows };
         }
         
         let text = '';
@@ -79,7 +88,16 @@ const sql = {
         
         try {
             const res = await pool.query(text, values);
-            return { recordset: res.rows };
+            const proxiedRows = res.rows.map(row => new Proxy(row, {
+                get(target, prop) {
+                    if (typeof prop === 'string') {
+                        const lowerProp = prop.toLowerCase();
+                        if (lowerProp in target) return target[lowerProp];
+                    }
+                    return Reflect.get(target, prop);
+                }
+            }));
+            return { recordset: proxiedRows };
         } catch (e) {
             console.error("SQL Error:", text, values, e.message);
             throw e;
