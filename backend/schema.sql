@@ -8,6 +8,16 @@
 -- USE BeTrapDB;
 -- GO
 
+DROP TABLE IF EXISTS Messages CASCADE;
+DROP TABLE IF EXISTS Conversations CASCADE;
+DROP TABLE IF EXISTS Reviews CASCADE;
+DROP TABLE IF EXISTS Transactions CASCADE;
+DROP TABLE IF EXISTS Favorites CASCADE;
+DROP TABLE IF EXISTS Services CASCADE;
+DROP TABLE IF EXISTS CustomerProfiles CASCADE;
+DROP TABLE IF EXISTS ProviderProfiles CASCADE;
+DROP TABLE IF EXISTS Users CASCADE;
+
 -- 1. Bảng Users
 CREATE TABLE Users (
     Id VARCHAR(50) PRIMARY KEY,
@@ -166,14 +176,16 @@ INSERT INTO CustomerProfiles (UserId, Location, WeddingDate) VALUES
 
 -- Seed Services
 INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Rating, ReviewCount, Tags) VALUES
-('s1', 'p1', 'be-trap', 'Gói Bê Tráp Tiêu Chuẩn (Nam)', 'Đội bê tráp 5 nam thanh lịch, trang phục áo dài truyền thống đỏ.', 1500000, 'buổi', 'assets/images/betrap-1.jpg', 'Hà Nội', 4.8, 24, '["5 người","Nam","Truyền thống"]'),
-('s2', 'p1', 'be-trap', 'Gói Bê Tráp Tiêu Chuẩn (Nữ)', 'Đội bê tráp 5 nữ xinh xắn, áo dài hồng pastel nhẹ nhàng.', 1500000, 'buổi', 'assets/images/betrap-2.jpg', 'Hà Nội', 4.7, 18, '["5 người","Nữ"]'),
-('s3', 'p2', 'be-trap', 'Gói Bê Tráp Áo Dài Đỏ', 'Đội hình 7 người, áo dài đỏ rực rỡ mang lại may mắn cho ngày cưới.', 2100000, 'buổi', 'assets/images/betrap-4.jpg', 'Hà Nội', 4.9, 35, '["7 người","Áo dài đỏ"]'),
-('s4', 'p2', 'be-trap', 'Gói Bê Tráp Áo Dài Vàng', 'Đội hình 7 người, trang phục áo dài vàng kim sang trọng.', 2200000, 'buổi', 'assets/images/betrap-5.jpg', 'Hà Nội', 4.8, 21, '["7 người","Áo dài vàng"]'),
-('s5', 'p1', 'be-trap', 'Gói Bê Tráp Cao Cấp (VIP)', 'Đội hình 9 người cao ráo, trang phục thiết kế riêng, chuyên nghiệp.', 3500000, 'buổi', 'assets/images/betrap-7.jpg', 'Hà Nội', 5.0, 42, '["9 người","VIP","Thiết kế"]'),
-('s6', 'p3', 'be-trap', 'Gói Bê Tráp Kèm Xe Hoa', 'Đội bê tráp 5 người kèm dịch vụ xe hoa sang trọng phục vụ đưa rước.', 5000000, 'ngày', 'assets/images/betrap-25.jpg', 'Hà Nội', 4.9, 12, '["5 người","Xe hoa"]'),
-('s7', 'p3', 'be-trap', 'Gói Bê Tráp Truyền Thống Xưa', 'Đội hình 7 người mặc áo tấc, khăn vấn đậm chất truyền thống Bắc Bộ.', 2800000, 'buổi', 'assets/images/betrap-12.jpg', 'Hà Nội', 4.8, 15, '["7 người","Áo tấc","Cổ điển"]'),
-('s8', 'p2', 'be-trap', 'Gói Bê Tráp Hiện Đại', 'Đội hình 9 người, trang phục suit và áo dài cách tân hiện đại.', 3200000, 'buổi', 'assets/images/betrap-22.jpg', 'Hà Nội', 4.6, 28, '["9 người","Hiện đại"]'),
+('bt1', 'p1', 'be-trap', 'Bộ 1 - Hồng Nhạt Thanh Khiết', 'Nam: Áo dài tay cổ đứng màu hồng nhạt trơn, chất liệu lụa satin. Nữ: Áo dài tay rộng màu hồng nhạt, thân áo có hoa văn chìm, phần ngực trang trí hoa 3D đỏ nổi bật.', 1500000, 'buổi', 'assets/images/betrap-1.jpg', 'Hà Nội', 4.9, 20, '["Hồng nhạt","Thanh khiết","Nam Nữ"]'),
+('bt2', 'p2', 'be-trap', 'Bộ 2 - Hồng Cam Lấp Lánh', 'Nam: Áo dài tay cổ đứng màu hồng nhạt trơn, lụa satin. Nữ: Áo màu hồng cam ánh kim, họa tiết hoa chìm tinh tế, viền cổ trang trí tua rua.', 1800000, 'buổi', 'assets/images/betrap-2.jpg', 'Hà Nội', 4.9, 20, '["Hồng cam","Lấp lánh","Sang trọng"]'),
+('bt3', 'p3', 'be-trap', 'Bộ 3 - Hồng Phấn Hoa Văn', 'Nam: Áo hồng nhạt. Nữ: Áo hồng nhạt họa tiết hoa lớn nổi, cổ cao đính ngọc trai/đá, tay rộng.', 1600000, 'buổi', 'assets/images/betrap-3.jpg', 'Hà Nội', 4.9, 20, '["Hồng phấn","Hoa văn","Quý phái"]'),
+('bt4', 'p1', 'be-trap', 'Bộ 4 - Ngà Kem Truyền Thống', 'Nam & Nữ: Cùng tone kem ngà, chất liệu satin bóng nhẹ. Nữ: Áo có họa tiết hoa chìm, cầm hoa sen vàng.', 2000000, 'buổi', 'assets/images/betrap-4.jpg', 'Hà Nội', 4.9, 20, '["Ngà kem","Truyền thống","Tinh khiết"]'),
+('bt5', 'p2', 'be-trap', 'Bộ 5 - Trắng Đỏ Kiêu Sa', 'Nam: Kem ngà. Nữ: Áo trắng trong suốt nhẹ, viền cổ đỏ, buộc nơ đỏ, mặc cùng quần đỏ.', 2200000, 'buổi', 'assets/images/betrap-5.jpg', 'Hà Nội', 4.9, 20, '["Trắng đỏ","Hiện đại","Cá tính"]'),
+('bt6', 'p3', 'be-trap', 'Bộ 6 - Ngà Voan Mỏng', 'Nam: Kem ngà. Nữ: Áo voan kem mỏng nhẹ, lớp trong, cầm hoa vàng.', 1700000, 'buổi', 'assets/images/betrap-6.jpg', 'Hà Nội', 4.9, 20, '["Ngà voan","Nhẹ nhàng","Thơ mộng"]'),
+('bt7', 'p1', 'be-trap', 'Bộ 7 - Trắng Đỏ May Mắn', 'Nam: Kem ngà. Nữ: Áo trắng viền đỏ, quần đỏ, đầu đội bờm đỏ.', 1900000, 'buổi', 'assets/images/betrap-7.jpg', 'Hà Nội', 4.9, 20, '["Trắng đỏ","May mắn","Truyền thống"]'),
+('bt8', 'p2', 'be-trap', 'Bộ 8 - Xanh Olive Thanh Bình', 'Nam: Xanh olive nhạt. Nữ: Xanh lá nhạt thêu hoa nhỏ, tay voan, cầm hoa trắng-vàng.', 1850000, 'buổi', 'assets/images/betrap-8.jpg', 'Hà Nội', 4.9, 20, '["Xanh olive","Mát mẻ","Tươi mới"]'),
+('bt9', 'p3', 'be-trap', 'Bộ 9 - Hồng Sen Đỏ', 'Nam: Hồng nhạt. Nữ: Áo hồng nhạt họa tiết, mặc quần đỏ.', 1650000, 'buổi', 'assets/images/betrap-9.jpg', 'Hà Nội', 4.9, 20, '["Hồng sen","Đỏ","Hài hòa"]'),
+('bt10', 'p1', 'be-trap', 'Bộ 10 - Hồng Gradient', 'Nam: Hồng nhạt. Nữ: Áo hồng gradient (phần trên đậm, dưới nhạt chuyển sang xanh ngọc), họa tiết óng ánh.', 2500000, 'buổi', 'assets/images/betrap-10.jpg', 'Hà Nội', 4.9, 20, '["Hồng gradient","Hiện đại","Bắt mắt"]'),
 ('s9', 'p2', 'ao-dai', 'Cho Thuê Áo Dài Cô Dâu Đỏ', 'Áo dài lụa tơ tằm cao cấp màu đỏ, thêu họa tiết hoa sen tinh xảo.', 800000, 'ngày', 'assets/images/aodai-1.jpg', 'Hà Nội', 4.9, 15, '["Cô dâu","Đỏ","Lụa"]'),
 ('s10', 'p2', 'ao-dai', 'Thuê Áo Dài Cặp Đôi (Đỏ)', 'Combo áo dài cặp cô dâu chú rể màu đỏ truyền thống.', 1500000, 'ngày', 'assets/images/aodai-2.jpg', 'Hà Nội', 4.8, 22, '["Cặp đôi","Đỏ"]'),
 ('s11', 'p2', 'ao-dai', 'Áo Dài Bê Tráp Nữ (Hồng)', 'Cho thuê theo dàn 5-7 bộ, áo dài hồng phấn nhẹ nhàng cho đội bê tráp.', 150000, 'bộ', 'assets/images/aodai-3.jpg', 'Hà Nội', 4.7, 45, '["Bê tráp","Hồng","Nữ"]'),
