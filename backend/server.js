@@ -781,4 +781,7 @@ function mapConsultation(c) {
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'BêTráp API v2.0 — Running ✅' }));
 
-app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
+}
+module.exports = app;
