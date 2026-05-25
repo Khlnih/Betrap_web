@@ -37,6 +37,10 @@ const upload = multer({
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
+const path = require('path');
+// Phục vụ các file tĩnh (Frontend) từ thư mục gốc
+app.use(express.static(path.join(__dirname, '../')));
+
 // ── Database ─────────────────────────────────────────────────────────────────
 const dbConfig = {
     user:     process.env.DB_USER     || 'sa',
