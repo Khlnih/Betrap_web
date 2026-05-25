@@ -38,12 +38,11 @@
   <div class="container page-content" style="padding-top:0">
     <!-- Mobile filter chips -->
     <div class="filter-bar" id="mobile-cats">
-      <button class="filter-chip active" data-cat="">Tất cả</button>
-      <button class="filter-chip" data-cat="be-trap">👰 Bê Tráp</button>
-      <button class="filter-chip" data-cat="ao-dai">👘 Áo Dài</button>
-      <button class="filter-chip" data-cat="lam-trap">🎁 Làm Tráp</button>
-      <button class="filter-chip" data-cat="media">📸 Media</button>
-      <button class="filter-chip" data-cat="makeup">💄 Make Up</button>
+      <button class="filter-chip" data-cat="be-trap">Bê Tráp</button>
+      <button class="filter-chip" data-cat="ao-dai">Áo Dài</button>
+      <button class="filter-chip" data-cat="lam-trap">Làm Tráp</button>
+      <button class="filter-chip" data-cat="media">Media</button>
+      <button class="filter-chip" data-cat="mc">MC Sự Kiện</button>
     </div>
 
     <div class="services-layout">
@@ -53,12 +52,11 @@
         <div class="filter-section">
           <div class="filter-title">Danh Mục</div>
           <div style="display:flex;flex-direction:column;gap:var(--sp-sm)">
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="" checked> Tất cả</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="be-trap"> 👰 Bê Tráp</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="ao-dai"> 👘 Áo Dài</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="lam-trap"> 🎁 Làm Tráp</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="media"> 📸 Media</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="makeup"> 💄 Make Up</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="be-trap" checked> Bê Tráp</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="ao-dai"> Áo Dài</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="lam-trap"> Làm Tráp</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="media"> Media</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="mc"> MC Sự Kiện</label>
           </div>
         </div>
         <div class="filter-section">
@@ -132,7 +130,7 @@
       };
 
       // Read URL param
-      const cat = new URLSearchParams(location.search).get('cat') || '';
+      const cat = new URLSearchParams(location.search).get('cat') || 'be-trap';
       if (cat) {
         const radio = document.querySelector(`input[name="cat"][value="${cat}"]`);
         if (radio) radio.checked = true;
@@ -225,7 +223,11 @@
     }
 
     function resetFilters() {
-      document.querySelector('input[name="cat"][value=""]').checked = true;
+      const defaultRadio = document.querySelector('input[name="cat"][value="be-trap"]');
+      if (defaultRadio) defaultRadio.checked = true;
+      document.querySelectorAll('[data-cat]').forEach(c=>c.classList.remove('active'));
+      const defaultChip = document.querySelector('[data-cat="be-trap"]');
+      if (defaultChip) defaultChip.classList.add('active');
       document.getElementById('location-filter').value = '';
       document.getElementById('search-input').value = '';
       applyFilters();
