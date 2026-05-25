@@ -329,9 +329,13 @@
       if (!svc) return;
       document.getElementById('bd-img').src = svc.image.startsWith('http') ? svc.image : rootPath() + svc.image;
       document.getElementById('bd-name').textContent = svc.name;
-      document.getElementById('bd-desc').innerHTML = svc.description.replace(/\n/g, '<br>');
+      let formattedDesc = svc.description.replace(/\n/g, '<br>');
+      formattedDesc = formattedDesc.replace(/(Nam:|Nữ:|Đặc điểm nổi bật:)/g, '<br><br><b style="color:var(--text-dark); font-size:1.1rem">$1</b>');
+      if (formattedDesc.startsWith('<br><br>')) formattedDesc = formattedDesc.substring(8);
+      document.getElementById('bd-desc').innerHTML = formattedDesc;
       document.getElementById('bd-book-btn').onclick = () => { closeBetrapDetail(); openQuickBook(id); };
-      document.getElementById('bd-consult-btn').onclick = () => { closeBetrapDetail(); showConsultModal(id); };
+      const consultBtn = document.getElementById('bd-consult-btn');
+      if (consultBtn) consultBtn.onclick = () => { closeBetrapDetail(); showConsultModal(id); };
       
       const el = document.getElementById('betrap-detail-modal');
       el.style.opacity = '1'; el.style.pointerEvents = 'auto';
