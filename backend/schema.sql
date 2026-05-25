@@ -149,10 +149,10 @@ CREATE TABLE Consultations (
 
 -- Seed Users
 INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Phone, Avatar, Verified) VALUES
-('p1', 'lan@betrap.vn', '123456', 'Lan Ngọc Wedding', 'provider', '0901234567', 'L', 1),
-('p2', 'thienphuc@betrap.vn', '123456', 'Áo Dài Thiên Phúc', 'provider', '0912345678', 'TP', 1),
-('p3', 'kimcuong@betrap.vn', '123456', 'Studio Kim Cương', 'provider', '0923456789', 'KC', 1),
-('c1', 'mai@gmail.com', '123456', 'Nguyễn Thị Mai', 'customer', '0934567890', 'NM', 0);
+('p1', 'lan@betrap.vn', '123456', 'Lan Ngọc Wedding', 'provider', '0901234567', 'L', true),
+('p2', 'thienphuc@betrap.vn', '123456', 'Áo Dài Thiên Phúc', 'provider', '0912345678', 'TP', true),
+('p3', 'kimcuong@betrap.vn', '123456', 'Studio Kim Cương', 'provider', '0923456789', 'KC', true),
+('c1', 'mai@gmail.com', '123456', 'Nguyễn Thị Mai', 'customer', '0934567890', 'NM', false);
 
 -- Seed ProviderProfiles
 INSERT INTO ProviderProfiles (UserId, Location, Bio, Bank) VALUES
