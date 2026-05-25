@@ -697,13 +697,23 @@ app.post('/api/consultations', authMiddleware, async (req, res) => {
     if (selectedDate < today) return res.status(400).json({ error: 'Ngày hẹn phải từ hôm nay trở đi.' });
     if (!address || address.length < 5) return res.status(400).json({ error: 'Vui lòng nhập địa chỉ cụ thể.' });
     try {
-        const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=1`;
-        if (!svcRes.recordset.length) return res.status(404).json({ error: 'Dịch vụ không tồn tại.' });
-        const svc = svcRes.recordset[0];
+        let providerId = null;
+        let svcName = 'Tư Vấn Chung';
+        let sId = null;
+        
+        if (serviceId) {
+            const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=1`;
+            if (!svcRes.recordset.length) return res.status(404).json({ error: 'Dịch vụ không tồn tại.' });
+            const svc = svcRes.recordset[0];
+            providerId = svc.ProviderId;
+            svcName = svc.Name;
+            sId = serviceId;
+        }
+        
         const id = 'CON_' + uid().toUpperCase();
         await sql.query`
             INSERT INTO Consultations (Id, CustomerId, ProviderId, ServiceId, ServiceName, Date, Time, Address, Note)
-            VALUES (${id}, ${req.user.userId}, ${svc.ProviderId}, ${serviceId}, ${svc.Name},
+            VALUES (${id}, ${req.user.userId}, ${providerId}, ${sId}, ${svcName},
                     ${date}, ${time}, ${address}, ${note||null})`;
         res.json({ id });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
