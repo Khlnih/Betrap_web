@@ -2,7 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors    = require('cors');
-const sql     = require('mssql');
+const { Pool } = require('pg');
 const bcrypt  = require('bcrypt');
 const jwt     = require('jsonwebtoken');
 const vnpay   = require('./vnpay');
@@ -42,19 +42,69 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../')));
 
 // ── Database ─────────────────────────────────────────────────────────────────
-const dbConfig = {
-    user:     process.env.DB_USER     || 'sa',
-    password: process.env.DB_PASSWORD || 'your_password',
-    server:   process.env.DB_SERVER   || 'localhost',
-    database: process.env.DB_NAME     || 'BeTrapDB',
-    options:  { encrypt: false, trustServerCertificate: true }
+const pool = new Pool({
+    connectionString: process.env.POSTGRES_URL,
+    // Vercel Postgres requires SSL
+    ssl: { rejectUnauthorized: false }
+});
+
+const sql = {
+    connect: async () => {}, // Mock for existing code
+    query: async function(strings, ...values) {
+        if (typeof strings === 'string') {
+            let q = strings.replace(/GETDATE\(\)/g, 'CURRENT_TIMESTAMP');
+            const res = await pool.query(q);
+            return { recordset: res.rows };
+        }
+        
+        let text = '';
+        for (let i = 0; i < strings.length; i++) {
+            text += strings[i];
+            if (i < values.length) {
+                text += `$${i + 1}`;
+            }
+        }
+        
+        text = text.replace(/GETDATE\(\)/g, 'CURRENT_TIMESTAMP');
+        text = text.replace(/ISNULL\(/g, 'COALESCE(');
+        
+        if (text.includes('OUTPUT INSERTED.')) {
+            const outputMatch = text.match(/OUTPUT INSERTED\.([a-zA-Z0-9_]+)/);
+            if (outputMatch) {
+                const col = outputMatch[1];
+                text = text.replace(/OUTPUT INSERTED\.[a-zA-Z0-9_]+\s+/g, '');
+                text = text + ` RETURNING ${col}`;
+            }
+        }
+        
+        try {
+            const res = await pool.query(text, values);
+            return { recordset: res.rows };
+        } catch (e) {
+            console.error("SQL Error:", text, values, e.message);
+            throw e;
+        }
+    }
 };
 
 async function connectDB() {
-    try   { await sql.connect(dbConfig); console.log('✅ Connected to SQL Server'); }
+    try   { await pool.query('SELECT 1'); console.log('✅ Connected to Vercel Postgres'); }
     catch (err) { console.error('❌ Database connection failed:', err.message); }
 }
 connectDB();
+
+// ── Setup Database Endpoint ────────────────────────────────────────────────────
+app.get('/api/setup-db', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+        await pool.query(schema);
+        res.send('✅ Database setup completed successfully!');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('❌ Error setting up database: ' + err.message);
+    }
+});
 
 // ── Auth Middleware ──────────────────────────────────────────────────────────
 function authMiddleware(req, res, next) {
