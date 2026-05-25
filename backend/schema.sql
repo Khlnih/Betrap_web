@@ -17,7 +17,7 @@ CREATE TABLE Users (
     Role VARCHAR(20) DEFAULT 'customer', -- 'customer' hoặc 'provider'
     Phone VARCHAR(20),
     Avatar VARCHAR(100),
-    Verified BOOLEAN DEFAULT 0,
+    Verified BOOLEAN DEFAULT false,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -48,7 +48,7 @@ CREATE TABLE Services (
     Unit VARCHAR(50),
     Image VARCHAR(500),
     Location VARCHAR(200),
-    Active BOOLEAN DEFAULT 1,
+    Active BOOLEAN DEFAULT true,
     Rating FLOAT DEFAULT 0,
     ReviewCount INT DEFAULT 0,
     Tags VARCHAR(200), -- Lưu dạng JSON array hoặc chuỗi cách phẩy
@@ -102,8 +102,8 @@ CREATE TABLE Messages (
     Id VARCHAR(50) PRIMARY KEY,
     ConversationId VARCHAR(50) NOT NULL REFERENCES Conversations(Id),
     SenderId VARCHAR(50) NOT NULL REFERENCES Users(Id),
-    Content VARCHAR(MAX) NOT NULL,
-    IsRead BOOLEAN DEFAULT 0,
+    Content TEXT NOT NULL,
+    IsRead BOOLEAN DEFAULT false,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
