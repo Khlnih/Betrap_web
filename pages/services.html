@@ -154,7 +154,7 @@
           <textarea id="qb-note" class="form-control" rows="2" placeholder="Yêu cầu đặc biệt..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px"></textarea>
         </div>
       </div>
-      <button id="qb-submit" class="btn btn-primary btn-block" style="padding:12px">Tiếp tục thanh toán</button>
+      <button id="qb-submit" class="btn btn-primary btn-block" style="padding:12px">Đăng ký</button>
     </div>
   </div>
 
@@ -224,7 +224,7 @@
           location.href = `checkout.html?id=${txn.id}`;
         } catch (e) {
           UI.toast(e.message, 'error');
-          btn.disabled = false; btn.textContent = 'Tiếp tục thanh toán';
+          btn.disabled = false; btn.textContent = 'Đăng ký';
         }
       });
     });
