@@ -9,7 +9,7 @@ const API = (() => {
   // ── Cấu hình (thay đổi URL khi deploy) ───────────────────────────────────
   const hostname = window.location.hostname;
   // Tự động nhận diện API (nếu chạy local thì gọi 3000, nếu trên mạng thì gọi /api)
-  const BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1') 
+  const BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') 
     ? 'http://localhost:3000/api' 
     : '/api';
 
