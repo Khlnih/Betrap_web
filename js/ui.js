@@ -37,9 +37,12 @@ const UI = (() => {
     const sess    = JSON.parse(localStorage.getItem('bt_session') || 'null');
     const root    = rootPath();
     const isLanding = !location.pathname.includes('/pages/');
-    const links = isLanding
-      ? `<a href="#services">Dịch vụ</a><a href="#about">Về chúng tôi</a><a href="#testimonials">Đánh giá</a><a href="#contact">Liên hệ</a>`
-      : `<a href="${root}index.html">Trang chủ</a><a href="${root}pages/services.html">Dịch vụ</a>`;
+    const links = `
+      <a href="${root}pages/services.html">Dịch vụ</a>
+      <a href="${root}index.html#about">Về chúng tôi</a>
+      <a href="${root}index.html#testimonials">Đánh giá</a>
+      <a href="${root}index.html#contact">Liên hệ</a>
+    `;
 
     const actions = sess
       ? `
