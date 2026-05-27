@@ -55,7 +55,7 @@ CREATE TABLE Services (
     ProviderId VARCHAR(50) NOT NULL REFERENCES Users(Id),
     Category VARCHAR(50) NOT NULL,
     Name VARCHAR(200) NOT NULL,
-    Description VARCHAR(1000),
+    Description TEXT,
     Price DECIMAL(18,0) NOT NULL,
     Unit VARCHAR(50),
     Image VARCHAR(500),

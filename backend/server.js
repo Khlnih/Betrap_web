@@ -957,6 +957,7 @@ app.use((err, req, res, next) => {
 
 // Auto-migration for Vercel
 sql.query(`ALTER TABLE Services ADD COLUMN Gallery VARCHAR(5000);`).catch(() => {});
+sql.query(`ALTER TABLE Services ALTER COLUMN Description TYPE TEXT;`).catch(() => {});
 
 if (require.main === module) {
     app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
