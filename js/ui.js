@@ -168,8 +168,16 @@ const UI = (() => {
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
   }
 
-  function closeModal() {
-    document.getElementById('modal-overlay')?.classList.remove('open');
+  function openModal(id) {
+    document.getElementById(id)?.classList.add('open');
+  }
+
+  function closeModal(id) {
+    if (id && typeof id === 'string') {
+      document.getElementById(id)?.classList.remove('open');
+    } else {
+      document.getElementById('modal-overlay')?.classList.remove('open');
+    }
   }
 
   // ─── LOADING ─────────────────────────────────────────────────────────────
@@ -352,7 +360,7 @@ const UI = (() => {
 
   return {
     initPage, renderNav, renderFooter, toggleDropdown, toggleMobile,
-    toast, modal, closeModal, showLoading, hideLoading,
+    toast, modal, openModal, closeModal, showLoading, hideLoading,
     formatCurrency, formatDate, formatDateTime, timeAgo,
     statusLabel, statusBadge, stars, categoryLabel, categoryIcon,
     animateCounter, launchConfetti, addRipple, skeleton, favBtn,
