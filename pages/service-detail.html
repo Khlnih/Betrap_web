@@ -63,12 +63,23 @@
       let isFav = false;
       try { isFav = await API.favorites.check(id); } catch(_) {}
 
-      const descLines = (svc.description || '').split('\\n');
-      const PAGE_SIZE = 8;
+      const fullText = svc.description || '';
+      const MAX_CHARS = 500; // Khoảng 8 dòng
       const descPages = [];
-      for (let i = 0; i < descLines.length; i += PAGE_SIZE) {
-        descPages.push(descLines.slice(i, i + PAGE_SIZE).join('<br>'));
+      let currentIdx = 0;
+      while (currentIdx < fullText.length) {
+        let endIdx = currentIdx + MAX_CHARS;
+        if (endIdx < fullText.length) {
+          // Cố gắng ngắt ở dấu cách hoặc xuống dòng để không bị đứt chữ
+          let spaceIdx = fullText.lastIndexOf(' ', endIdx);
+          let nlIdx = fullText.lastIndexOf('\\n', endIdx);
+          let breakIdx = Math.max(spaceIdx, nlIdx);
+          if (breakIdx > currentIdx) endIdx = breakIdx;
+        }
+        descPages.push(fullText.substring(currentIdx, endIdx).trim().replace(/\\n/g, '<br>'));
+        currentIdx = endIdx + 1;
       }
+      
       window.totalDescPages = descPages.length;
       let descHTML = '';
       if (descPages.length <= 1) {
