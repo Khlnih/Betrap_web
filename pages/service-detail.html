@@ -63,6 +63,29 @@
       let isFav = false;
       try { isFav = await API.favorites.check(id); } catch(_) {}
 
+      const descLines = (svc.description || '').split('\\n');
+      const PAGE_SIZE = 8;
+      const descPages = [];
+      for (let i = 0; i < descLines.length; i += PAGE_SIZE) {
+        descPages.push(descLines.slice(i, i + PAGE_SIZE).join('<br>'));
+      }
+      window.totalDescPages = descPages.length;
+      let descHTML = '';
+      if (descPages.length <= 1) {
+        descHTML = `<p style="color:var(--text-dark);line-height:2.2;font-size:1.05rem;white-space:pre-line;margin:0;">${svc.description}</p>`;
+      } else {
+        descHTML = `
+          <div id="desc-pages-container" style="min-height: 200px;">
+            ${descPages.map((p, idx) => `<p class="animate-fadeIn" id="desc-page-${idx}" style="color:var(--text-dark);line-height:2.2;font-size:1.05rem;margin:0; display: ${idx === 0 ? 'block' : 'none'};">${p}</p>`).join('')}
+          </div>
+          <div style="display:flex; justify-content:center; align-items:center; gap: 16px; margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(0,0,0,0.1)">
+            <button id="desc-prev-btn" class="btn btn-outline" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;" onclick="changeDescPage(-1)" disabled><i class="ri-arrow-left-s-line"></i> Trước</button>
+            <span id="desc-page-indicator" style="font-size: 0.9rem; color: var(--text-dark); font-weight:600; min-width: 50px; text-align: center;">1 / ${descPages.length}</span>
+            <button id="desc-next-btn" class="btn btn-outline" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;" onclick="changeDescPage(1)">Sau <i class="ri-arrow-right-s-line"></i></button>
+          </div>
+        `;
+      }
+
       document.getElementById('detail-content').innerHTML = `
         <div data-aos="fade-right">
           <img class="main-img animate-fadeIn" src="${svc.image.startsWith('http') ? svc.image : rootPath() + svc.image}" alt="${svc.name}">
@@ -87,7 +110,7 @@
             </div>
             <h3 style="margin-top:var(--sp-xl)">Mô Tả Dịch Vụ</h3>
             <div style="background:#fdfcfc;border-radius:var(--r-lg);padding:var(--sp-lg);margin-top:var(--sp-sm);border:1px solid rgba(0,0,0,0.03);">
-              <p style="color:var(--text-dark);line-height:2.2;font-size:1.05rem;white-space:pre-line;">${svc.description}</p>
+              ${descHTML}
             </div>
             ${svc.gallery && svc.gallery.length > 0 ? `
             <h3 style="margin-top:var(--sp-xl)">Hình Ảnh Thực Tế / Kinh Nghiệm</h3>
@@ -259,6 +282,20 @@
       } catch(e) {
         UI.toast(e.message || 'Không thể bắt đầu trò chuyện', 'error');
       }
+    }
+
+    window.currentDescPage = 0;
+    function changeDescPage(dir) {
+      const newPage = window.currentDescPage + dir;
+      if (newPage < 0 || newPage >= window.totalDescPages) return;
+      
+      document.getElementById('desc-page-' + window.currentDescPage).style.display = 'none';
+      document.getElementById('desc-page-' + newPage).style.display = 'block';
+      
+      window.currentDescPage = newPage;
+      document.getElementById('desc-page-indicator').innerText = (newPage + 1) + ' / ' + window.totalDescPages;
+      document.getElementById('desc-prev-btn').disabled = newPage === 0;
+      document.getElementById('desc-next-btn').disabled = newPage === window.totalDescPages - 1;
     }
   </script>
 
