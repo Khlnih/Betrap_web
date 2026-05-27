@@ -65,7 +65,7 @@ const UI = (() => {
     container.innerHTML = `
       <nav class="navbar" id="navbar">
         <a class="navbar-brand" href="${root}index.html">
-          <img src="${root}assets/images/logo.jpg" alt="Trap Connect" style="height:48px; width:auto; object-fit:contain;">
+          <img src="${root}assets/images/logo.jpg" alt="Trap Connect" style="height:48px; width:auto; object-fit:contain; mix-blend-mode: multiply;">
         </a>
         <div class="navbar-links" id="nav-links">${links}</div>
         <div class="navbar-actions">
@@ -250,7 +250,7 @@ const UI = (() => {
           <div class="footer-grid">
             <div class="footer-brand">
               <div class="navbar-brand" style="color:var(--gold-light);font-size:1.4rem">
-                <img src="${root}assets/images/logo.jpg" alt="Trap Connect" style="height:56px; width:auto; object-fit:contain;">
+                <img src="${root}assets/images/logo.jpg" alt="Trap Connect" style="height:56px; width:auto; object-fit:contain; mix-blend-mode: multiply;">
               </div>
               <p class="brand-desc">Nền tảng kết nối dịch vụ đám hỏi truyền thống Việt Nam — uy tín, chuyên nghiệp, đáng nhớ.</p>
               <div class="social-links mt-md">
