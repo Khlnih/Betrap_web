@@ -157,16 +157,19 @@
       animation: floatUpDown 5s ease-in-out infinite alternate-reverse;
     }
     .float-card {
-      position: absolute; background: white; border-radius: 20px;
-      padding: 14px 18px; box-shadow: 0 12px 40px rgba(0,0,0,.12);
-      display: flex; align-items: center; gap: 12px;
+      position: absolute; background: rgba(255, 255, 255, 0.95); 
+      backdrop-filter: blur(8px);
+      padding: 16px 24px; box-shadow: 0 15px 40px rgba(0,0,0,.15);
+      text-align: center;
       font-size: .85rem; font-weight: 600; color: #1a0a14;
       animation: floatUpDown 4s ease-in-out infinite alternate;
+      z-index: 3;
+      border: 1px solid rgba(255, 107, 157, 0.15);
     }
-    .float-card-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-    .float-card:nth-child(2) { top: 20px; right: -20px; animation-delay: 0s; }
-    .float-card:nth-child(3) { bottom: 60px; right: -10px; animation-delay: 1.5s; }
-    .float-card:nth-child(4) { bottom: 10px; left: 20px; animation-delay: .8s; }
+    /* Petal shapes for cards */
+    .float-card:nth-of-type(1) { border-radius: 24px 24px 24px 4px; top: 20px; right: -30px; animation-delay: 0s; }
+    .float-card:nth-of-type(2) { border-radius: 24px 24px 4px 24px; bottom: 60px; right: -20px; animation-delay: 1.5s; }
+    .float-card:nth-of-type(3) { border-radius: 4px 24px 24px 24px; bottom: 10px; left: -10px; animation-delay: .8s; }
     @keyframes floatUpDown {
       from { transform: translateY(0); }
       to   { transform: translateY(-14px); }
@@ -488,21 +491,21 @@
 
           <div class="float-card">
             <div>
-              <div>Đội Bê Tráp</div>
+              <div style="font-size: .95rem; color: var(--pink); margin-bottom: 2px;">Đội Bê Tráp</div>
               <div style="font-size:.75rem;color:#9CA3AF;font-weight:400">Chuyên nghiệp</div>
             </div>
           </div>
 
           <div class="float-card">
             <div>
-              <div>4.9 / 5 sao</div>
+              <div style="font-size: .95rem; color: #F59E0B; margin-bottom: 2px;">4.9 / 5 sao</div>
               <div style="font-size:.75rem;color:#9CA3AF;font-weight:400">500+ đánh giá</div>
             </div>
           </div>
 
           <div class="float-card">
             <div>
-              <div>Đặt lịch dễ dàng</div>
+              <div style="font-size: .95rem; color: #10B981; margin-bottom: 2px;">Đặt lịch dễ dàng</div>
               <div style="font-size:.75rem;color:#9CA3AF;font-weight:400">Trong 2 phút</div>
             </div>
           </div>
