@@ -129,7 +129,7 @@ app.get('/api/setup-admin', async (req, res) => {
         const hash = await bcrypt.hash('123456', 10);
         await sql.query`
             INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Avatar, Verified)
-            VALUES ('U_ADMIN', 'admin@betrap.vn', ${hash}, 'Quản Trị Viên', 'admin', 'AD', 1)
+            VALUES ('U_ADMIN', 'admin@betrap.vn', ${hash}, 'Quản Trị Viên', 'admin', 'AD', true)
         `;
         res.send('✅ Admin account created: admin@betrap.vn / 123456');
     } catch (err) {
@@ -240,11 +240,12 @@ app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
         if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
         const tagsStr = tags ? JSON.stringify(tags) : null;
+        const isActive = active !== undefined ? active : true;
         await sql.query`
             UPDATE Services SET Name=${name}, Description=${description||null},
             Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Image=${image||null},
             Location=${location||null}, Tags=${tagsStr},
-            Active=${active !== undefined ? active : 1}, UpdatedAt=GETDATE()
+            Active=${isActive}, UpdatedAt=GETDATE()
             WHERE Id=${req.params.id}`;
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -263,9 +264,9 @@ app.patch('/api/services/:id/toggle', authMiddleware, providerOnly, async (req, 
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
         if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
         const currentActive = check.recordset[0].Active;
-        const newActive = currentActive ? 0 : 1;
+        const newActive = currentActive ? false : true;
         await sql.query`UPDATE Services SET Active=${newActive}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
-        res.json({ success: true, active: newActive === 1 });
+        res.json({ success: true, active: newActive === true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -363,7 +364,7 @@ app.post('/api/auth/register', async (req, res) => {
         const hash = await bcrypt.hash(password, 10);
         await sql.query`
             INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Phone, Avatar, Verified)
-            VALUES (${id}, ${email.toLowerCase()}, ${hash}, ${name}, ${role}, ${phone||null}, ${avatar}, 0)`;
+            VALUES (${id}, ${email.toLowerCase()}, ${hash}, ${name}, ${role}, ${phone||null}, ${avatar}, false)`;
         if (role === 'customer') {
             await sql.query`INSERT INTO CustomerProfiles (UserId, Location) VALUES (${id}, ${location||null})`;
         } else {
@@ -885,7 +886,7 @@ app.post('/api/admin/providers', authMiddleware, adminOnly, async (req, res) => 
         const hash = await bcrypt.hash(password, 10);
         await sql.query`
             INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Phone, Avatar, Verified)
-            VALUES (${id}, ${email.toLowerCase()}, ${hash}, ${name}, 'provider', ${phone||null}, ${avatar}, 1)`;
+            VALUES (${id}, ${email.toLowerCase()}, ${hash}, ${name}, 'provider', ${phone||null}, ${avatar}, true)`;
         await sql.query`INSERT INTO ProviderProfiles (UserId, Location) VALUES (${id}, ${location||null})`;
         res.json({ id, message: 'Tạo nhà cung cấp thành công' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
