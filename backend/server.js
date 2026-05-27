@@ -848,7 +848,13 @@ function mapConsultation(c) {
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'BêTráp API v2.0 — Running ✅' }));
 
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+// ── Global Error Handler ─────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+    console.error('Express Global Error:', err);
+    res.status(500).json({ error: err.message || 'Lỗi hệ thống hoặc dịch vụ Cloudinary.' });
+});
+
+if (require.main === module) {
     app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
 }
 module.exports = app;
