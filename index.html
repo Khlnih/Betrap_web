@@ -143,6 +143,18 @@
       border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
       box-shadow: 0 30px 80px rgba(255,107,157,.25);
       position: absolute; top: 20px; left: 30px;
+      z-index: 2;
+    }
+    .hero-secondary-img {
+      width: 240px; height: 280px; object-fit: cover;
+      /* Petal shape */
+      border-radius: 50% 50% 0 50% / 50% 50% 0 50%;
+      position: absolute; top: 120px; left: -60px;
+      z-index: 1;
+      opacity: 0.95;
+      box-shadow: 0 15px 35px rgba(0,0,0,.1);
+      transform: rotate(-15deg);
+      animation: floatUpDown 5s ease-in-out infinite alternate-reverse;
     }
     .float-card {
       position: absolute; background: white; border-radius: 20px;
@@ -308,7 +320,7 @@
     /* ─── FOOTER ───────────────────────────────────────────── */
     .section-pad-bottom { padding-bottom: 100px; }
   </style>
-  <link rel="icon" type="image/png" href="assets/favicon.png">
+  
 </head>
 <body>
   <div id="nav-container"></div>
@@ -471,6 +483,7 @@
 
         <!-- RIGHT – floating cards + image -->
         <div class="hero-right" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+          <img class="hero-secondary-img" src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=500&q=80" alt="Đám hỏi">
           <img class="hero-main-img" src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=700&q=80" alt="Đám hỏi đẹp">
 
           <div class="float-card">
