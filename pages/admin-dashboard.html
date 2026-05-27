@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Admin Dashboard — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body { background-color: var(--bg-body); }
+    .dash-layout { display: flex; min-height: 100vh; }
+    .dash-sidebar {
+      width: 260px;
+      background: white;
+      border-right: 1px solid rgba(191,167,162,0.15);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 40;
+    }
+    .dash-brand {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--sp-lg);
+      border-bottom: 1px solid rgba(191,167,162,0.1);
+    }
+    .dash-brand img { height: 40px; }
+    .dash-menu { padding: var(--sp-md) 0; flex: 1; }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      padding: var(--sp-sm) var(--sp-lg);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all var(--t-fast);
+      border-left: 3px solid transparent;
+    }
+    .menu-item i { font-size: 1.25rem; }
+    .menu-item:hover { color: var(--gold-dark); background: rgba(191,167,162,0.05); }
+    .menu-item.active {
+      color: var(--red-dark);
+      background: rgba(166,44,56,0.05);
+      border-left-color: var(--red-dark);
+    }
+    .dash-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: var(--sp-xl);
+    }
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--sp-xl);
+    }
+    .user-info { display: flex; align-items: center; gap: var(--sp-sm); }
+    .user-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--grad-gold);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+    }
+    
+    .table-card {
+      background: white;
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      padding: var(--sp-sm) var(--sp-md);
+      background: rgba(191,167,162,0.05);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(191,167,162,0.1);
+    }
+    td {
+      padding: var(--sp-sm) var(--sp-md);
+      border-bottom: 1px solid rgba(191,167,162,0.05);
+      vertical-align: middle;
+      font-size: 0.875rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: var(--r-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge.admin { background: rgba(166,44,56,0.1); color: var(--red-dark); }
+    .badge.provider { background: rgba(191,167,162,0.2); color: var(--gold-dark); }
+    .badge.customer { background: rgba(0,0,0,0.05); color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <div class="dash-layout">
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+      <div class="dash-brand">
+        <img src="../assets/images/logo.jpg" alt="Betrap Logo" style="border-radius:4px">
+      </div>
+      <div class="dash-menu">
+        <div class="menu-item active" onclick="switchTab('users')" id="tab-users">
+          <i class="ri-team-line"></i> Quản lý Người dùng
+        </div>
+        <div class="menu-item" onclick="switchTab('providers')" id="tab-providers">
+          <i class="ri-store-2-line"></i> Quản lý Nhà cung cấp
+        </div>
+      </div>
+      <div style="padding: var(--sp-lg); border-top: 1px solid rgba(191,167,162,0.1)">
+        <button class="btn btn-ghost btn-block" style="color:var(--text-muted)" onclick="logout()">
+          <i class="ri-logout-box-r-line"></i> Đăng xuất
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dash-content animate-fadeIn">
+      <header class="dash-header">
+        <div>
+          <h1 style="font-family:var(--font-h);font-size:1.8rem;color:var(--text-dark)" id="page-title">Quản lý Người dùng</h1>
+          <p style="color:var(--text-muted);font-size:0.875rem">Quản trị toàn bộ dữ liệu hệ thống.</p>
+        </div>
+        <div class="user-info">
+          <div style="text-align:right">
+            <div style="font-weight:600;color:var(--text-dark);font-size:0.875rem" id="admin-name">Admin</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">Quản trị viên</div>
+          </div>
+          <div class="user-avatar" id="admin-avatar">AD</div>
+        </div>
+      </header>
+
+      <!-- Users View -->
+      <section id="view-users">
+        <div class="table-card">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Họ & Tên</th>
+                <th>Email</th>
+                <th>Vai Trò</th>
+                <th>Điện Thoại</th>
+                <th>Ngày Đăng Ký</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loaded via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Providers View -->
+      <section id="view-providers" class="hidden">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:var(--sp-md)">
+          <button class="btn btn-primary" onclick="UI.openModal('providerModal')">
+            <i class="ri-add-line"></i> Tạo Nhà Cung Cấp
+          </button>
+        </div>
+        <div class="table-card">
+          <table id="providers-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên Cửa Hàng</th>
+                <th>Email Đăng Nhập</th>
+                <th>Điện Thoại</th>
+                <th>Ngày Tạo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loaded via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Create Provider Modal -->
+  <div class="modal-overlay" id="providerModal">
+    <div class="modal-content" style="max-width:500px">
+      <div class="modal-header">
+        <h3 class="modal-title">Tạo Tài Khoản Nhà Cung Cấp</h3>
+        <button class="btn btn-ghost" style="padding:4px" onclick="UI.closeModal('providerModal')"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="create-provider-form">
+          <div class="form-group">
+            <label class="form-label">Tên cửa hàng / Nhà cung cấp</label>
+            <input type="text" id="prov-name" class="form-control" required placeholder="Ví dụ: Tráp Cưới Mai Lan">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email đăng nhập</label>
+            <input type="email" id="prov-email" class="form-control" required placeholder="mailan@betrap.vn">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mật khẩu cấp phát</label>
+            <input type="text" id="prov-pass" class="form-control" required value="Betrap@123">
+            <p style="font-size:12px;color:var(--text-muted);margin-top:4px">Mật khẩu phải có chữ hoa, số và ký tự đặc biệt.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại liên hệ</label>
+            <input type="tel" id="prov-phone" class="form-control" required placeholder="0901234567">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Khu vực</label>
+            <input type="text" id="prov-location" class="form-control" placeholder="Hà Nội">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block mt-md" id="btn-create-prov">Tạo Tài Khoản</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    const session = API.auth.currentSession();
+    if (!session || session.role !== 'admin') {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('admin-name').textContent = session.name;
+    document.getElementById('admin-avatar').textContent = session.avatar;
+
+    let allUsers = [];
+
+    async function loadData() {
+      try {
+        allUsers = await API.admin.getUsers();
+        renderUsers();
+        renderProviders();
+      } catch (err) {
+        UI.toast('Lỗi tải dữ liệu: ' + err.message, 'error');
+      }
+    }
+
+    function renderUsers() {
+      const tbody = document.querySelector('#users-table tbody');
+      tbody.innerHTML = '';
+      allUsers.forEach(u => {
+        let roleBadge = '';
+        if (u.Role === 'admin') roleBadge = '<span class="badge admin">Admin</span>';
+        else if (u.Role === 'provider') roleBadge = '<span class="badge provider">Nhà Cung Cấp</span>';
+        else roleBadge = '<span class="badge customer">Khách Hàng</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-family:monospace;color:var(--text-muted)">${u.Id}</span></td>
+          <td style="font-weight:600;color:var(--text-dark)">${u.Name}</td>
+          <td>${u.Email}</td>
+          <td>${roleBadge}</td>
+          <td>${u.Phone || '-'}</td>
+          <td>${new Date(u.CreatedAt).toLocaleDateString('vi-VN')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderProviders() {
+      const tbody = document.querySelector('#providers-table tbody');
+      tbody.innerHTML = '';
+      const providers = allUsers.filter(u => u.Role === 'provider');
+      providers.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-family:monospace;color:var(--text-muted)">${u.Id}</span></td>
+          <td style="font-weight:600;color:var(--text-dark)">${u.Name}</td>
+          <td>${u.Email}</td>
+          <td>${u.Phone || '-'}</td>
+          <td>${new Date(u.CreatedAt).toLocaleDateString('vi-VN')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      
+      document.getElementById('view-users').classList.add('hidden');
+      document.getElementById('view-providers').classList.add('hidden');
+      document.getElementById('view-' + tabId).classList.remove('hidden');
+
+      const titles = {
+        'users': 'Quản lý Người dùng',
+        'providers': 'Quản lý Nhà cung cấp'
+      };
+      document.getElementById('page-title').textContent = titles[tabId];
+    }
+
+    document.getElementById('create-provider-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-create-prov');
+      btn.disabled = true;
+      btn.textContent = 'Đang xử lý...';
+
+      try {
+        await API.admin.createProvider({
+          name: document.getElementById('prov-name').value,
+          email: document.getElementById('prov-email').value,
+          password: document.getElementById('prov-pass').value,
+          phone: document.getElementById('prov-phone').value,
+          location: document.getElementById('prov-location').value
+        });
+        UI.toast('Tạo tài khoản nhà cung cấp thành công!', 'success');
+        UI.closeModal('providerModal');
+        e.target.reset();
+        await loadData(); // Reload table
+      } catch (err) {
+        UI.toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Tạo Tài Khoản';
+      }
+    });
+
+    function logout() {
+      API.auth.logout();
+      window.location.href = 'login.html';
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

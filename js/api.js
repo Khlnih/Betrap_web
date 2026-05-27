@@ -302,6 +302,16 @@ const API = (() => {
     },
   };
 
+  // ── ADMIN ───────────────────────────────────────────────────────────────
+  const admin = {
+    getUsers: async () => {
+      return await get('/admin/users', true);
+    },
+    createProvider: async (data) => {
+      return await post('/admin/providers', data, true);
+    }
+  };
+
   // ── STATS ─────────────────────────────────────────────────────────────────
   const stats = {
     customer: async () => {
@@ -330,7 +340,7 @@ const API = (() => {
     }
   };
 
-  return { auth, svc, txn, consultation, chat, review, favorites, stats, users, utils };
+  return { auth, svc, txn, consultation, chat, review, favorites, stats, users, utils, admin };
 })();
 
 // Helper: get root path relative to current page

@@ -124,6 +124,19 @@ app.get('/api/setup-db', async (req, res) => {
     }
 });
 
+app.get('/api/setup-admin', async (req, res) => {
+    try {
+        const hash = await bcrypt.hash('123456', 10);
+        await sql.query`
+            INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Avatar, Verified)
+            VALUES ('U_ADMIN', 'admin@betrap.vn', ${hash}, 'Quản Trị Viên', 'admin', 'AD', 1)
+        `;
+        res.send('✅ Admin account created: admin@betrap.vn / 123456');
+    } catch (err) {
+        res.status(500).send('❌ Error: ' + err.message);
+    }
+});
+
 // ── Auth Middleware ──────────────────────────────────────────────────────────
 function authMiddleware(req, res, next) {
     const header = req.headers.authorization;
@@ -136,6 +149,11 @@ function authMiddleware(req, res, next) {
 
 function providerOnly(req, res, next) {
     if (req.user.role !== 'provider') return res.status(403).json({ error: 'Chỉ nhà cung cấp mới có quyền này.' });
+    next();
+}
+
+function adminOnly(req, res, next) {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Chỉ Quản trị viên mới có quyền này.' });
     next();
 }
 
@@ -844,6 +862,34 @@ function mapConsultation(c) {
         createdAt: c.CreatedAt, updatedAt: c.UpdatedAt
     };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. ADMIN ENDPOINTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+app.get('/api/admin/users', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const result = await sql.query`SELECT Id, Name, Email, Role, Phone, CreatedAt FROM Users ORDER BY CreatedAt DESC`;
+        res.json(result.recordset);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/admin/providers', authMiddleware, adminOnly, async (req, res) => {
+    const { name, email, password, phone, location } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin.' });
+    try {
+        const check = await sql.query`SELECT Id FROM Users WHERE Email = ${email.toLowerCase()}`;
+        if (check.recordset.length) return res.status(400).json({ error: 'Email đã tồn tại.' });
+        const id = 'U_' + uid();
+        const avatar = name.trim().split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+        const hash = await bcrypt.hash(password, 10);
+        await sql.query`
+            INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Phone, Avatar, Verified)
+            VALUES (${id}, ${email.toLowerCase()}, ${hash}, ${name}, 'provider', ${phone||null}, ${avatar}, 1)`;
+        await sql.query`INSERT INTO ProviderProfiles (UserId, Location) VALUES (${id}, ${location||null})`;
+        res.json({ id, message: 'Tạo nhà cung cấp thành công' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'BêTráp API v2.0 — Running ✅' }));
