@@ -908,7 +908,7 @@ app.patch('/api/admin/users/:id/toggle', authMiddleware, adminOnly, async (req, 
 app.get('/api/admin/services', authMiddleware, adminOnly, async (req, res) => {
     try {
         const result = await sql.query`
-            SELECT s.Id, s.Name, s.Category, s.Price, s.Active, s.CreatedAt, u.Name as ProviderName 
+            SELECT s.Id, s.Name, s.Category, s.Price, s.Active, s.CreatedAt, u.Name as ProviderName, u.Verified as ProviderVerified 
             FROM Services s
             LEFT JOIN Users u ON s.ProviderId = u.Id
             ORDER BY s.CreatedAt DESC`;
