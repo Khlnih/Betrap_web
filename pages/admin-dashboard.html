@@ -151,7 +151,7 @@
       <section id="view-users">
         <div class="table-card">
           <div class="table-header">
-            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách khách hàng & quản trị viên</h3>
+            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Khách Hàng</h3>
           </div>
           <div style="overflow-x:auto">
             <table id="users-table">
@@ -258,7 +258,7 @@
     function renderUsers() {
       const tbody = document.querySelector('#users-table tbody');
       tbody.innerHTML = '';
-      const list = allUsers.filter(u => u.role !== 'provider' && u.Role !== 'provider');
+      const list = allUsers.filter(u => u.role === 'customer' || u.Role === 'customer');
       
       list.forEach(u => {
         // Handle both lowercase (JSON) and uppercase (Proxy) keys just in case
@@ -268,9 +268,7 @@
         const role = u.role || u.Role;
         const dateRaw = u.createdat || u.createdAt || u.CreatedAt;
         
-        let roleBadge = '';
-        if (role === 'admin') roleBadge = '<span class="badge admin"><i class="ri-shield-star-line"></i> Quản Trị Viên</span>';
-        else roleBadge = '<span class="badge customer"><i class="ri-user-line"></i> Khách Hàng</span>';
+        let roleBadge = '<span class="badge customer"><i class="ri-user-line"></i> Khách Hàng</span>';
 
         const date = dateRaw ? new Date(dateRaw).toLocaleDateString('vi-VN') : '-';
         
