@@ -213,12 +213,12 @@
 
   <!-- Create Provider Modal -->
   <div class="modal-overlay" id="providerModal">
-    <div class="modal-content" style="max-width:450px; border-radius:20px; overflow:hidden;">
-      <div class="modal-header" style="background:#F8FAFC; border-bottom:1px solid #E2E8F0; padding:20px 24px">
-        <h3 class="modal-title" style="font-size:1.2rem; color:#1E293B"><i class="ri-store-2-line" style="color:var(--red-dark); margin-right:8px"></i> Cấp tài khoản Nhà Cung Cấp</h3>
+    <div class="modal" style="max-width:450px; padding:0; overflow:hidden;">
+      <div class="modal-header" style="background:#F8FAFC; border-bottom:1px solid #E2E8F0; padding:20px 24px; margin-bottom:0;">
+        <h3 class="modal-title" style="font-size:1.2rem; color:#1E293B; margin:0;"><i class="ri-store-2-line" style="color:var(--red-dark); margin-right:8px"></i> Cấp tài khoản Nhà Cung Cấp</h3>
         <button class="btn btn-ghost" style="padding:4px" onclick="UI.closeModal('providerModal')"><i class="ri-close-line"></i></button>
       </div>
-      <div class="modal-body" style="padding:24px">
+      <div class="modal-body" style="padding:24px; background:white;">
         <form id="create-provider-form">
           <div class="form-group">
             <label class="form-label" style="font-size:0.85rem">Tên cửa hàng</label>
