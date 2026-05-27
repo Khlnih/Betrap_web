@@ -171,7 +171,7 @@ app.get('/api/services', async (req, res) => {
         let query = `SELECT s.*, u.Name AS ProviderName FROM Services s
                      LEFT JOIN Users u ON s.ProviderId = u.Id
                      WHERE 1=1`;
-        if (!all) query += ` AND s.Active = true`;
+        if (!all) query += ` AND s.Active = true AND u.Verified = true`;
         if (category) query += ` AND s.Category = '${category.replace(/'/g,"''")}'`;
         if (location) query += ` AND s.Location LIKE '%${location.replace(/'/g,"''").replace(/[%_]/g,'')}%'`;
         if (search)   query += ` AND (s.Name LIKE '%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%' OR s.Description LIKE '%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%')`;
@@ -889,6 +889,17 @@ app.post('/api/admin/providers', authMiddleware, adminOnly, async (req, res) => 
             VALUES (${id}, ${email.toLowerCase()}, ${hash}, ${name}, 'provider', ${phone||null}, ${avatar}, true)`;
         await sql.query`INSERT INTO ProviderProfiles (UserId, Location) VALUES (${id}, ${location||null})`;
         res.json({ id, message: 'Tạo nhà cung cấp thành công' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.patch('/api/admin/providers/:id/toggle', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const check = await sql.query`SELECT Verified FROM Users WHERE Id = ${req.params.id} AND Role = 'provider'`;
+        if (!check.recordset.length) return res.status(404).json({ error: 'Không tìm thấy nhà cung cấp' });
+        const currentVerified = check.recordset[0].Verified;
+        const newVerified = currentVerified ? false : true;
+        await sql.query`UPDATE Users SET Verified=${newVerified}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
+        res.json({ success: true, verified: newVerified === true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 

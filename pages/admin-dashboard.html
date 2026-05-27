@@ -178,7 +178,7 @@
             <table id="providers-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Tên Cửa Hàng</th><th>Email Đăng Nhập</th><th>Điện Thoại</th><th>Ngày Tạo</th>
+                  <th>ID</th><th>Tên Cửa Hàng</th><th>Email Đăng Nhập</th><th>Điện Thoại</th><th>Ngày Tạo</th><th>Hành Động</th>
                 </tr>
               </thead>
               <tbody><!-- JS --></tbody>
@@ -297,17 +297,40 @@
         const phone = u.phone || u.Phone || '-';
         const dateRaw = u.createdat || u.createdAt || u.CreatedAt;
         const date = dateRaw ? new Date(dateRaw).toLocaleDateString('vi-VN') : '-';
+        const verified = u.verified ?? u.Verified ?? false; // Status
+        
+        let statusBadge = verified 
+          ? '<span class="badge" style="background:rgba(34,197,94,0.1);color:#16A34A"><i class="ri-checkbox-circle-line"></i> Hoạt động</span>'
+          : '<span class="badge" style="background:rgba(239,68,68,0.1);color:#DC2626"><i class="ri-forbid-line"></i> Đã khoá</span>';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${id}</span></td>
-          <td style="font-weight:700;color:var(--red-dark)">${name}</td>
+          <td style="font-weight:700;color:var(--red-dark)">${name}<br>${statusBadge}</td>
           <td>${email}</td>
           <td style="font-family:monospace;font-size:0.95rem">${phone}</td>
           <td><span style="color:#64748B;font-size:0.85rem"><i class="ri-calendar-line"></i> ${date}</span></td>
+          <td>
+            <button class="btn btn-sm ${verified ? 'btn-ghost' : 'btn-primary'}" 
+                    style="font-size:0.8rem; padding:4px 8px; ${verified ? 'border:1px solid #DC2626; color:#DC2626' : ''}" 
+                    onclick="toggleProv('${id}')">
+              ${verified ? '<i class="ri-lock-2-line"></i> Khoá' : '<i class="ri-lock-unlock-line"></i> Mở khoá'}
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    async function toggleProv(id) {
+      if(!confirm('Bạn có chắc muốn thay đổi trạng thái hoạt động của Nhà cung cấp này?')) return;
+      try {
+        const res = await API.admin.toggleProvider(id);
+        UI.toast(res.verified ? 'Đã MỞ KHÓA nhà cung cấp!' : 'Đã KHÓA nhà cung cấp!', 'success');
+        await loadData();
+      } catch (err) {
+        UI.toast('Lỗi: ' + err.message, 'error');
+      }
     }
 
     function switchTab(tabId) {

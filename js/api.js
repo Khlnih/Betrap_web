@@ -309,6 +309,16 @@ const API = (() => {
     },
     createProvider: async (data) => {
       return await post('/admin/providers', data, true);
+    },
+    toggleProvider: async (id) => {
+      const token = localStorage.getItem('bt_token');
+      const res = await fetch(BASE_URL + '/admin/providers/' + id + '/toggle', {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'Lỗi');
+      return data;
     }
   };
 
