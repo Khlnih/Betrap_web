@@ -110,6 +110,12 @@
         <div class="menu-item" onclick="switchTab('providers')" id="tab-providers">
           <i class="ri-store-2-line"></i> Nhà Cung Cấp
         </div>
+        <div class="menu-item" onclick="switchTab('services')" id="tab-services">
+          <i class="ri-briefcase-4-line"></i> Dịch Vụ
+        </div>
+        <div class="menu-item" onclick="switchTab('transactions')" id="tab-transactions">
+          <i class="ri-shopping-cart-2-line"></i> Giao Dịch
+        </div>
       </div>
       <div style="padding: 24px; border-top: 1px solid rgba(0,0,0,0.05)">
         <button class="btn btn-ghost btn-block" style="color:#64748B; border: 1px solid #E2E8F0; border-radius: 12px;" onclick="logout()">
@@ -157,7 +163,7 @@
             <table id="users-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Họ & Tên</th><th>Email</th><th>Vai Trò</th><th>Ngày Đăng Ký</th>
+                  <th>ID</th><th>Họ & Tên</th><th>Email</th><th>Vai Trò</th><th>Ngày Đăng Ký</th><th>Hành Động</th>
                 </tr>
               </thead>
               <tbody><!-- JS --></tbody>
@@ -179,6 +185,42 @@
               <thead>
                 <tr>
                   <th>ID</th><th>Tên Cửa Hàng</th><th>Email Đăng Nhập</th><th>Điện Thoại</th><th>Ngày Tạo</th><th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-services" class="hidden">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Dịch Vụ</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table id="services-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Tên Dịch Vụ</th><th>Nhà Cung Cấp</th><th>Giá Tiền</th><th>Trạng Thái</th><th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-transactions" class="hidden">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Giao Dịch Đặt Lịch</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table id="transactions-table">
+              <thead>
+                <tr>
+                  <th>Mã HĐ</th><th>Khách Hàng</th><th>Nhà Cung Cấp</th><th>Dịch Vụ</th><th>Tổng Tiền</th><th>Ngày Thực Hiện</th><th>Trạng Thái</th>
                 </tr>
               </thead>
               <tbody><!-- JS --></tbody>
@@ -237,13 +279,19 @@
     document.getElementById('admin-avatar').textContent = session.avatar || 'AD';
 
     let allUsers = [];
+    let allServices = [];
+    let allTransactions = [];
 
     async function loadData() {
       try {
         allUsers = await API.admin.getUsers();
+        allServices = await API.admin.getServices();
+        allTransactions = await API.admin.getTransactions();
         updateStats();
         renderUsers();
         renderProviders();
+        renderServices();
+        renderTransactions();
       } catch (err) {
         UI.toast('Lỗi tải dữ liệu: ' + err.message, 'error');
       }
@@ -267,18 +315,30 @@
         const email = u.email || u.Email;
         const role = u.role || u.Role;
         const dateRaw = u.createdat || u.createdAt || u.CreatedAt;
+        const verified = u.verified ?? u.Verified ?? false;
         
         let roleBadge = '<span class="badge customer"><i class="ri-user-line"></i> Khách Hàng</span>';
+        
+        let statusBadge = verified 
+          ? '<span class="badge" style="background:rgba(34,197,94,0.1);color:#16A34A"><i class="ri-checkbox-circle-line"></i> Hoạt động</span>'
+          : '<span class="badge" style="background:rgba(239,68,68,0.1);color:#DC2626"><i class="ri-forbid-line"></i> Đã khoá</span>';
 
         const date = dateRaw ? new Date(dateRaw).toLocaleDateString('vi-VN') : '-';
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${id}</span></td>
-          <td style="font-weight:600;color:#1E293B">${name}</td>
+          <td style="font-weight:600;color:#1E293B">${name}<br>${statusBadge}</td>
           <td>${email}</td>
           <td>${roleBadge}</td>
           <td><span style="color:#64748B;font-size:0.85rem"><i class="ri-calendar-line"></i> ${date}</span></td>
+          <td>
+            <button class="btn btn-sm ${verified ? 'btn-ghost' : 'btn-primary'}" 
+                    style="font-size:0.8rem; padding:4px 8px; ${verified ? 'border:1px solid #DC2626; color:#DC2626' : ''}" 
+                    onclick="toggleUser('${id}')">
+              ${verified ? '<i class="ri-lock-2-line"></i> Khoá' : '<i class="ri-lock-unlock-line"></i> Mở khoá'}
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -311,7 +371,7 @@
           <td>
             <button class="btn btn-sm ${verified ? 'btn-ghost' : 'btn-primary'}" 
                     style="font-size:0.8rem; padding:4px 8px; ${verified ? 'border:1px solid #DC2626; color:#DC2626' : ''}" 
-                    onclick="toggleProv('${id}')">
+                    onclick="toggleUser('${id}')">
               ${verified ? '<i class="ri-lock-2-line"></i> Khoá' : '<i class="ri-lock-unlock-line"></i> Mở khoá'}
             </button>
           </td>
@@ -320,15 +380,94 @@
       });
     }
 
-    async function toggleProv(id) {
-      if(!confirm('Bạn có chắc muốn thay đổi trạng thái hoạt động của Nhà cung cấp này?')) return;
+    async function toggleUser(id) {
+      if(!confirm('Bạn có chắc muốn thay đổi trạng thái hoạt động của tài khoản này?')) return;
       try {
-        const res = await API.admin.toggleProvider(id);
-        UI.toast(res.verified ? 'Đã MỞ KHÓA nhà cung cấp!' : 'Đã KHÓA nhà cung cấp!', 'success');
+        const res = await API.admin.toggleUser(id);
+        UI.toast(res.verified ? 'Đã MỞ KHÓA tài khoản!' : 'Đã KHÓA tài khoản!', 'success');
         await loadData();
       } catch (err) {
         UI.toast('Lỗi: ' + err.message, 'error');
       }
+    }
+
+    function renderServices() {
+      const tbody = document.querySelector('#services-table tbody');
+      tbody.innerHTML = '';
+      allServices.forEach(s => {
+        const id = s.id || s.Id;
+        const name = s.name || s.Name;
+        const provider = s.providerName || s.ProviderName;
+        const price = s.price || s.Price;
+        const active = s.active ?? s.Active ?? false;
+        
+        let statusBadge = active 
+          ? '<span class="badge" style="background:rgba(34,197,94,0.1);color:#16A34A"><i class="ri-eye-line"></i> Đang hiển thị</span>'
+          : '<span class="badge" style="background:rgba(239,68,68,0.1);color:#DC2626"><i class="ri-eye-off-line"></i> Bị Ẩn</span>';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${id}</span></td>
+          <td style="font-weight:600;color:#1E293B">${name}</td>
+          <td>${provider}</td>
+          <td style="font-family:monospace;font-weight:600">${price.toLocaleString('vi-VN')} ₫</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button class="btn btn-sm ${active ? 'btn-ghost' : 'btn-primary'}" 
+                    style="font-size:0.8rem; padding:4px 8px; ${active ? 'border:1px solid #DC2626; color:#DC2626' : ''}" 
+                    onclick="toggleService('${id}')">
+              ${active ? '<i class="ri-eye-off-line"></i> Ẩn' : '<i class="ri-eye-line"></i> Hiển thị'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function toggleService(id) {
+      if(!confirm('Bạn có chắc muốn ẩn/hiện dịch vụ này trên hệ thống?')) return;
+      try {
+        const res = await API.admin.toggleService(id);
+        UI.toast(res.active ? 'Đã hiển thị dịch vụ!' : 'Đã ẨN dịch vụ!', 'success');
+        await loadData();
+      } catch (err) {
+        UI.toast('Lỗi: ' + err.message, 'error');
+      }
+    }
+
+    function renderTransactions() {
+      const tbody = document.querySelector('#transactions-table tbody');
+      tbody.innerHTML = '';
+      allTransactions.forEach(t => {
+        const id = t.id || t.Id;
+        const cName = t.customerName || t.CustomerName;
+        const pName = t.providerName || t.ProviderName;
+        const sName = t.serviceName || t.ServiceName;
+        const price = t.price || t.Price;
+        const status = (t.status || t.Status).toLowerCase();
+        
+        let date = t.date || t.Date;
+        if(date) date = new Date(date).toLocaleDateString('vi-VN');
+        const time = t.time || t.Time || '';
+        
+        let statusBadge = '';
+        if (status === 'pending') statusBadge = '<span class="badge" style="background:#FEF9C3;color:#CA8A04"><i class="ri-time-line"></i> Chờ xác nhận</span>';
+        else if (status === 'confirmed') statusBadge = '<span class="badge" style="background:#DBEAFE;color:#2563EB"><i class="ri-check-line"></i> Đã nhận</span>';
+        else if (status === 'done') statusBadge = '<span class="badge" style="background:#DCFCE7;color:#16A34A"><i class="ri-checkbox-circle-line"></i> Hoàn thành</span>';
+        else statusBadge = '<span class="badge" style="background:#FEE2E2;color:#DC2626"><i class="ri-close-circle-line"></i> Đã huỷ</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${id}</span></td>
+          <td style="font-weight:600;color:#1E293B">${cName}</td>
+          <td style="font-weight:600;color:var(--red-dark)">${pName}</td>
+          <td>${sName}</td>
+          <td style="font-family:monospace;font-weight:600">${price ? price.toLocaleString('vi-VN') + ' ₫' : '-'}</td>
+          <td><span style="color:#64748B;font-size:0.85rem">${time} | ${date}</span></td>
+          <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function switchTab(tabId) {
@@ -336,8 +475,17 @@
       document.getElementById('tab-' + tabId).classList.add('active');
       document.getElementById('view-users').classList.add('hidden');
       document.getElementById('view-providers').classList.add('hidden');
+      document.getElementById('view-services').classList.add('hidden');
+      document.getElementById('view-transactions').classList.add('hidden');
       document.getElementById('view-' + tabId).classList.remove('hidden');
-      document.getElementById('page-title').textContent = tabId === 'users' ? 'Quản lý Người Dùng' : 'Quản lý Nhà Cung Cấp';
+      
+      const titles = {
+        'users': 'Quản lý Người Dùng',
+        'providers': 'Quản lý Nhà Cung Cấp',
+        'services': 'Quản lý Dịch Vụ',
+        'transactions': 'Quản lý Giao Dịch Đặt Lịch'
+      };
+      document.getElementById('page-title').textContent = titles[tabId];
     }
 
     document.getElementById('create-provider-form').addEventListener('submit', async (e) => {

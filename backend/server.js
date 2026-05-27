@@ -892,14 +892,52 @@ app.post('/api/admin/providers', authMiddleware, adminOnly, async (req, res) => 
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-app.patch('/api/admin/providers/:id/toggle', authMiddleware, adminOnly, async (req, res) => {
+app.patch('/api/admin/users/:id/toggle', authMiddleware, adminOnly, async (req, res) => {
     try {
-        const check = await sql.query`SELECT Verified FROM Users WHERE Id = ${req.params.id} AND Role = 'provider'`;
-        if (!check.recordset.length) return res.status(404).json({ error: 'Không tìm thấy nhà cung cấp' });
+        const check = await sql.query`SELECT Verified, Role FROM Users WHERE Id = ${req.params.id}`;
+        if (!check.recordset.length) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+        if (check.recordset[0].Role === 'admin') return res.status(403).json({ error: 'Không thể khoá quản trị viên' });
+        
         const currentVerified = check.recordset[0].Verified;
         const newVerified = currentVerified ? false : true;
         await sql.query`UPDATE Users SET Verified=${newVerified}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
         res.json({ success: true, verified: newVerified === true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/admin/services', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const result = await sql.query`
+            SELECT s.Id, s.Name, s.Category, s.Price, s.Active, s.CreatedAt, u.Name as ProviderName 
+            FROM Services s
+            LEFT JOIN Users u ON s.ProviderId = u.Id
+            ORDER BY s.CreatedAt DESC`;
+        res.json(result.recordset);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.patch('/api/admin/services/:id/toggle', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const check = await sql.query`SELECT Active FROM Services WHERE Id = ${req.params.id}`;
+        if (!check.recordset.length) return res.status(404).json({ error: 'Không tìm thấy dịch vụ' });
+        
+        const currentActive = check.recordset[0].Active;
+        const newActive = currentActive ? false : true;
+        await sql.query`UPDATE Services SET Active=${newActive}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
+        res.json({ success: true, active: newActive === true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/admin/transactions', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const result = await sql.query`
+            SELECT t.Id, t.ServiceName, t.Price, t.Status, t.Date, t.Time, t.CreatedAt,
+                   c.Name AS CustomerName, p.Name AS ProviderName
+            FROM Transactions t
+            LEFT JOIN Users c ON t.CustomerId = c.Id
+            LEFT JOIN Users p ON t.ProviderId = p.Id
+            ORDER BY t.CreatedAt DESC`;
+        res.json(result.recordset);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
