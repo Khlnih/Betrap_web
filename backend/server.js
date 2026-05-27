@@ -870,7 +870,7 @@ function mapConsultation(c) {
 
 app.get('/api/admin/users', authMiddleware, adminOnly, async (req, res) => {
     try {
-        const result = await sql.query`SELECT Id, Name, Email, Role, Phone, CreatedAt FROM Users ORDER BY CreatedAt DESC`;
+        const result = await sql.query`SELECT Id, Name, Email, Role, Phone, Verified, CreatedAt FROM Users ORDER BY CreatedAt DESC`;
         res.json(result.recordset);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
