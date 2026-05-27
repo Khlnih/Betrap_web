@@ -238,9 +238,15 @@
           <label class="form-label">Mô tả</label>
           <textarea id="so-desc" class="form-control" rows="3" placeholder="Mô tả chi tiết dịch vụ..."></textarea>
         </div>
-        <div style="display:none;">
-          <input id="so-price" class="form-control" type="number" min="0" value="0">
-          <input id="so-unit" class="form-control" type="text" value="buổi">
+        <div style="display:flex;gap:var(--sp-md);">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Giá dịch vụ (VNĐ) *</label>
+            <input id="so-price" class="form-control" type="number" min="0" placeholder="VD: 1500000">
+          </div>
+          <div class="form-group" style="width:120px">
+            <label class="form-label">Đơn vị</label>
+            <input id="so-unit" class="form-control" type="text" value="buổi" placeholder="buổi, mâm...">
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Ảnh đại diện dịch vụ</label>
