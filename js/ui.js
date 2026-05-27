@@ -271,8 +271,8 @@ const UI = (() => {
             <div>
               <p class="footer-heading">Liên hệ</p>
               <div class="footer-links">
-                <a href="tel:1900xxxx"><i class="ri-phone-line"></i> 1900 xxxx</a>
-                <a href="mailto:hello@betrap.vn"><i class="ri-mail-line"></i> hello@betrap.vn</a>
+                <a href="tel:0915650548"><i class="ri-phone-line"></i> 0915650548</a>
+                <a href="mailto:trapconnect24@gmail.com"><i class="ri-mail-line"></i> trapconnect24@gmail.com</a>
                 <a href="#"><i class="ri-map-pin-line"></i> Toàn quốc</a>
               </div>
             </div>
