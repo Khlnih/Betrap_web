@@ -199,7 +199,7 @@
             <table id="services-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Tên Dịch Vụ</th><th>Nhà Cung Cấp</th><th>Giá Tiền</th><th>Trạng Thái</th><th>Hành Động</th>
+                  <th>ID</th><th>Tên Dịch Vụ</th><th>Nhà Cung Cấp</th><th>Trạng Thái</th><th>Hành Động</th>
                 </tr>
               </thead>
               <tbody><!-- JS --></tbody>
@@ -373,8 +373,8 @@
       allServices.forEach(s => {
         const id = s.id || s.Id;
         const name = s.name || s.Name;
-        const provider = s.providerName || s.ProviderName;
-        const price = s.price || s.Price;
+        // Fix for Postgres lowercase key
+        const provider = s.providername || s.providerName || s.ProviderName || 'Không rõ';
         const active = s.active ?? s.Active ?? false;
         
         let statusBadge = active 
@@ -386,7 +386,6 @@
           <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${id}</span></td>
           <td style="font-weight:600;color:#1E293B">${name}</td>
           <td>${provider}</td>
-          <td style="font-family:monospace;font-weight:600">${price.toLocaleString('vi-VN')} ₫</td>
           <td>${statusBadge}</td>
           <td>
             <button class="btn btn-sm ${active ? 'btn-ghost' : 'btn-primary'}" 
