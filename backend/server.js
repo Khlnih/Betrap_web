@@ -955,15 +955,10 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: err.message || 'Lỗi hệ thống hoặc dịch vụ Cloudinary.' });
 });
 
+// Auto-migration for Vercel
+sql.query(`ALTER TABLE Services ADD COLUMN Gallery VARCHAR(5000);`).catch(() => {});
+
 if (require.main === module) {
-    (async () => {
-        try {
-            await sql.query`ALTER TABLE Services ADD COLUMN Gallery VARCHAR(5000);`;
-            console.log('Migration: Added Gallery column.');
-        } catch (e) {
-            // Ignore if column already exists
-        }
-        app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
-    })();
+    app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
 }
 module.exports = app;
