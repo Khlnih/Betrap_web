@@ -113,9 +113,6 @@
         <div class="menu-item" onclick="switchTab('services')" id="tab-services">
           <i class="ri-briefcase-4-line"></i> Dịch Vụ
         </div>
-        <div class="menu-item" onclick="switchTab('transactions')" id="tab-transactions">
-          <i class="ri-shopping-cart-2-line"></i> Giao Dịch
-        </div>
       </div>
       <div style="padding: 24px; border-top: 1px solid rgba(0,0,0,0.05)">
         <button class="btn btn-ghost btn-block" style="color:#64748B; border: 1px solid #E2E8F0; border-radius: 12px;" onclick="logout()">
@@ -211,24 +208,6 @@
         </div>
       </section>
 
-      <section id="view-transactions" class="hidden">
-        <div class="table-card">
-          <div class="table-header">
-            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Giao Dịch Đặt Lịch</h3>
-          </div>
-          <div style="overflow-x:auto">
-            <table id="transactions-table">
-              <thead>
-                <tr>
-                  <th>Mã HĐ</th><th>Khách Hàng</th><th>Nhà Cung Cấp</th><th>Dịch Vụ</th><th>Tổng Tiền</th><th>Ngày Thực Hiện</th><th>Trạng Thái</th>
-                </tr>
-              </thead>
-              <tbody><!-- JS --></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
     </main>
   </div>
 
@@ -280,18 +259,15 @@
 
     let allUsers = [];
     let allServices = [];
-    let allTransactions = [];
 
     async function loadData() {
       try {
         allUsers = await API.admin.getUsers();
         allServices = await API.admin.getServices();
-        allTransactions = await API.admin.getTransactions();
         updateStats();
         renderUsers();
         renderProviders();
         renderServices();
-        renderTransactions();
       } catch (err) {
         UI.toast('Lỗi tải dữ liệu: ' + err.message, 'error');
       }
@@ -435,55 +411,18 @@
       }
     }
 
-    function renderTransactions() {
-      const tbody = document.querySelector('#transactions-table tbody');
-      tbody.innerHTML = '';
-      allTransactions.forEach(t => {
-        const id = t.id || t.Id;
-        const cName = t.customerName || t.CustomerName;
-        const pName = t.providerName || t.ProviderName;
-        const sName = t.serviceName || t.ServiceName;
-        const price = t.price || t.Price;
-        const status = (t.status || t.Status).toLowerCase();
-        
-        let date = t.date || t.Date;
-        if(date) date = new Date(date).toLocaleDateString('vi-VN');
-        const time = t.time || t.Time || '';
-        
-        let statusBadge = '';
-        if (status === 'pending') statusBadge = '<span class="badge" style="background:#FEF9C3;color:#CA8A04"><i class="ri-time-line"></i> Chờ xác nhận</span>';
-        else if (status === 'confirmed') statusBadge = '<span class="badge" style="background:#DBEAFE;color:#2563EB"><i class="ri-check-line"></i> Đã nhận</span>';
-        else if (status === 'done') statusBadge = '<span class="badge" style="background:#DCFCE7;color:#16A34A"><i class="ri-checkbox-circle-line"></i> Hoàn thành</span>';
-        else statusBadge = '<span class="badge" style="background:#FEE2E2;color:#DC2626"><i class="ri-close-circle-line"></i> Đã huỷ</span>';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${id}</span></td>
-          <td style="font-weight:600;color:#1E293B">${cName}</td>
-          <td style="font-weight:600;color:var(--red-dark)">${pName}</td>
-          <td>${sName}</td>
-          <td style="font-family:monospace;font-weight:600">${price ? price.toLocaleString('vi-VN') + ' ₫' : '-'}</td>
-          <td><span style="color:#64748B;font-size:0.85rem">${time} | ${date}</span></td>
-          <td>${statusBadge}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
     function switchTab(tabId) {
       document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + tabId).classList.add('active');
       document.getElementById('view-users').classList.add('hidden');
       document.getElementById('view-providers').classList.add('hidden');
       document.getElementById('view-services').classList.add('hidden');
-      document.getElementById('view-transactions').classList.add('hidden');
       document.getElementById('view-' + tabId).classList.remove('hidden');
       
       const titles = {
         'users': 'Quản lý Người Dùng',
         'providers': 'Quản lý Nhà Cung Cấp',
-        'services': 'Quản lý Dịch Vụ',
-        'transactions': 'Quản lý Giao Dịch Đặt Lịch'
+        'services': 'Quản lý Dịch Vụ'
       };
       document.getElementById('page-title').textContent = titles[tabId];
     }
