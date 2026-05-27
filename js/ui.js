@@ -218,11 +218,11 @@ const UI = (() => {
     return '★'.repeat(full) + '☆'.repeat(5-full);
   }
   function categoryLabel(c) {
-    const m = { 'be-trap':'Bê Tráp', 'ao-dai':'Áo Dài', 'lam-trap':'Làm Tráp', 'media':'Media', 'makeup':'Make Up' };
+    const m = { 'be-trap':'Bê Tráp', 'ao-dai':'Áo Dài', 'lam-trap':'Làm Tráp', 'media':'Media', 'makeup':'Make Up', 'mc-su-kien':'MC Sự Kiện' };
     return m[c] || c;
   }
   function categoryIcon(c) {
-    const m = { 'be-trap':'👰', 'ao-dai':'👘', 'lam-trap':'🎁', 'media':'📸', 'makeup':'💄' };
+    const m = { 'be-trap':'👰', 'ao-dai':'👘', 'lam-trap':'🎁', 'media':'📸', 'makeup':'💄', 'mc-su-kien':'🎤' };
     return m[c] || '✨';
   }
 

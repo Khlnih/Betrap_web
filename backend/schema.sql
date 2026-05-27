@@ -60,6 +60,7 @@ CREATE TABLE Services (
     Unit VARCHAR(50),
     Image VARCHAR(500),
     Location VARCHAR(200),
+    Gallery VARCHAR(5000),
     Active BOOLEAN DEFAULT true,
     Rating FLOAT DEFAULT 0,
     ReviewCount INT DEFAULT 0,

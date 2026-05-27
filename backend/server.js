@@ -187,6 +187,7 @@ app.get('/api/services', async (req, res) => {
             price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
             active: s.Active, rating: s.Rating, reviewCount: s.ReviewCount,
             tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
+            gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
             createdAt: s.CreatedAt
         }));
         res.json(services);
@@ -212,6 +213,7 @@ app.get('/api/services/:id', async (req, res) => {
             price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
             active: s.Active, rating: s.Rating, reviewCount: s.ReviewCount,
             tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
+            gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
             createdAt: s.CreatedAt
         });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -219,33 +221,35 @@ app.get('/api/services/:id', async (req, res) => {
 
 // POST create service (provider only)
 app.post('/api/services', authMiddleware, providerOnly, async (req, res) => {
-    const { category, name, description, price, unit, image, location, tags } = req.body;
+    const { category, name, description, price, unit, image, location, tags, gallery } = req.body;
     if (!category || !name || !price) return res.status(400).json({ error: 'Thiếu thông tin dịch vụ.' });
     try {
         const id = 'SVC_' + uid();
         const tagsStr = JSON.stringify(tags || []);
+        const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         await sql.query`
-            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Tags)
+            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Tags, Gallery)
             VALUES (${id}, ${req.user.userId}, ${category}, ${name}, ${description||null},
-                    ${parseFloat(price)}, ${unit||'buổi'}, ${image||null}, ${location||null}, ${tagsStr})`;
+                    ${parseFloat(price)}, ${unit||'buổi'}, ${image||null}, ${location||null}, ${tagsStr}, ${galleryStr})`;
         res.json({ id, message: 'Tạo dịch vụ thành công!' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
 // PUT update service
 app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
-    const { name, description, price, unit, image, location, tags, active } = req.body;
+    const { name, description, price, unit, image, location, tags, gallery, active } = req.body;
     try {
         const check = await sql.query`SELECT ProviderId FROM Services WHERE Id = ${req.params.id}`;
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
         if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
         const tagsStr = tags ? JSON.stringify(tags) : null;
+        const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         const isActive = active !== undefined ? active : true;
         await sql.query`
             UPDATE Services SET Name=${name}, Description=${description||null},
             Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Image=${image||null},
-            Location=${location||null}, Tags=${tagsStr},
-            Active=${isActive}, UpdatedAt=GETDATE()
+            Location=${location||null}, Tags=${tagsStr}, Gallery=${galleryStr},
+            Active=${isActive}, UpdatedAt=CURRENT_TIMESTAMP
             WHERE Id=${req.params.id}`;
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -285,6 +289,7 @@ app.get('/api/provider/services', authMiddleware, providerOnly, async (req, res)
             active: s.Active === 1 || s.Active === true,
             rating: s.Rating, reviewCount: s.ReviewCount,
             tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
+            gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
             createdAt: s.CreatedAt
         }));
         res.json(services);
@@ -951,6 +956,14 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-    app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
+    (async () => {
+        try {
+            await sql.query`ALTER TABLE Services ADD COLUMN Gallery VARCHAR(5000);`;
+            console.log('Migration: Added Gallery column.');
+        } catch (e) {
+            // Ignore if column already exists
+        }
+        app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
+    })();
 }
 module.exports = app;

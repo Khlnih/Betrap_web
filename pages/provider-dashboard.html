@@ -232,6 +232,7 @@
             <option value="lam-trap">Làm Tráp</option>
             <option value="media">Chụp ảnh / Quay phim</option>
             <option value="makeup">Trang điểm</option>
+            <option value="mc-su-kien">MC Sự Kiện</option>
           </select>
         </div>
         <div class="form-group">
@@ -252,6 +253,13 @@
             </div>
           </div>
           <input type="hidden" id="so-image-url" value="">
+        </div>
+        <div class="form-group" id="gallery-group" style="display:none;">
+          <label class="form-label">Bộ sưu tập ảnh (Tối đa 8 ảnh, dành riêng cho MC)</label>
+          <input id="so-gallery-files" class="form-control" type="file" accept="image/*" multiple max="8">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Chọn nhiều file cùng lúc để tải lên bộ sưu tập.</div>
+          <div id="so-gallery-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+          <input type="hidden" id="so-gallery-urls" value="[]">
         </div>
         <div class="form-group">
           <label class="form-label">Khu vực phục vụ</label>
@@ -769,6 +777,26 @@
         imgPreview.style.display = 'none';
       }
 
+      const galleryGroup = document.getElementById('gallery-group');
+      const galleryUrls = document.getElementById('so-gallery-urls');
+      const galleryPreview = document.getElementById('so-gallery-preview');
+      galleryPreview.innerHTML = '';
+      if (editSvc && editSvc.category === 'mc-su-kien') {
+        galleryGroup.style.display = 'block';
+        if (editSvc.gallery && editSvc.gallery.length > 0) {
+          galleryUrls.value = JSON.stringify(editSvc.gallery);
+          editSvc.gallery.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url.startsWith('http') ? url : rootPath() + url;
+            img.style = 'width:60px;height:60px;object-fit:cover;border-radius:var(--r-sm)';
+            galleryPreview.appendChild(img);
+          });
+        }
+      } else {
+        galleryGroup.style.display = 'none';
+        galleryUrls.value = '[]';
+      }
+
       document.getElementById('so-location').value = editSvc ? (editSvc.location || '') : '';
       document.getElementById('so-tags').value     = editSvc && editSvc.tags ? editSvc.tags.join(', ') : '';
 
@@ -793,6 +821,32 @@
         preview.src = '';
       }
     }
+
+    document.getElementById('so-category').addEventListener('change', function() {
+      const isMC = this.value === 'mc-su-kien';
+      document.getElementById('gallery-group').style.display = isMC ? 'block' : 'none';
+    });
+
+    document.getElementById('so-gallery-files').addEventListener('change', function() {
+      const files = Array.from(this.files);
+      const previewContainer = document.getElementById('so-gallery-preview');
+      previewContainer.innerHTML = '';
+      if (files.length > 8) {
+        UI.toast('Chỉ được tải tối đa 8 ảnh!', 'error');
+        this.value = '';
+        return;
+      }
+      files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style = 'width:60px;height:60px;object-fit:cover;border-radius:var(--r-sm)';
+          previewContainer.appendChild(img);
+        }
+        reader.readAsDataURL(f);
+      });
+    });
 
     async function submitServiceModal() {
       const id       = document.getElementById('so-id').value;
@@ -821,7 +875,15 @@
           image = await API.utils.uploadImage(fileInput.files[0]);
         }
 
-        const payload = { category, name, description, price, unit, image, location, tags };
+        let gallery = JSON.parse(document.getElementById('so-gallery-urls').value || '[]');
+        const galleryInput = document.getElementById('so-gallery-files');
+        if (galleryInput.files && galleryInput.files.length > 0) {
+          btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Đang tải bộ sưu tập...';
+          const newUrls = await Promise.all(Array.from(galleryInput.files).map(f => API.utils.uploadImage(f)));
+          gallery = newUrls; // Tạm thời ghi đè ảnh cũ nếu upload mới
+        }
+
+        const payload = { category, name, description, price, unit, image, location, tags, gallery };
         
         if (id) {
           await API.svc.update(id, payload);
