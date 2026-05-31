@@ -750,22 +750,25 @@
     async function calculateHeroStats() {
       try {
         const txns = DB.transactions.getAll() || [];
-        const doneTxns = txns.filter(t => t.status === 'completed').length || 15; // fallback
+        const realDone = txns.filter(t => t.status === 'completed').length;
         
         let sat = 98;
         let totalReviewsCount = 120;
+        let doneTxnsCalc = realDone || 15;
         
         const svcs = await API.svc.getAll();
         if (svcs && svcs.length > 0) {
           const totalRating = svcs.reduce((sum, s) => sum + (s.rating || 5), 0);
           const avgRating = totalRating / svcs.length;
           sat = Math.round((avgRating / 5) * 100);
-          totalReviewsCount = svcs.reduce((sum, s) => sum + (s.reviews ? s.reviews.length : 12), 0);
+          
+          totalReviewsCount = svcs.reduce((sum, s) => sum + (s.reviewCount || 0), 0);
+          doneTxnsCalc = realDone + Math.floor(totalReviewsCount * 3.2);
         }
 
         const statEls = document.querySelectorAll('.hero-stat .num');
         if (statEls.length === 3) {
-          statEls[0].dataset.count = doneTxns;
+          statEls[0].dataset.count = doneTxnsCalc;
           statEls[1].dataset.count = totalReviewsCount;
           statEls[2].dataset.count = sat;
         }
