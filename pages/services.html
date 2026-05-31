@@ -65,6 +65,48 @@
     }
     #float-book-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(184,148,90,.55); }
     #float-book-btn.visible { display: flex; }
+    /* ── Horizontal Description Card (Áo Dài / Làm Tráp) ── */
+    .desc-card {
+      display: flex; border-radius: 16px; overflow: hidden;
+      background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform .3s ease, box-shadow .3s ease;
+      grid-column: 1 / -1;
+    }
+    .desc-card:hover { transform: translateY(-4px); box-shadow: 0 10px 32px rgba(0,0,0,0.13); }
+    .desc-card-img {
+      width: 280px; min-height: 220px; flex-shrink: 0; overflow: hidden;
+    }
+    .desc-card-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .5s ease;
+    }
+    .desc-card:hover .desc-card-img img { transform: scale(1.05); }
+    .desc-card-body {
+      flex: 1; padding: 28px 32px;
+      display: flex; flex-direction: column; justify-content: center; gap: 10px;
+    }
+    .desc-card-cat {
+      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--gold);
+    }
+    .desc-card-title {
+      font-family: var(--font-h); font-size: 1.25rem;
+      color: var(--text-dark); line-height: 1.3;
+    }
+    .desc-card-desc {
+      font-size: .88rem; color: var(--text-muted);
+      line-height: 1.65; display: -webkit-box;
+      -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .desc-card-meta {
+      font-size: .8rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 12px;
+    }
+    @media(max-width:640px) {
+      .desc-card { flex-direction: column; }
+      .desc-card-img { width: 100%; height: 200px; }
+    }
   </style>
   <link rel="icon" type="image/png" href="../assets/favicon.png">
 </head>
@@ -359,13 +401,47 @@
           </div>`;
         return;
       }
+      const isBetrap = svcs.length > 0 && svcs[0].category === 'be-trap';
+      const isDescCat = svcs.length > 0 && (svcs[0].category === 'ao-dai' || svcs[0].category === 'lam-trap');
+      // Adjust grid columns based on category
+      const gridEl = document.getElementById('services-grid');
+      if (isDescCat) {
+        gridEl.style.gridTemplateColumns = '1fr';
+        gridEl.style.gap = '16px';
+      } else {
+        gridEl.style.gridTemplateColumns = '';
+        gridEl.style.gap = '';
+      }
       grid.innerHTML = svcs.map(s => {
-        if (s.category === 'be-trap' || s.category === 'ao-dai') {
+        if (s.category === 'be-trap') {
+          // Photo-only grid card
           return `
             <div class="photo-card" onclick="openBetrapDetail('${s.id}')">
               <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" loading="lazy">
               <div class="photo-card-overlay">
                 <button onclick="event.stopPropagation();openBetrapDetail('${s.id}')">Xem chi tiết</button>
+              </div>
+            </div>`;
+        } else if (s.category === 'ao-dai' || s.category === 'lam-trap') {
+          // Horizontal card with description
+          const desc = (s.description || '').replace(/<[^>]+>/g, '');
+          const loc = s.location || '';
+          return `
+            <div class="desc-card">
+              <div class="desc-card-img">
+                <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" loading="lazy">
+              </div>
+              <div class="desc-card-body">
+                <div class="desc-card-cat">${UI.categoryIcon ? UI.categoryIcon(s.category) : ''} ${UI.categoryLabel ? UI.categoryLabel(s.category) : s.category}</div>
+                <div class="desc-card-title">${s.name}</div>
+                <div class="desc-card-desc">${desc}</div>
+                <div class="desc-card-meta">
+                  ${loc ? `<span><i class="ri-map-pin-line"></i> ${loc}</span>` : ''}
+                  <span>${UI.stars ? UI.stars(s.rating) : ''} <span style="color:var(--text-muted);font-size:.75rem">(${s.reviewCount || 0})</span></span>
+                </div>
+                <div style="margin-top:8px">
+                  <button class="btn btn-primary btn-sm" onclick="openBetrapDetail('${s.id}')">Xem chi tiết</button>
+                </div>
               </div>
             </div>`;
         } else {
