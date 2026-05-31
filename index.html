@@ -86,27 +86,48 @@
       line-height: 0;
       z-index: 2;
       pointer-events: none;
+      height: 130px;
     }
     .wave-svg {
       width: 200%;
-      height: 80px;
+      height: 130px;
       display: block;
-      animation: waveFlow 7s linear infinite;
+      animation: waveFlow 6s linear infinite;
     }
     .wave-svg-2 {
       width: 200%;
-      height: 60px;
+      height: 100px;
       display: block;
       position: absolute;
       bottom: 0;
       left: 0;
-      animation: waveFlow 11s linear infinite reverse;
-      opacity: 0.5;
+      animation: waveFlow 9s linear infinite reverse;
+      opacity: 0.75;
+    }
+    .wave-svg-3 {
+      width: 200%;
+      height: 70px;
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      animation: waveFlow 13s linear infinite;
+      opacity: 0.55;
     }
     @keyframes waveFlow {
       0%   { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
+    /* Hiệu ứng đổi màu sóng liên tục */
+    @keyframes waveColorShift {
+      0%   { fill: rgba(184,148,90,0.22); }
+      30%  { fill: rgba(139,104,64,0.30); }
+      60%  { fill: rgba(210,175,120,0.25); }
+      100% { fill: rgba(184,148,90,0.22); }
+    }
+    .wave-path-1 { animation: waveColorShift 5s ease-in-out infinite; }
+    .wave-path-2 { animation: waveColorShift 7s ease-in-out infinite reverse; }
+    .wave-path-3 { animation: waveColorShift 9s ease-in-out infinite 2s; }
 
     /* Hero nội dung */
     #bubble-container {
@@ -363,12 +384,18 @@
 
     <!-- Sóng vỗ -->
     <div class="wave-container">
-      <svg class="wave-svg" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,40 C180,70 360,10 540,40 C720,70 900,10 1080,40 C1260,70 1440,10 1440,40 L1440,80 L0,80 Z" fill="rgba(184,148,90,0.08)"/>
-        <path d="M0,55 C200,30 400,70 600,50 C800,30 1000,70 1200,50 C1350,36 1440,55 1440,55 L1440,80 L0,80 Z" fill="rgba(184,148,90,0.06)"/>
+      <!-- Lớp 1: Sóng chính (to, đậm) -->
+      <svg class="wave-svg" viewBox="0 0 1440 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="wave-path-1" d="M0,65 C180,105 360,25 540,65 C720,105 900,25 1080,65 C1260,105 1440,25 1440,65 L1440,130 L0,130 Z"/>
+        <path d="M0,85 C200,55 400,115 600,85 C800,55 1000,115 1200,85 C1350,65 1440,85 1440,85 L1440,130 L0,130 Z" fill="rgba(139,104,64,0.12)"/>
       </svg>
-      <svg class="wave-svg-2" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,30 C240,55 480,5 720,30 C960,55 1200,5 1440,30 L1440,60 L0,60 Z" fill="rgba(139,104,64,0.07)"/>
+      <!-- Lớp 2: Sóng ngược chiều -->
+      <svg class="wave-svg-2" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="wave-path-2" d="M0,50 C240,85 480,15 720,50 C960,85 1200,15 1440,50 L1440,100 L0,100 Z"/>
+      </svg>
+      <!-- Lớp 3: Sóng nhỏ trước -->
+      <svg class="wave-svg-3" viewBox="0 0 1440 70" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="wave-path-3" d="M0,35 C300,60 600,10 900,35 C1200,60 1440,10 1440,35 L1440,70 L0,70 Z"/>
       </svg>
     </div>
 
