@@ -408,13 +408,14 @@
 
     let lastCat = null;
     let currentSvcs = [];
+    let activeCat = 'be-trap'; // track danh mục đang xem
 
     async function applyFilters() {
       const cat      = document.querySelector('input[name="cat"]:checked')?.value || '';
       const location = document.getElementById('location-filter').value;
       const sort     = 'rating';
       const search   = document.getElementById('search-input').value;
-      
+      activeCat = cat || 'be-trap'; // cập nhật danh mục đang xem
       showCategoryModal(cat);
 
       const svcs = await API.svc.getAll({ category:cat, location, sort, search });
@@ -569,6 +570,10 @@
       if (id) {
         activeBookId = id;
         activeBookService = currentSvcs.find(s => s.id === id) || null;
+      } else {
+        // Float button: dùng danh mục đang xem, không gắn serviceId cụ thể
+        activeBookId = null;
+        activeBookService = { category: activeCat, id: null };
       }
       const sess = API.auth.currentSession();
       if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
