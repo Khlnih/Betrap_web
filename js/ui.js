@@ -267,7 +267,7 @@ const UI = (() => {
                 <a href="${root}pages/services.html?cat=ao-dai">Thuê Áo Dài</a>
                 <a href="${root}pages/services.html?cat=lam-trap">Làm Tráp</a>
                 <a href="${root}pages/services.html?cat=media">Media</a>
-                <a href="${root}pages/services.html?cat=makeup">Make Up</a>
+                <a href="${root}pages/services.html?cat=mc-su-kien">MC Sự Kiện</a>
               </div>
             </div>
             <div>
