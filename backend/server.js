@@ -455,8 +455,11 @@ app.get('/api/transactions/:userId', authMiddleware, async (req, res) => {
         return res.status(403).json({ error: 'Forbidden' });
     try {
         const result = await sql.query`
-            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone FROM Transactions t
+            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone,
+                   s.Category AS ServiceCategory
+            FROM Transactions t
             LEFT JOIN Users u ON t.CustomerId = u.Id
+            LEFT JOIN Services s ON t.ServiceId = s.Id
             WHERE t.CustomerId=${req.params.userId} OR t.ProviderId=${req.params.userId}
             ORDER BY t.CreatedAt DESC`;
         res.json(result.recordset.map(mapTxn));
@@ -466,8 +469,11 @@ app.get('/api/transactions/:userId', authMiddleware, async (req, res) => {
 app.get('/api/transaction/:id', authMiddleware, async (req, res) => {
     try {
         const result = await sql.query`
-            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone FROM Transactions t
+            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone,
+                   s.Category AS ServiceCategory
+            FROM Transactions t
             LEFT JOIN Users u ON t.CustomerId = u.Id
+            LEFT JOIN Services s ON t.ServiceId = s.Id
             WHERE t.Id=${req.params.id}`;
         if (!result.recordset.length) return res.status(404).json({ error: 'Not found' });
         const t = result.recordset[0];
@@ -503,7 +509,9 @@ app.put('/api/transaction/:id/status', authMiddleware, async (req, res) => {
 function mapTxn(t) {
     return {
         id: t.Id, customerId: t.CustomerId, providerId: t.ProviderId,
-        serviceId: t.ServiceId, serviceName: t.ServiceName, price: t.Price,
+        serviceId: t.ServiceId, serviceName: t.ServiceName,
+        serviceCategory: t.ServiceCategory || null,
+        price: t.Price,
         date: t.Date ? (t.Date instanceof Date ? t.Date.toISOString().split('T')[0] : t.Date) : null,
         time: t.Time, address: t.Address, note: t.Note, status: t.Status,
         cancelReason: t.CancelReason || null,

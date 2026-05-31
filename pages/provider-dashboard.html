@@ -469,12 +469,17 @@
         el.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h3>Không có đơn nào đang chờ</h3><p>Bạn đã xử lý hết tất cả đơn hàng!</p></div>`;
         return;
       }
-      el.innerHTML = orders.map(o => `
+      el.innerHTML = orders.map(o => {
+        const cat = o.serviceCategory || '';
+        const bdgCls = CAT_BADGE_CLASS[cat] || '';
+        const catLbl = UI.categoryLabel ? UI.categoryLabel(cat) : cat;
+        return `
         <div class="order-card-full border-pending" style="margin-bottom:var(--sp-md)">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);flex-wrap:wrap">
             <div>
               <div class="order-id">${o.id}</div>
-              <div style="font-weight:700;margin-top:4px;font-size:1rem">${o.serviceName}</div>
+              ${bdgCls ? `<span class="cat-badge ${bdgCls}" style="margin:4px 0;display:inline-block">${catLbl}</span>` : ''}
+              <div style="font-weight:700;margin-top:2px;font-size:1rem">${o.serviceName}</div>
               <div style="font-size:.8rem;color:var(--text-muted);margin-top:4px">
                 <i class="ri-user-line"></i> ${o.customerName || 'Khách hàng'}
               </div>
@@ -489,7 +494,8 @@
             <button class="btn btn-danger btn-sm" onclick="promptCancelOrder('${o.id}')"><i class="ri-close-line"></i> Từ Chối</button>
             <button class="btn btn-ghost btn-sm" onclick="showOrderDetail('${o.id}')"><i class="ri-eye-line"></i> Xem Chi Tiết</button>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
 
     // ── All Orders ────────────────────────────────────────────────────────────
@@ -501,12 +507,16 @@
       }
       el.innerHTML = orders.map(o => {
         const borderColor = o.status==='done' ? 'var(--success)' : o.status==='cancelled' ? 'var(--error)' : o.status==='confirmed' ? 'var(--info)' : 'var(--gold)';
+        const cat = o.serviceCategory || '';
+        const bdgCls = CAT_BADGE_CLASS[cat] || '';
+        const catLbl = UI.categoryLabel ? UI.categoryLabel(cat) : cat;
         return `
         <div style="background:white;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-xs);margin-bottom:var(--sp-md);border-left:4px solid ${borderColor}">
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-md)">
             <div>
               <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
-              <div style="font-weight:700;margin-top:4px">${o.serviceName}</div>
+              ${bdgCls ? `<span class="cat-badge ${bdgCls}" style="margin:4px 0;display:inline-block">${catLbl}</span>` : ''}
+              <div style="font-weight:700;margin-top:2px">${o.serviceName}</div>
               <div style="font-size:.8rem;color:var(--text-muted)">${o.customerName || 'Khách hàng'} · ${o.date}</div>
               <div style="font-size:.8rem;color:var(--text-muted)">${o.address}</div>
             </div>
