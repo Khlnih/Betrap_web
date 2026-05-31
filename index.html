@@ -57,59 +57,34 @@
       background-image: radial-gradient(circle, rgba(139,104,64,.06) 1px, transparent 1px);
       background-size: 36px 36px;
     }
-    /* ── Vệt sáng chuyển động ── */
+    /* ── Vệt sáng chéo chuyển động ── */
     .light-beam {
       position: absolute;
       pointer-events: none;
       z-index: 1;
-      border-radius: 50%;
-      filter: blur(55px);
-    }
-    .beam-1 {
-      width: 700px; height: 180px;
+      /* Vệt chéo: mỏng theo chiều dọc, dài theo chiều ngang */
+      width: 160px;
+      height: 160vh;
+      top: -30vh;
+      left: -200px;
+      transform: rotate(20deg);
+      transform-origin: top center;
       background: linear-gradient(90deg,
         transparent 0%,
-        rgba(184,148,90,0.55) 30%,
-        rgba(210,175,120,0.80) 50%,
-        rgba(184,148,90,0.55) 70%,
+        rgba(184,148,90,0.18) 20%,
+        rgba(210,175,120,0.55) 50%,
+        rgba(184,148,90,0.18) 80%,
         transparent 100%);
-      top: 16%; left: -800px;
-      transform: rotate(-12deg);
-      animation: beamSweep 9s ease-in-out infinite;
+      filter: blur(18px);
+      animation: beamSlide 18s cubic-bezier(0.4,0,0.6,1) infinite;
       opacity: 0;
     }
-    .beam-2 {
-      width: 520px; height: 120px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(139,104,64,0.50) 25%,
-        rgba(184,148,90,0.72) 50%,
-        rgba(139,104,64,0.50) 75%,
-        transparent 100%);
-      top: 44%; left: -600px;
-      transform: rotate(-8deg);
-      animation: beamSweep 12s ease-in-out infinite 3.5s;
-      opacity: 0;
-    }
-    .beam-3 {
-      width: 380px; height: 90px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(210,175,120,0.48) 30%,
-        rgba(184,148,90,0.65) 50%,
-        rgba(210,175,120,0.48) 70%,
-        transparent 100%);
-      top: 68%; left: -500px;
-      transform: rotate(-5deg);
-      animation: beamSweep 16s ease-in-out infinite 7s;
-      opacity: 0;
-    }
-    @keyframes beamSweep {
-      0%   { left: -800px; opacity: 0; }
-      8%   { opacity: 1; }
-      50%  { opacity: 0.9; }
-      88%  { opacity: 0.55; }
-      100% { left: 110%; opacity: 0; }
+    @keyframes beamSlide {
+      0%   { left: -200px;  opacity: 0; }
+      6%   { opacity: 1; }
+      85%  { opacity: 0.85; }
+      95%  { opacity: 0; }
+      100% { left: 110vw;   opacity: 0; }
     }
 
     /* ── Bong bóng nổi ── */
@@ -434,10 +409,8 @@
     <div class="blob blob-3"></div>
     <div class="dots-grid"></div>
 
-    <!-- Vệt sáng chuyển động -->
-    <div class="light-beam beam-1"></div>
-    <div class="light-beam beam-2"></div>
-    <div class="light-beam beam-3"></div>
+    <!-- Vệt sáng chéo -->
+    <div class="light-beam"></div>
 
     <!-- Bong bóng nổi -->
     <div id="bubble-container"></div>
