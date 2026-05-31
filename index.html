@@ -62,29 +62,31 @@
       position: absolute;
       pointer-events: none;
       z-index: 1;
-      /* Vệt chéo: mỏng theo chiều dọc, dài theo chiều ngang */
       width: 640px;
-      height: 160vh;
-      top: -30vh;
-      left: -700px;
+      height: 300vh;        /* Kéo dài đủ để che toàn bộ hero theo chiều cao */
+      top: -100vh;          /* Bắt đầu từ xa phía trên để đầu vệt không lộ */
+      left: -1200px;
       transform: rotate(40deg);
       transform-origin: top center;
+      /* Gradient 4 điểm: fade in dài ở 2 đầu, đậm ở giữa */
       background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(184,148,90,0.18) 20%,
+        transparent   0%,
+        rgba(184,148,90,0.10) 10%,
+        rgba(184,148,90,0.22) 25%,
         rgba(210,175,120,0.55) 50%,
-        rgba(184,148,90,0.18) 80%,
+        rgba(184,148,90,0.22) 75%,
+        rgba(184,148,90,0.10) 90%,
         transparent 100%);
-      filter: blur(18px);
-      animation: beamSlide 18s cubic-bezier(0.4,0,0.6,1) infinite;
+      filter: blur(28px);   /* Blur lớn hơn → 2 mép fade mượt, không thấy cạnh cứng */
+      animation: beamSlide 20s cubic-bezier(0.4,0,0.6,1) infinite;
       opacity: 0;
     }
     @keyframes beamSlide {
-      0%   { left: -200px;  opacity: 0; }
-      6%   { opacity: 1; }
-      85%  { opacity: 0.85; }
-      95%  { opacity: 0; }
-      100% { left: 110vw;   opacity: 0; }
+      0%   { left: -1200px; opacity: 0; }
+      8%   { opacity: 1; }
+      82%  { opacity: 0.85; }
+      96%  { opacity: 0; }
+      100% { left: 130vw;   opacity: 0; }
     }
 
     /* ── Bong bóng nổi ── */
