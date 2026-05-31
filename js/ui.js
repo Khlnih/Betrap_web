@@ -218,7 +218,7 @@ const UI = (() => {
     return '★'.repeat(full) + '☆'.repeat(5-full);
   }
   function categoryLabel(c) {
-    const m = { 'be-trap':'Bê Tráp', 'ao-dai':'Áo Dài', 'lam-trap':'Tráp Ăn Hỏi', 'media':'Media', 'makeup':'Make Up', 'mc-su-kien':'MC Sự Kiện' };
+    const m = { 'be-trap':'Cưới Hỏi', 'ao-dai':'Áo Dài', 'lam-trap':'Tráp Ăn Hỏi', 'media':'Media', 'makeup':'Make Up', 'mc-su-kien':'MC Sự Kiện' };
     return m[c] || c;
   }
   function categoryIcon(c) {
@@ -263,7 +263,7 @@ const UI = (() => {
             <div>
               <p class="footer-heading">Dịch vụ</p>
               <div class="footer-links">
-                <a href="${root}pages/services.html?cat=be-trap">Bê Tráp</a>
+                <a href="${root}pages/services.html?cat=be-trap">Cưới Hỏi</a>
                 <a href="${root}pages/services.html?cat=ao-dai">Thuê Áo Dài</a>
                 <a href="${root}pages/services.html?cat=lam-trap">Tráp Ăn Hỏi</a>
                 <a href="${root}pages/services.html?cat=media">Media</a>

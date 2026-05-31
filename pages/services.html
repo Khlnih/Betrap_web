@@ -122,7 +122,7 @@
   <div class="container page-content" style="padding-top:0">
     <!-- Mobile filter chips -->
     <div class="filter-bar" id="mobile-cats">
-      <button class="filter-chip" data-cat="be-trap">Bê Tráp</button>
+      <button class="filter-chip" data-cat="be-trap">Cưới Hỏi</button>
       <button class="filter-chip" data-cat="ao-dai">Áo Dài</button>
       <button class="filter-chip" data-cat="lam-trap">Tráp Ăn Hỏi</button>
       <button class="filter-chip" data-cat="media">Media</button>
@@ -136,7 +136,7 @@
         <div class="filter-section">
           <div class="filter-title">Danh Mục</div>
           <div style="display:flex;flex-direction:column;gap:var(--sp-sm)">
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="be-trap" checked> Bê Tráp</label>
+            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="be-trap" checked> Cưới Hỏi</label>
             <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="ao-dai"> Áo Dài</label>
             <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="lam-trap"> Tráp Ăn Hỏi</label>
             <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="media"> Media</label>
@@ -205,7 +205,7 @@
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;">
           <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
-          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Cọc 30% để giữ chỗ đội bê tráp</span>
+          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Cọc 30% để giữ chỗ đội cưới hỏi</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;">
           <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
@@ -451,8 +451,8 @@
       if (cat === 'be-trap') {
         if (typeof closeNotice === 'function') closeNotice();
         UI.modal({
-          title: 'Đội Bê Tráp',
-          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Đội bê tráp chuyên nghiệp với phong cách trẻ trung, lịch sự và chỉn chu trong từng nghi thức cưới hỏi. Nam mặc quần âu, giày tây lịch lãm; nữ duyên dáng với áo dài nhiều mẫu đẹp, đi giày bệt hoặc cao gót theo yêu cầu concept của khách hàng.<br><br>Đội hình được sắp xếp đồng đều, tác phong chuyên nghiệp, đúng giờ và hỗ trợ tận tâm trong suốt buổi lễ. Không chỉ bê tráp, đội còn hỗ trợ rót nước, mời khách và phối hợp nghi lễ để ngày vui diễn ra trọn vẹn, trang trọng và mang đậm nét đẹp truyền thống Việt Nam.</div>',
+          title: 'Đội Cưới Hỏi',
+          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Đội cưới hỏi chuyên nghiệp với phong cách trẻ trung, lịch sự và chỉn chu trong từng nghi thức cưới hỏi. Nam mặc quần âu, giày tây lịch lãm; nữ duyên dáng với áo dài nhiều mẫu đẹp, đi giày bệt hoặc cao gót theo yêu cầu concept của khách hàng.<br><br>Đội hình được sắp xếp đồng đều, tác phong chuyên nghiệp, đúng giờ và hỗ trợ tận tâm trong suốt buổi lễ. Không chỉ hỗ trợ đám hỏi, đội còn hỗ trợ rót nước, mời khách và phối hợp nghi lễ để ngày vui diễn ra trọn vẹn, trang trọng và mang đậm nét đẹp truyền thống Việt Nam.</div>',
           cancelText: 'Đóng',
           confirmText: 'Không hiện lại',
           confirmClass: 'btn-outline',
@@ -576,7 +576,7 @@
 
     // ── Form fields shown per category ──
     const CAT_CONFIG = {
-      'be-trap':    { title: 'Đặt Đội Bê Tráp',    subtitle: 'Vui lòng điền thông tin ngày lễ của bạn', qty: true,  color: false, theme: false, media: false, event: false },
+      'be-trap':    { title: 'Đặt Đội Cưới Hỏi',    subtitle: 'Vui lòng điền thông tin ngày lễ của bạn', qty: true,  color: false, theme: false, media: false, event: false },
       'ao-dai':     { title: 'Thuê Áo Dài',         subtitle: 'Chọn màu sắc và số lượng bộ áo dài cần thuê',   qty: true,  color: true,  theme: false, media: false, event: false },
       'lam-trap':   { title: 'Đặt Tráp Ăn Hỏi',       subtitle: 'Cho chúng tôi biết chủ đề và kiểu mâm bạn muốn',   qty: false, color: false, theme: true,  media: false, event: false },
       'media':      { title: 'Đặt Dịch Vụ Media',  subtitle: 'Chọn loại hình dịch vụ ảnh/video cần thực hiện',  qty: false, color: false, theme: false, media: true,  event: false },
