@@ -83,16 +83,16 @@
       window.totalDescPages = descPages.length;
       let descHTML = '';
       if (descPages.length <= 1) {
-        descHTML = `<p style="color:var(--text-dark);line-height:2.2;font-size:1.05rem;white-space:pre-line;margin:0;">${svc.description}</p>`;
+        descHTML = `<p style="color:#4B5563;font-weight:500;text-align:justify;line-height:2.2;font-size:1.05rem;white-space:pre-line;margin:0;">${svc.description}</p>`;
       } else {
         descHTML = `
           <div id="desc-pages-container" style="min-height: 200px;">
-            ${descPages.map((p, idx) => `<p class="animate-fadeIn" id="desc-page-${idx}" style="color:var(--text-dark);line-height:2.2;font-size:1.05rem;margin:0; display: ${idx === 0 ? 'block' : 'none'};">${p}</p>`).join('')}
+            ${descPages.map((p, idx) => `<p class="animate-fadeIn" id="desc-page-${idx}" style="color:#4B5563;font-weight:500;text-align:justify;line-height:2.2;font-size:1.05rem;margin:0; display: ${idx === 0 ? 'block' : 'none'};">${p}</p>`).join('')}
           </div>
-          <div style="display:flex; justify-content:center; align-items:center; gap: 16px; margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(0,0,0,0.1)">
-            <button id="desc-prev-btn" class="btn btn-outline" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;" onclick="changeDescPage(-1)" disabled><i class="ri-arrow-left-s-line"></i> Trước</button>
-            <span id="desc-page-indicator" style="font-size: 0.9rem; color: var(--text-dark); font-weight:600; min-width: 50px; text-align: center;">1 / ${descPages.length}</span>
-            <button id="desc-next-btn" class="btn btn-outline" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;" onclick="changeDescPage(1)">Sau <i class="ri-arrow-right-s-line"></i></button>
+          <div style="display:flex; justify-content:center; align-items:center; gap: 16px; margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(255,107,157,0.2)">
+            <button id="desc-prev-btn" class="btn btn-outline" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; color:var(--pink); border-color:rgba(255,107,157,0.3)" onclick="changeDescPage(-1)" disabled><i class="ri-arrow-left-s-line"></i> Trước</button>
+            <span id="desc-page-indicator" style="font-size: 0.9rem; color: #4B5563; font-weight:700; min-width: 50px; text-align: center;">1 / ${descPages.length}</span>
+            <button id="desc-next-btn" class="btn btn-outline" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; color:var(--pink); border-color:rgba(255,107,157,0.3)" onclick="changeDescPage(1)">Sau <i class="ri-arrow-right-s-line"></i></button>
           </div>
         `;
       }
@@ -120,7 +120,7 @@
               </div>
             </div>
             <h3 style="margin-top:var(--sp-xl)">Mô Tả Dịch Vụ</h3>
-            <div style="background:#fdfcfc;border-radius:var(--r-lg);padding:var(--sp-lg);margin-top:var(--sp-sm);border:1px solid rgba(0,0,0,0.03);">
+            <div style="background:#ffffff;border-radius:var(--r-lg);padding:var(--sp-xl);margin-top:var(--sp-sm);border:1px solid rgba(255,107,157,0.15);box-shadow:0 8px 24px rgba(255,107,157,0.06);">
               ${descHTML}
             </div>
             ${svc.gallery && svc.gallery.length > 0 ? `
