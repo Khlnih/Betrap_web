@@ -236,42 +236,82 @@
           <img id="bd-img2" src="" style="width:100%;height:100%;object-fit:cover">
         </div>
         <div style="flex:1;padding:40px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;gap:14px">
-          <div id="bd-cat-label" style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)"></div>
-          <h2 id="bd-name" style="font-family:var(--font-h);color:var(--text-dark);font-size:1.8rem;line-height:1.2;margin:0"></h2>
-          <div id="bd-desc" style="font-size:.93rem;line-height:1.75;color:var(--text-muted)"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Đặt Nhanh -->
+          <div id="bd-cat-label" style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercas  <!-- Modal Đặt Dịch Vụ -->
   <div id="betrap-book-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
-    <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:400px;position:relative;transform:translateY(20px);transition:transform .3s ease;">
+    <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:440px;position:relative;transform:translateY(20px);transition:transform .3s ease;">
       <button onclick="closeQuickBook()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
-      <h3 style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:20px;color:var(--text-dark)">Thông Tin Đặt Lịch</h3>
-      <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-bottom: 20px;">
-        <div class="form-group" style="margin-bottom:16px">
-          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Ngày diễn ra</label>
-          <input type="date" id="qb-date" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+      <h3 id="qb-title" style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:6px;color:var(--text-dark)">Thông Tin Đặt Lịch</h3>
+      <p id="qb-subtitle" style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px"></p>
+      <div style="max-height:60vh;overflow-y:auto;padding-right:6px;margin-bottom:20px;display:flex;flex-direction:column;gap:14px">
+
+        <!-- Ngày + Giờ (Tất cả) -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Ngày diễn ra</label>
+            <input type="date" id="qb-date" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Giờ chuẩn bị</label>
+            <input type="time" id="qb-time" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+          </div>
         </div>
-        <div class="form-group" style="margin-bottom:16px">
-          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Giờ chuẩn bị</label>
-          <input type="time" id="qb-time" class="form-control" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+
+        <!-- Địa chỉ (Tất cả) -->
+        <div>
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Địa chỉ tổ chức</label>
+          <input type="text" id="qb-address" class="form-control" placeholder="Số nhà, tên đườ ng..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
         </div>
-        <div class="form-group" style="margin-bottom:16px">
-          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Số lượng (Tuỳ chọn)</label>
-          <input type="text" id="qb-quantity" class="form-control" placeholder="Ví dụ: 7 bộ, 7 người..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+
+        <!-- Số lượng (Bê Tráp / Áo Dài) -->
+        <div id="qb-row-qty">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Số lượng</label>
+          <input type="text" id="qb-quantity" class="form-control" placeholder="Ví dụ: 7 người, 7 bộ..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
         </div>
-        <div class="form-group" style="margin-bottom:16px">
-          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Địa chỉ tổ chức</label>
-          <input type="text" id="qb-address" class="form-control" placeholder="Số nhà, tên đường..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px">
+
+        <!-- Tông màu (Áo Dài) -->
+        <div id="qb-row-color" style="display:none">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Tông màu / concept</label>
+          <input type="text" id="qb-color" class="form-control" placeholder="Ví dụ: Hồng pastel, Đỏ cười..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
         </div>
-        <div class="form-group" style="margin-bottom:16px">
-          <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.9rem">Ghi chú thêm</label>
-          <textarea id="qb-note" class="form-control" rows="2" placeholder="Yêu cầu đặc biệt..." style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px"></textarea>
+
+        <!-- Chủ đề / kiểu mâm (Làm Tráp) -->
+        <div id="qb-row-theme" style="display:none">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Chủ đề / kiểu mâm</label>
+          <input type="text" id="qb-theme" class="form-control" placeholder="Ví dụ: Mâm truyền thống, hiện đại..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+        </div>
+
+        <!-- Loại dịch vụ Media -->
+        <div id="qb-row-media" style="display:none">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Loại dịch vụ</label>
+          <select id="qb-media-type" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+            <option value="">-- Chọn loại --</option>
+            <option>Ảnh cưới / Lễ ăn hỏi</option>
+            <option>Quay phim</option>
+            <option>Ảnh + Phim</option>
+            <option>Drone</option>
+          </select>
+        </div>
+
+        <!-- Loại sự kiện MC -->
+        <div id="qb-row-event" style="display:none">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Loại sự kiện</label>
+          <select id="qb-event-type" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+            <option value="">-- Chọn loại --</option>
+            <option>Lễ ăn hỏi</option>
+            <option>Tiệc cưới</option>
+            <option>Tiệc báo hỷ</option>
+            <option>Lễ gia tiên</option>
+          </select>
+        </div>
+
+        <!-- Ghi chú (Tất cả) -->
+        <div>
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Ghi chú thêm</label>
+          <textarea id="qb-note" class="form-control" rows="2" placeholder="Yêu cầu đặc biệt..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px"></textarea>
         </div>
       </div>
-      <button id="qb-submit" class="btn btn-primary btn-block" style="padding:12px">Đăng ký</button>
+      <button id="qb-submit" class="btn btn-primary btn-block" style="padding:13px;font-size:1rem">Đăng ký
+      </button>
     </div>
   </div>
 
@@ -322,22 +362,34 @@
       document.getElementById('qb-submit').addEventListener('click', async () => {
         const sess = API.auth.currentSession();
         if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
-        
-        const date = document.getElementById('qb-date').value;
-        const time = document.getElementById('qb-time').value;
+
+        const date    = document.getElementById('qb-date').value;
+        const time    = document.getElementById('qb-time').value;
         const address = document.getElementById('qb-address').value;
         if (!date || !time || !address) return UI.toast('Vui lòng điền ngày, giờ và địa chỉ', 'error');
-        
-        const qty = document.getElementById('qb-quantity').value;
-        let note = document.getElementById('qb-note').value;
-        if (qty) {
-          note = note ? `Số lượng: ${qty} - ${note}` : `Số lượng: ${qty}`;
-        }
-        
+
+        // Build note based on category
+        const cat = activeBookService?.category || '';
+        let noteParts = [];
+        const qty     = document.getElementById('qb-quantity')?.value;
+        const color   = document.getElementById('qb-color')?.value;
+        const theme   = document.getElementById('qb-theme')?.value;
+        const media   = document.getElementById('qb-media-type')?.value;
+        const event   = document.getElementById('qb-event-type')?.value;
+        const baseNote= document.getElementById('qb-note')?.value;
+
+        if (qty)     noteParts.push(`Số lượng: ${qty}`);
+        if (color)   noteParts.push(`Tông màu: ${color}`);
+        if (theme)   noteParts.push(`Kiểu mâm: ${theme}`);
+        if (media)   noteParts.push(`Loại dịch vụ: ${media}`);
+        if (event)   noteParts.push(`Sự kiện: ${event}`);
+        if (baseNote) noteParts.push(baseNote);
+        const note = noteParts.join(' | ');
+
         const btn = document.getElementById('qb-submit');
         btn.disabled = true; btn.textContent = 'Đang xử lý...';
         try {
-          const txn = await API.txn.create({ serviceId: activeBookId, date, time, address, note });
+          const txn = await API.txn.create({ serviceId: activeBookService?.id || activeBookId, date, time, address, note });
           location.href = `checkout.html?id=${txn.id}`;
         } catch (e) {
           UI.toast(e.message, 'error');
@@ -494,10 +546,46 @@
     }
 
     let activeBookId = null;
+    let activeBookService = null;
+
+    // ── Form fields shown per category ──
+    const CAT_CONFIG = {
+      'be-trap':    { title: 'Đặt Đội Bê Tráp',    subtitle: 'Vui lòng điền thông tin ngày lễ của bạn', qty: true,  color: false, theme: false, media: false, event: false },
+      'ao-dai':     { title: 'Thuê Áo Dài',         subtitle: 'Chọn màu sắc và số lượng bộ áo dài cần thuê',   qty: true,  color: true,  theme: false, media: false, event: false },
+      'lam-trap':   { title: 'Đặt Làm Tráp',       subtitle: 'Cho chúng tôi biết chủ đề và kiểu mâm bạn muốn',   qty: false, color: false, theme: true,  media: false, event: false },
+      'media':      { title: 'Đặt Dịch Vụ Media',  subtitle: 'Chọn loại hình dịch vụ ảnh/video cần thực hiện',  qty: false, color: false, theme: false, media: true,  event: false },
+      'mc-su-kien': { title: 'Đặt MC Sự Kiện',    subtitle: 'Cho biết loại sự kiện và thông tin cần thiết',   qty: false, color: false, theme: false, media: false, event: true  },
+    };
+
     function openQuickBook(id) {
-      if (id) activeBookId = id;
+      if (id) {
+        activeBookId = id;
+        activeBookService = currentSvcs.find(s => s.id === id) || null;
+      }
       const sess = API.auth.currentSession();
       if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
+
+      // Configure form based on category
+      const cat = activeBookService?.category || 'be-trap';
+      const cfg = CAT_CONFIG[cat] || CAT_CONFIG['be-trap'];
+      document.getElementById('qb-title').textContent = cfg.title;
+      document.getElementById('qb-subtitle').textContent = cfg.subtitle;
+      document.getElementById('qb-row-qty').style.display   = cfg.qty   ? 'block' : 'none';
+      document.getElementById('qb-row-color').style.display = cfg.color ? 'block' : 'none';
+      document.getElementById('qb-row-theme').style.display = cfg.theme ? 'block' : 'none';
+      document.getElementById('qb-row-media').style.display = cfg.media ? 'block' : 'none';
+      document.getElementById('qb-row-event').style.display = cfg.event ? 'block' : 'none';
+
+      // Reset form
+      ['qb-date','qb-time','qb-address','qb-quantity','qb-color','qb-theme','qb-note'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      ['qb-media-type','qb-event-type'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.selectedIndex = 0;
+      });
+      document.getElementById('qb-submit').disabled = false;
+      document.getElementById('qb-submit').textContent = 'Đăng ký';
+
       const el = document.getElementById('betrap-book-modal');
       el.style.opacity = '1'; el.style.pointerEvents = 'auto';
       el.firstElementChild.style.transform = 'translateY(0)';
