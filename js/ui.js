@@ -284,7 +284,7 @@ const UI = (() => {
               <div class="footer-links">
                 <a href="tel:0915650548"><i class="ri-phone-line"></i> 0915650548</a>
                 <a href="mailto:trapconnect24@gmail.com"><i class="ri-mail-line"></i> trapconnect24@gmail.com</a>
-                <a href="#"><i class="ri-map-pin-line"></i> Toàn quốc</a>
+                <a href="#"><i class="ri-map-pin-line"></i> Hà Nội</a>
               </div>
             </div>
           </div>
