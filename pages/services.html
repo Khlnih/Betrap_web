@@ -252,6 +252,14 @@
       <p id="qb-subtitle" style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px"></p>
       <div style="max-height:60vh;overflow-y:auto;padding-right:6px;margin-bottom:20px;display:flex;flex-direction:column;gap:14px">
 
+        <!-- Chọn dịch vụ (chỉ hiện khi cần) -->
+        <div id="qb-row-service" style="display:none">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Chọn dịch vụ</label>
+          <select id="qb-service-select" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+            <option value="">-- Chọn dịch vụ --</option>
+          </select>
+        </div>
+
         <!-- Ngày + Giờ (Tất cả) -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
@@ -374,7 +382,16 @@
         const date    = document.getElementById('qb-date').value;
         const time    = document.getElementById('qb-time').value;
         const address = document.getElementById('qb-address').value;
-        if (!date || !time || !address) return UI.toast('Vui lòng điền ngày, giờ và địa chỉ', 'error');
+        if (!date || !time) return UI.toast('Vui lòng điền ngày và giờ', 'error');
+        if (!address || address.trim().length < 5) return UI.toast('Vui lòng nhập địa chỉ tổ chức', 'error');
+
+        // Nếu chưa có serviceId, kiểm tra dropdown chọn dịch vụ
+        let finalServiceId = activeBookService?.id || activeBookId;
+        const svcSelect = document.getElementById('qb-service-select');
+        if (!finalServiceId && svcSelect && svcSelect.value) {
+          finalServiceId = svcSelect.value;
+        }
+        if (!finalServiceId) return UI.toast('Vui lòng chọn dịch vụ cụ thể', 'error');
 
         // Build note based on category
         const cat = activeBookService?.category || '';
@@ -397,7 +414,7 @@
         const btn = document.getElementById('qb-submit');
         btn.disabled = true; btn.textContent = 'Đang xử lý...';
         try {
-          const txn = await API.txn.create({ serviceId: activeBookService?.id || activeBookId, date, time, address, note });
+          const txn = await API.txn.create({ serviceId: finalServiceId, date, time, address, note });
           location.href = `checkout.html?id=${txn.id}`;
         } catch (e) {
           UI.toast(e.message, 'error');
@@ -571,7 +588,7 @@
         activeBookId = id;
         activeBookService = currentSvcs.find(s => s.id === id) || null;
       } else {
-        // Float button: dùng danh mục đang xem, không gắn serviceId cụ thể
+        // Float button: dùng danh mục đang xem
         activeBookId = null;
         activeBookService = { category: activeCat, id: null };
       }
@@ -588,6 +605,23 @@
       document.getElementById('qb-row-theme').style.display = cfg.theme ? 'block' : 'none';
       document.getElementById('qb-row-media').style.display = cfg.media ? 'block' : 'none';
       document.getElementById('qb-row-event').style.display = cfg.event ? 'block' : 'none';
+
+      // Nếu không có serviceId cụ thể → hiện dropdown chọn service
+      const svcRow = document.getElementById('qb-row-service');
+      const svcSel = document.getElementById('qb-service-select');
+      const svcsInCat = currentSvcs.filter(s => s.category === cat);
+      if (!id && svcsInCat.length > 1) {
+        svcRow.style.display = 'block';
+        svcSel.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' +
+          svcsInCat.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      } else if (!id && svcsInCat.length === 1) {
+        // Chỉ có 1 service → tự chọn luôn
+        activeBookId = svcsInCat[0].id;
+        activeBookService = svcsInCat[0];
+        svcRow.style.display = 'none';
+      } else {
+        svcRow.style.display = 'none';
+      }
 
       // Reset form
       ['qb-date','qb-time','qb-address','qb-quantity','qb-color','qb-theme','qb-note'].forEach(id => {
