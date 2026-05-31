@@ -219,13 +219,28 @@
     </div>
   </div>
 
-  <!-- Modal Chi Tiết (Image Only) -->
+  <!-- Modal Chi Tiết -->
   <div id="betrap-detail-modal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;">
+    <!-- Nút thoát -->
     <button onclick="closeBetrapDetail()" style="position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.15);border:none;width:44px;height:44px;border-radius:50%;font-size:1.6rem;color:#fff;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
       <i class="ri-close-line"></i>
     </button>
-    <div style="max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center;transform:scale(0.95);transition:transform .3s ease">
+    <!-- Chế độ 1: Chỉ ảnh (Bê Tráp) -->
+    <div id="bd-image-only" style="max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center;transform:scale(0.95);transition:transform .3s ease">
       <img id="bd-img" src="" style="max-width:90vw;max-height:88vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+    </div>
+    <!-- Chế độ 2: Ảnh + Mô tả (Áo Dài / Làm Tráp) -->
+    <div id="bd-image-desc" style="display:none;width:90vw;max-width:1000px;max-height:90vh;background:#fff;border-radius:20px;overflow:hidden;transform:scale(0.95);transition:transform .3s ease;box-shadow:0 24px 60px rgba(0,0,0,0.4)">
+      <div style="display:flex;height:100%">
+        <div style="flex:1.1;overflow:hidden;min-height:420px">
+          <img id="bd-img2" src="" style="width:100%;height:100%;object-fit:cover">
+        </div>
+        <div style="flex:1;padding:40px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;gap:14px">
+          <div id="bd-cat-label" style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)"></div>
+          <h2 id="bd-name" style="font-family:var(--font-h);color:var(--text-dark);font-size:1.8rem;line-height:1.2;margin:0"></h2>
+          <div id="bd-desc" style="font-size:.93rem;line-height:1.75;color:var(--text-muted)"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -403,45 +418,18 @@
       }
       const isBetrap = svcs.length > 0 && svcs[0].category === 'be-trap';
       const isDescCat = svcs.length > 0 && (svcs[0].category === 'ao-dai' || svcs[0].category === 'lam-trap');
-      // Adjust grid columns based on category
+      // Reset grid to 3 columns always
       const gridEl = document.getElementById('services-grid');
-      if (isDescCat) {
-        gridEl.style.gridTemplateColumns = '1fr';
-        gridEl.style.gap = '16px';
-      } else {
-        gridEl.style.gridTemplateColumns = '';
-        gridEl.style.gap = '';
-      }
+      gridEl.style.gridTemplateColumns = '';
+      gridEl.style.gap = '';
       grid.innerHTML = svcs.map(s => {
-        if (s.category === 'be-trap') {
-          // Photo-only grid card
+        if (s.category === 'be-trap' || s.category === 'ao-dai' || s.category === 'lam-trap') {
+          // Photo-only grid card for all three categories
           return `
             <div class="photo-card" onclick="openBetrapDetail('${s.id}')">
               <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" loading="lazy">
               <div class="photo-card-overlay">
                 <button onclick="event.stopPropagation();openBetrapDetail('${s.id}')">Xem chi tiết</button>
-              </div>
-            </div>`;
-        } else if (s.category === 'ao-dai' || s.category === 'lam-trap') {
-          // Horizontal card with description
-          const desc = (s.description || '').replace(/<[^>]+>/g, '');
-          const loc = s.location || '';
-          return `
-            <div class="desc-card">
-              <div class="desc-card-img">
-                <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" loading="lazy">
-              </div>
-              <div class="desc-card-body">
-                <div class="desc-card-cat">${UI.categoryIcon ? UI.categoryIcon(s.category) : ''} ${UI.categoryLabel ? UI.categoryLabel(s.category) : s.category}</div>
-                <div class="desc-card-title">${s.name}</div>
-                <div class="desc-card-desc">${desc}</div>
-                <div class="desc-card-meta">
-                  ${loc ? `<span><i class="ri-map-pin-line"></i> ${loc}</span>` : ''}
-                  <span>${UI.stars ? UI.stars(s.rating) : ''} <span style="color:var(--text-muted);font-size:.75rem">(${s.reviewCount || 0})</span></span>
-                </div>
-                <div style="margin-top:8px">
-                  <button class="btn btn-primary btn-sm" onclick="openBetrapDetail('${s.id}')">Xem chi tiết</button>
-                </div>
               </div>
             </div>`;
         } else {
@@ -472,20 +460,37 @@
     function openBetrapDetail(id) {
       const svc = currentSvcs.find(s => s.id === id);
       if (!svc) return;
-      const imgEl = document.getElementById('bd-img');
-      imgEl.src = svc.image.startsWith('http') ? svc.image : rootPath() + svc.image;
       const modal = document.getElementById('betrap-detail-modal');
+      const imageOnly = document.getElementById('bd-image-only');
+      const imageDesc = document.getElementById('bd-image-desc');
+      const imgSrc = svc.image.startsWith('http') ? svc.image : rootPath() + svc.image;
+
+      if (svc.category === 'ao-dai' || svc.category === 'lam-trap') {
+        // Image + description mode
+        document.getElementById('bd-img2').src = imgSrc;
+        document.getElementById('bd-name').textContent = svc.name;
+        document.getElementById('bd-cat-label').textContent = UI.categoryLabel ? UI.categoryLabel(svc.category) : svc.category;
+        let desc = (svc.description || '').replace(/\n/g, '<br>');
+        document.getElementById('bd-desc').innerHTML = desc;
+        imageOnly.style.display = 'none';
+        imageDesc.style.display = 'block';
+        setTimeout(() => { imageDesc.style.transform = 'scale(1)'; }, 10);
+      } else {
+        // Image only mode (be-trap)
+        document.getElementById('bd-img').src = imgSrc;
+        imageDesc.style.display = 'none';
+        imageOnly.style.display = 'flex';
+        setTimeout(() => { imageOnly.style.transform = 'scale(1)'; }, 10);
+      }
       modal.style.opacity = '1';
       modal.style.pointerEvents = 'auto';
-      const inner = modal.querySelector('div:not([style*="position:absolute"])');
-      if (inner) inner.style.transform = 'scale(1)';
     }
     function closeBetrapDetail() {
       const modal = document.getElementById('betrap-detail-modal');
       modal.style.opacity = '0';
       modal.style.pointerEvents = 'none';
-      const inner = modal.querySelector('div:not([style*="position:absolute"])');
-      if (inner) inner.style.transform = 'scale(0.95)';
+      document.getElementById('bd-image-only').style.transform = 'scale(0.95)';
+      document.getElementById('bd-image-desc').style.transform = 'scale(0.95)';
     }
 
     let activeBookId = null;
