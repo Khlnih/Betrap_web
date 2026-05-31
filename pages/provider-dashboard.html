@@ -256,7 +256,7 @@
           <input type="hidden" id="so-image-url" value="">
         </div>
         <div class="form-group" id="gallery-group" style="display:none;">
-          <label class="form-label">Bộ sưu tập ảnh (Tối đa 8 ảnh, dành riêng cho MC)</label>
+          <label class="form-label">Bộ sưu tập ảnh (Tối đa 8 ảnh, dành cho MC / Media)</label>
           <input id="so-gallery-files" class="form-control" type="file" accept="image/*" multiple max="8">
           <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Chọn nhiều file cùng lúc để tải lên bộ sưu tập.</div>
           <div id="so-gallery-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
@@ -782,7 +782,7 @@
       const galleryUrls = document.getElementById('so-gallery-urls');
       const galleryPreview = document.getElementById('so-gallery-preview');
       galleryPreview.innerHTML = '';
-      if (editSvc && editSvc.category === 'mc-su-kien') {
+      if (editSvc && (editSvc.category === 'mc-su-kien' || editSvc.category === 'media')) {
         galleryGroup.style.display = 'block';
         if (editSvc.gallery && editSvc.gallery.length > 0) {
           galleryUrls.value = JSON.stringify(editSvc.gallery);
@@ -824,7 +824,7 @@
     }
 
     document.getElementById('so-category').addEventListener('change', function() {
-      const isMC = this.value === 'mc-su-kien';
+      const isMC = this.value === 'mc-su-kien' || this.value === 'media';
       document.getElementById('gallery-group').style.display = isMC ? 'block' : 'none';
     });
 
