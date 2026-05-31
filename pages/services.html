@@ -285,6 +285,13 @@
           body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Cho thuê áo dài dành cho đội bê trap với nhiều mẫu mã đa dạng, từ truyền thống đến hiện đại, phù hợp cho lễ ăn hỏi, cưới hỏi và các sự kiện đặc biệt. Áo dài được chuẩn bị sạch sẽ, chỉn chu, chất liệu đẹp và lên form tôn dáng, giúp đội hình đồng đều và nổi bật trong ngày lễ.<br><br>Có nhiều tone màu và concept để lựa chọn. Trang phục dành cho cả nam và nữ, dễ phối phụ kiện và phù hợp với nhiều phong cách nghi lễ Việt Nam. Cam kết chuẩn bị đúng mẫu, đúng size và đúng thời gian để mang đến hình ảnh chuyên nghiệp và đẹp mắt cho ngày vui của khách hàng.</div>',
           confirmText: 'Đã hiểu'
         });
+      } else if (cat === 'mc-su-kien') {
+        if (typeof closeNotice === 'function') closeNotice();
+        UI.modal({
+          title: 'MC Sự Kiện',
+          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify;font-family:var(--font)">Cung cấp MC chuyên nghiệp cho các sự kiện cưới hỏi, tiệc báo hỷ, lễ gia tiên. Đội ngũ MC có kinh nghiệm, khả năng hoạt náo tốt, xử lý tình huống linh hoạt, giọng nói truyền cảm, mang đến không khí trang trọng nhưng không kém phần ấm cúng và vui tươi cho ngày trọng đại của bạn.<br><br>Chúng tôi cam kết MC trang phục chỉn chu, đúng giờ, làm việc bằng chữ "tâm" để ngày vui của bạn thật sự trọn vẹn và ý nghĩa.</div>',
+          confirmText: 'Đã hiểu'
+        });
       }
     }
 
