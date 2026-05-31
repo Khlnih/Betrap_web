@@ -14,18 +14,21 @@
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
     :root {
-      --pink: #FF6B9D;
-      --pink-light: #FFD6E7;
-      --peach: #FF9472;
-      --lavender: #C4B5FD;
-      --mint: #6EE7B7;
-      --gold-v2: #F59E0B;
+      --pink: #C9A96E;
+      --pink-light: #EFE5D5;
+      --peach: #D4B896;
+      --lavender: #D9CFC4;
+      --mint: #B5C4B1;
+      --gold-v2: #B8945A;
+      --cream: #FAF7F2;
+      --ivory: #F5F0E8;
+      --beige-dark: #6B5744;
     }
 
     /* ─── HERO ─────────────────────────────────────────────── */
     .hero-v2 {
       min-height: 100vh;
-      background: linear-gradient(135deg, #FFF5F7 0%, #FFF8F0 40%, #F5F0FF 100%);
+      background: linear-gradient(135deg, #FAF7F2 0%, #F5EFE4 45%, #EDE4D6 100%);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -40,9 +43,9 @@
       opacity: 0.5;
       animation: blobPulse 8s ease-in-out infinite alternate;
     }
-    .blob-1 { width: 600px; height: 600px; background: #FFD6E7; top: -200px; right: -100px; animation-delay: 0s; }
-    .blob-2 { width: 400px; height: 400px; background: #C4B5FD; bottom: -100px; left: -100px; animation-delay: 2s; }
-    .blob-3 { width: 300px; height: 300px; background: #FED7AA; top: 40%; left: 40%; animation-delay: 4s; }
+    .blob-1 { width: 600px; height: 600px; background: #E8D9C5; top: -200px; right: -100px; animation-delay: 0s; }
+    .blob-2 { width: 400px; height: 400px; background: #D9CFC4; bottom: -100px; left: -100px; animation-delay: 2s; }
+    .blob-3 { width: 300px; height: 300px; background: #E8DDD0; top: 40%; left: 40%; animation-delay: 4s; }
     @keyframes blobPulse {
       from { transform: scale(1) translate(0,0); }
       to   { transform: scale(1.15) translate(20px, -20px); }
@@ -51,7 +54,7 @@
     .dots-grid {
       position: absolute;
       inset: 0;
-      background-image: radial-gradient(circle, rgba(200,16,46,.07) 1px, transparent 1px);
+      background-image: radial-gradient(circle, rgba(139,104,64,.06) 1px, transparent 1px);
       background-size: 36px 36px;
     }
     /* Cánh hoa rơi */
@@ -98,19 +101,19 @@
     @media(max-width:900px) { .hero-v2-inner { grid-template-columns: 1fr; text-align: center; } .hero-right { display: none; } }
     .hero-tag {
       display: inline-flex; align-items: center; gap: 8px;
-      background: white; border: 1.5px solid #FFD6E7;
-      color: var(--pink); padding: 6px 16px; border-radius: 100px;
+      background: rgba(255,255,255,0.8); border: 1.5px solid #D9C9B5;
+      color: var(--beige-dark); padding: 6px 16px; border-radius: 100px;
       font-size: .8rem; font-weight: 700; margin-bottom: 24px;
-      box-shadow: 0 4px 14px rgba(255,107,157,.15);
+      box-shadow: 0 4px 14px rgba(139,104,64,.12);
     }
     .hero-v2 h1 {
       font-size: clamp(2.6rem, 5.5vw, 4.2rem);
       font-weight: 900; line-height: 1.1;
-      color: #1a0a14;
+      color: #2C1F14;
       margin-bottom: 20px;
     }
     .hero-v2 h1 .highlight {
-      background: linear-gradient(135deg, #FF6B9D, #FF9472, #F59E0B);
+      background: linear-gradient(135deg, #C9A96E, #B8945A, #8B6840);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
@@ -118,13 +121,13 @@
     .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
     .btn-pink {
       display: inline-flex; align-items: center; gap: 8px;
-      background: linear-gradient(135deg, #FF6B9D, #FF9472);
+      background: linear-gradient(135deg, #C9A96E, #8B6840);
       color: white; padding: 14px 32px; border-radius: 100px;
       font-weight: 700; font-size: 1rem; text-decoration: none;
-      box-shadow: 0 8px 24px rgba(255,107,157,.4);
+      box-shadow: 0 8px 24px rgba(139,104,64,.35);
       transition: all .3s ease;
     }
-    .btn-pink:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(255,107,157,.5); }
+    .btn-pink:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(139,104,64,.5); }
     .btn-ghost-dark {
       display: inline-flex; align-items: center; gap: 8px;
       background: white; color: #1a0a14;
@@ -134,14 +137,14 @@
       border: 1.5px solid #e5e7eb;
       transition: all .3s ease;
     }
-    .btn-ghost-dark:hover { transform: translateY(-3px); border-color: var(--pink); color: var(--pink); }
+    .btn-ghost-dark:hover { transform: translateY(-3px); border-color: var(--beige-dark); color: var(--beige-dark); }
 
     /* Hero right – floating cards */
     .hero-right { position: relative; height: 520px; }
     .hero-main-img {
       width: 380px; height: 480px; object-fit: cover;
       border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
-      box-shadow: 0 30px 80px rgba(255,107,157,.25);
+      box-shadow: 0 30px 80px rgba(139,104,64,.18);
       position: absolute; top: 20px; left: 30px;
       z-index: 2;
     }
@@ -164,7 +167,7 @@
       font-size: .85rem; font-weight: 600; color: #1a0a14;
       animation: floatUpDown 4s ease-in-out infinite alternate;
       z-index: 3;
-      border: 1px solid rgba(255, 107, 157, 0.15);
+      border: 1px solid rgba(184,148,90,.2);
     }
     /* Petal shapes for cards */
     .float-card:nth-of-type(1) { border-radius: 24px 24px 24px 4px; top: 20px; right: -30px; animation-delay: 0s; }
@@ -176,7 +179,7 @@
     }
     .hero-stats-row {
       display: flex; gap: 40px; margin-top: 40px; padding-top: 32px;
-      border-top: 1.5px solid #F3E8EE;
+      border-top: 1.5px solid #DDD0C0;
     }
     .hero-stat .num { font-size: 2rem; font-weight: 800; color: #1a0a14; font-family: var(--font-h); }
     .hero-stat .lbl { font-size: .78rem; color: #9CA3AF; margin-top: 2px; }
@@ -491,21 +494,21 @@
 
           <div class="float-card">
             <div>
-              <div style="font-size: .95rem; color: var(--pink); margin-bottom: 2px;">Đội Bê Tráp</div>
+              <div style="font-size: .95rem; color: var(--beige-dark); margin-bottom: 2px;">Đội Bê Tráp</div>
               <div style="font-size:.75rem;color:#9CA3AF;font-weight:400">Chuyên nghiệp</div>
             </div>
           </div>
 
           <div class="float-card">
             <div>
-              <div style="font-size: .95rem; color: #F59E0B; margin-bottom: 2px;">4.9 / 5 sao</div>
+              <div style="font-size: .95rem; color: #B8945A; margin-bottom: 2px;">4.9 / 5 sao</div>
               <div style="font-size:.75rem;color:#9CA3AF;font-weight:400">500+ đánh giá</div>
             </div>
           </div>
 
           <div class="float-card">
             <div>
-              <div style="font-size: .95rem; color: #10B981; margin-bottom: 2px;">Đặt lịch dễ dàng</div>
+              <div style="font-size: .95rem; color: #7A9B7A; margin-bottom: 2px;">Đặt lịch dễ dàng</div>
               <div style="font-size:.75rem;color:#9CA3AF;font-weight:400">Trong 2 phút</div>
             </div>
           </div>
