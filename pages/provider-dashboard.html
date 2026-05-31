@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     body{background:var(--cream)}
@@ -316,6 +317,24 @@
     </div>
   </div>
 
+  <!-- ── Crop Overlay ─────────────────────────────────────────────────────────── -->
+  <div id="crop-overlay" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
+    <div class="service-dialog" style="max-width:600px;width:100%;display:flex;flex-direction:column;height:80vh;">
+      <div class="service-dialog-header" style="border-bottom:none;padding-bottom:0;margin-bottom:var(--sp-sm)">
+        <div class="service-dialog-title" style="font-size:1.2rem"><i class="ri-crop-line"></i> Căn Chỉnh Ảnh</div>
+        <button class="service-close-btn" onclick="closeCropOverlay()" title="Đóng">&times;</button>
+      </div>
+      <div class="service-dialog-body" style="flex:1;overflow:hidden;position:relative;">
+        <img id="crop-image" src="" style="max-width:100%;max-height:100%;display:block;">
+      </div>
+      <div class="service-dialog-footer" style="border-top:none;margin-top:0">
+        <button class="btn btn-ghost" onclick="closeCropOverlay()">Hủy</button>
+        <button class="btn btn-primary" id="btn-apply-crop" onclick="applyCrop()">Áp Dụng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script src="../js/db.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
@@ -325,6 +344,8 @@
     let myServices  = [];
     let statsData   = null;
     let allReviews  = [];
+    let cropperInstance = null;
+    let croppedImageBlob = null;
     const TABS = ['overview','orders','consultations','reviews','services','profile'];
 
     // ── Boot ─────────────────────────────────────────────────────────────────
@@ -754,6 +775,9 @@
     function openServiceModal(serviceId) {
       const editSvc = serviceId ? myServices.find(s => s.id === serviceId) : null;
       
+      croppedImageBlob = null;
+      if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+
       document.getElementById('so-title').textContent = editSvc ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới';
       document.getElementById('so-submit-btn').textContent = editSvc ? 'Lưu Thay Đổi' : 'Tạo Dịch Vụ';
       
@@ -809,18 +833,46 @@
     }
 
     function previewServiceImage(input) {
-      const preview = document.getElementById('so-image-preview');
+      const cropImage = document.getElementById('crop-image');
       if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          preview.src = e.target.result;
-          preview.style.display = 'block';
+          cropImage.src = e.target.result;
+          document.getElementById('crop-overlay').style.opacity = '1';
+          document.getElementById('crop-overlay').style.pointerEvents = 'all';
+          if (cropperInstance) cropperInstance.destroy();
+          // Allow Cropper UI time to show before initializing
+          setTimeout(() => {
+            cropperInstance = new Cropper(cropImage, {
+              aspectRatio: NaN, // Free crop
+              viewMode: 1,
+              autoCropArea: 0.9,
+            });
+          }, 50);
         }
         reader.readAsDataURL(input.files[0]);
-      } else {
-        preview.style.display = 'none';
-        preview.src = '';
       }
+    }
+
+    function closeCropOverlay() {
+      document.getElementById('crop-overlay').style.opacity = '0';
+      document.getElementById('crop-overlay').style.pointerEvents = 'none';
+      if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+      if (!croppedImageBlob) document.getElementById('so-image-file').value = '';
+    }
+
+    function applyCrop() {
+      if (!cropperInstance) return;
+      cropperInstance.getCroppedCanvas({
+        maxWidth: 1200,
+        maxHeight: 1200
+      }).toBlob((blob) => {
+        croppedImageBlob = blob;
+        const preview = document.getElementById('so-image-preview');
+        preview.src = URL.createObjectURL(blob);
+        preview.style.display = 'block';
+        closeCropOverlay();
+      }, 'image/jpeg', 0.85);
     }
 
     document.getElementById('so-category').addEventListener('change', function() {
@@ -871,7 +923,12 @@
       try {
         let image = document.getElementById('so-image-url').value;
         const fileInput = document.getElementById('so-image-file');
-        if (fileInput.files && fileInput.files[0]) {
+        
+        if (croppedImageBlob) {
+          btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Đang tải ảnh...';
+          const file = new File([croppedImageBlob], "avatar.jpg", { type: "image/jpeg" });
+          image = await API.utils.uploadImage(file);
+        } else if (fileInput.files && fileInput.files[0]) {
           btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Đang tải ảnh...';
           image = await API.utils.uploadImage(fileInput.files[0]);
         }
