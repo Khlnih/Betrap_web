@@ -606,19 +606,30 @@
       document.getElementById('qb-row-media').style.display = cfg.media ? 'block' : 'none';
       document.getElementById('qb-row-event').style.display = cfg.event ? 'block' : 'none';
 
-      // Nếu không có serviceId cụ thể → hiện dropdown chọn service
+      // Nếu không có serviceId cụ thể
       const svcRow = document.getElementById('qb-row-service');
       const svcSel = document.getElementById('qb-service-select');
       const svcsInCat = currentSvcs.filter(s => s.category === cat);
-      if (!id && svcsInCat.length > 1) {
-        svcRow.style.display = 'block';
-        svcSel.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' +
-          svcsInCat.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      } else if (!id && svcsInCat.length === 1) {
-        // Chỉ có 1 service → tự chọn luôn
-        activeBookId = svcsInCat[0].id;
-        activeBookService = svcsInCat[0];
-        svcRow.style.display = 'none';
+      
+      if (!id) {
+        if (cat === 'be-trap' && svcsInCat.length > 0) {
+          // Với dịch vụ Bê Tráp, chọn mặc định cái đầu tiên và ẩn dropdown
+          activeBookId = svcsInCat[0].id;
+          activeBookService = svcsInCat[0];
+          svcRow.style.display = 'none';
+        } else if (svcsInCat.length > 1) {
+          // Với các dịch vụ khác, hiển thị dropdown để chọn
+          svcRow.style.display = 'block';
+          svcSel.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' +
+            svcsInCat.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        } else if (svcsInCat.length === 1) {
+          // Chỉ có 1 dịch vụ thì tự chọn luôn
+          activeBookId = svcsInCat[0].id;
+          activeBookService = svcsInCat[0];
+          svcRow.style.display = 'none';
+        } else {
+          svcRow.style.display = 'none';
+        }
       } else {
         svcRow.style.display = 'none';
       }
