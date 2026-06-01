@@ -637,8 +637,8 @@ app.get('/api/stats/global', async (req, res) => {
     try {
         const [txns, revCount, avgRat] = await Promise.all([
             sql.query`SELECT COUNT(*) AS TotalDone FROM Transactions WHERE Status='done'`,
-            sql.query`SELECT SUM(ReviewCount) AS TotalReviews FROM Services WHERE Active=true`,
-            sql.query`SELECT AVG(CAST(Rating AS FLOAT)) AS AvgRating FROM Services WHERE Active=true AND ReviewCount > 0`
+            sql.query`SELECT COUNT(*) AS TotalReviews FROM Reviews`,
+            sql.query`SELECT AVG(CAST(Rating AS FLOAT)) AS AvgRating FROM Reviews`
         ]);
         res.json({
             doneTxns: txns.recordset[0].TotalDone || 0,

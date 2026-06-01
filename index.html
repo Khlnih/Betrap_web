@@ -739,9 +739,16 @@
         if (API.stats && API.stats.global) {
           const st = await API.stats.global();
           if (st) {
-            doneTxnsCalc = st.doneTxns > 0 ? st.doneTxns : 15;
-            totalReviewsCount = st.totalReviews > 0 ? st.totalReviews : 120;
-            sat = st.avgRating ? Math.round((st.avgRating / 5) * 100) : 98;
+            if (st.doneTxns === 0 && st.totalReviews === 0) {
+              // Dữ liệu mẫu ban đầu nếu hệ thống hoàn toàn mới
+              doneTxnsCalc = 1500;
+              totalReviewsCount = 450;
+              sat = 98;
+            } else {
+              doneTxnsCalc = st.doneTxns;
+              totalReviewsCount = st.totalReviews;
+              sat = st.avgRating ? Math.round((st.avgRating / 5) * 100) : 100;
+            }
           }
         }
 
