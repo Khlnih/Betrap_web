@@ -305,12 +305,12 @@
 
     /* ─── HOW IT WORKS ─────────────────────────────────────── */
     .how-v2-bg {
-      background: linear-gradient(135deg, #1a0a14 0%, #2d1529 100%);
+      background: linear-gradient(135deg, #d3c4b5 0%, #b8a696 100%);
       position: relative; overflow: hidden;
     }
     .how-v2-bg::before {
       content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 70% 50%, rgba(255,107,157,.15), transparent 60%);
+      background: radial-gradient(ellipse at 70% 50%, rgba(255,255,255,.2), transparent 60%);
     }
     .steps-v2 { display: grid; grid-template-columns: repeat(4,1fr); gap: 32px; margin-top: 60px; position: relative; }
     @media(max-width:768px) { .steps-v2 { grid-template-columns: repeat(2,1fr); } }
@@ -318,7 +318,7 @@
       content: ''; position: absolute; top: 30px; left: 8%; right: 8%;
       height: 2px;
       background: linear-gradient(to right, #FF6B9D, #FF9472, #F59E0B);
-      opacity: .3; z-index: 0;
+      opacity: .5; z-index: 0;
     }
     @media(max-width:768px) { .steps-v2::before { display: none; } }
     .step-v2 { text-align: center; position: relative; z-index: 1; transition: transform .3s ease; }
@@ -329,10 +329,10 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 1.4rem; font-weight: 800; color: white;
       margin: 0 auto 24px;
-      box-shadow: 0 12px 32px rgba(255,107,157,.5);
+      box-shadow: 0 12px 32px rgba(255,107,157,.4);
     }
-    .step-v2 h4 { color: white; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
-    .step-v2 p { color: rgba(255,255,255,.6); font-size: .9rem; line-height: 1.8; }
+    .step-v2 h4 { color: var(--text-dark); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
+    .step-v2 p { color: rgba(0,0,0,.7); font-size: .9rem; line-height: 1.8; }
 
     /* ─── FEATURED SERVICES ────────────────────────────────── */
     .services-grid-v2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 56px; }
@@ -559,8 +559,8 @@
     <div class="container" data-aos="fade-up">
       <div style="text-align:center">
         <div class="section-pill" style="background:rgba(255,107,157,.15);color:#FF6B9D">✨ Về Chúng Tôi</div>
-        <h2 class="section-title-v2" style="color:white">Trap Connect<br>Nâng Tầm Cưới Hỏi Việt</h2>
-        <p class="section-sub-v2" style="color:rgba(255,255,255,.5);margin:0 auto">Kết nối văn hoá truyền thống với nhịp sống hiện đại.</p>
+        <h2 class="section-title-v2" style="color:var(--text-dark)">Trap Connect<br>Nâng Tầm Cưới Hỏi Việt</h2>
+        <p class="section-sub-v2" style="color:rgba(0,0,0,.6);margin:0 auto">Kết nối văn hoá truyền thống với nhịp sống hiện đại.</p>
       </div>
       <div class="steps-v2">
         <div class="step-v2">
