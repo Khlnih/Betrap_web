@@ -37,7 +37,7 @@
   --shadow-red: 0 12px 32px rgba(216,195,165,.35);
   --r-sm: 8px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px; --r-full: 9999px;
   --sp-xs:4px;--sp-sm:8px;--sp-md:16px;--sp-lg:24px;--sp-xl:40px;--sp-2xl:64px;--sp-3xl:96px;
-  --font: 'BrushKencur', 'Plus Jakarta Sans', sans-serif; --font-h: 'BrushKencur', 'Playfair Display', serif;
+  --font: 'Plus Jakarta Sans', sans-serif; --font-h: 'Playfair Display', serif;
   --t-fast:150ms cubic-bezier(0.4, 0, 0.2, 1);--t-normal:300ms cubic-bezier(0.4, 0, 0.2, 1);--t-slow:500ms cubic-bezier(0.4, 0, 0.2, 1);
   --nav-h:76px; --z-nav:1000; --z-dropdown:200; --z-modal:1050; --z-toast:400;
 }
