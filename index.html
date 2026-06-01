@@ -732,32 +732,23 @@
 
     async function calculateHeroStats() {
       try {
-        const txns = DB.transactions.getAll() || [];
-        const realDone = txns.filter(t => t.status === 'completed').length;
-        
         let sat = 98;
         let totalReviewsCount = 120;
-        let doneTxnsCalc = realDone || 15;
-        
-        const svcs = await API.svc.getAll();
-        if (svcs && svcs.length > 0) {
-          const ratedSvcs = svcs.filter(s => Number(s.reviewCount) > 0 && Number(s.rating) > 0);
-          if (ratedSvcs.length > 0) {
-            const totalRating = ratedSvcs.reduce((sum, s) => sum + Number(s.rating), 0);
-            const avgRating = totalRating / ratedSvcs.length;
-            sat = Math.round((avgRating / 5) * 100);
-          } else {
-            sat = 98; // Mặc định nếu chưa có đánh giá nào
+        let doneTxnsCalc = 15;
+
+        if (API.stats && API.stats.global) {
+          const st = await API.stats.global();
+          if (st) {
+            doneTxnsCalc = st.doneTxns > 0 ? st.doneTxns : 15;
+            totalReviewsCount = st.totalReviews > 0 ? st.totalReviews : 120;
+            sat = st.avgRating ? Math.round((st.avgRating / 5) * 100) : 98;
           }
-          
-          totalReviewsCount = svcs.reduce((sum, s) => sum + Number(s.reviewCount || 0), 0);
-          doneTxnsCalc = realDone + Math.floor(totalReviewsCount * 3.2) || 15;
         }
 
         const statEls = document.querySelectorAll('.hero-stat .num');
         if (statEls.length === 3) {
           statEls[0].dataset.count = doneTxnsCalc;
-          statEls[1].dataset.count = totalReviewsCount || 120;
+          statEls[1].dataset.count = totalReviewsCount;
           statEls[2].dataset.count = sat;
         }
       } catch(e) {

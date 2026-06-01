@@ -340,6 +340,11 @@ const API = (() => {
 
   // ── STATS ─────────────────────────────────────────────────────────────────
   const stats = {
+    global: async () => {
+      try { return await get('/stats/global'); }
+      catch { return { doneTxns: 0, totalReviews: 0, avgRating: 5 }; }
+    },
+
     customer: async () => {
       try { return await get('/stats/customer', true); }
       catch { return { total: 0, pending: 0, done: 0, spent: 0 }; }

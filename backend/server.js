@@ -633,6 +633,21 @@ app.get('/api/reviews/provider/:providerId', authMiddleware, async (req, res) =>
 // 6. STATS
 // ═══════════════════════════════════════════════════════════════════════════
 
+app.get('/api/stats/global', async (req, res) => {
+    try {
+        const [txns, revCount, avgRat] = await Promise.all([
+            sql.query`SELECT COUNT(*) AS TotalDone FROM Transactions WHERE Status='done'`,
+            sql.query`SELECT SUM(ReviewCount) AS TotalReviews FROM Services WHERE Active=true`,
+            sql.query`SELECT AVG(CAST(Rating AS FLOAT)) AS AvgRating FROM Services WHERE Active=true AND ReviewCount > 0`
+        ]);
+        res.json({
+            doneTxns: txns.recordset[0].TotalDone || 0,
+            totalReviews: revCount.recordset[0].TotalReviews || 0,
+            avgRating: avgRat.recordset[0].AvgRating || 5
+        });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
 app.get('/api/stats/customer', authMiddleware, async (req, res) => {
     const uid = req.user.userId;
     try {
