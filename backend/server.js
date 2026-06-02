@@ -989,7 +989,16 @@ app.get('/api/blogs', async (req, res) => {
         if (offset) query += ` OFFSET ${parseInt(offset)}`;
         
         const result = await sql.query(query);
-        res.json(result.recordset);
+        const mapped = result.recordset.map(p => ({
+            Id: p.id || p.Id,
+            Title: p.title || p.Title,
+            Slug: p.slug || p.Slug,
+            CoverImage: p.coverimage || p.CoverImage,
+            Published: p.published || p.Published,
+            PublishedAt: p.publishedat || p.PublishedAt,
+            CreatedAt: p.createdat || p.CreatedAt
+        }));
+        res.json(mapped);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -1016,10 +1025,24 @@ app.get('/api/blogs/:id', async (req, res) => {
         }
         
         if (!postRes.recordset.length) return res.status(404).json({ error: 'Blog not found' });
-        const post = postRes.recordset[0];
-        const blocksRes = await sql.query`SELECT * FROM BlogBlocks WHERE PostId=${post.Id} ORDER BY Position ASC`;
-        post.blocks = blocksRes.recordset;
-        res.json(post);
+        const p = postRes.recordset[0];
+        const mappedPost = {
+            Id: p.id || p.Id,
+            Title: p.title || p.Title,
+            Slug: p.slug || p.Slug,
+            CoverImage: p.coverimage || p.CoverImage,
+            Published: p.published || p.Published,
+            PublishedAt: p.publishedat || p.PublishedAt,
+            CreatedAt: p.createdat || p.CreatedAt
+        };
+        const blocksRes = await sql.query`SELECT * FROM BlogBlocks WHERE PostId=${p.id || p.Id} ORDER BY Position ASC`;
+        mappedPost.blocks = blocksRes.recordset.map(b => ({
+            Id: b.id || b.Id,
+            Type: b.type || b.Type,
+            Content: b.content || b.Content,
+            Position: b.position || b.Position
+        }));
+        res.json(mappedPost);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -1136,7 +1159,10 @@ sql.query(`
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 `).catch(e => console.error(e));
+sql.query(`ALTER TABLE BlogBlocks RENAME COLUMN "Position" TO position;`).catch(() => {});
+sql.query(`ALTER TABLE BlogBlocks RENAME COLUMN "Type" TO type;`).catch(() => {});
 
+// Test kết nối
 if (require.main === module) {
     app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));
 }
