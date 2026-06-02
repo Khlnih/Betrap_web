@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Blog Editor — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css?v=1.6">
+  <link rel="stylesheet" href="../css/components.css?v=1.6">
+  <style>
+    body { background: #fdfdfd; }
+    .editor-header {
+      position: sticky; top: 0; z-index: 100;
+      background: white; border-bottom: 1px solid #eee;
+      padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .editor-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    
+    .title-input {
+      width: 100%; border: none; outline: none; font-family: var(--font-h);
+      font-size: 2.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 20px;
+    }
+    .title-input::placeholder { color: #ddd; }
+    
+    .cover-upload {
+      width: 100%; height: 200px; background: #f5f5f5; border: 2px dashed #ddd;
+      border-radius: var(--r-md); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; margin-bottom: 40px; position: relative; overflow: hidden;
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .cover-upload:hover { background: #f0f0f0; border-color: #ccc; }
+    .cover-upload img { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; }
+    
+    /* Blocks */
+    .block-row {
+      position: relative; padding: 12px 0; border: 1px solid transparent; transition: all 0.2s;
+    }
+    .block-row:hover { border-color: #eee; background: #fafafa; border-radius: 8px; }
+    .block-actions {
+      position: absolute; right: 8px; top: 8px; opacity: 0; transition: opacity 0.2s;
+      display: flex; gap: 4px; background: white; padding: 4px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .block-row:hover .block-actions { opacity: 1; }
+    .block-actions button { padding: 4px 8px; border-radius: 4px; color: var(--text-muted); }
+    .block-actions button:hover { background: #f0f0f0; color: var(--error); }
+
+    .block-input {
+      width: 100%; border: none; outline: none; background: transparent; resize: none;
+      font-family: inherit; font-size: inherit; line-height: inherit; color: inherit;
+    }
+    
+    .b-heading { font-family: var(--font-h); font-weight: 700; font-size: 1.75rem; color: var(--text-dark); }
+    .b-paragraph { font-size: 1.1rem; line-height: 1.8; color: var(--text-body); }
+    .b-image { width: 100%; border-radius: 8px; }
+    .b-image-wrap { text-align: center; }
+    .b-image-caption { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; text-align: center; border:none; outline:none; background:transparent; }
+    
+    .b-table { width: 100%; border-collapse: collapse; background: white; }
+    .b-table th, .b-table td { border: 1px solid #ddd; padding: 8px; }
+    .b-table input { width: 100%; border: none; outline: none; background: transparent; }
+    
+    /* Toolbar */
+    .add-block-bar {
+      display: flex; gap: 8px; margin-top: 20px; padding: 16px; background: white;
+      border: 1px solid #eee; border-radius: 8px; justify-content: center;
+    }
+    .btn-tool {
+      display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 100px;
+      font-size: 0.9rem; font-weight: 600; color: var(--text-muted); background: #f5f5f5; transition: all 0.2s;
+    }
+    .btn-tool:hover { background: var(--cream-dark); color: var(--text-dark); }
+    
+    /* Modal styles specifically for editor */
+    .editor-modal-input {
+      width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-header">
+    <div>
+      <a href="admin-dashboard.html" class="btn btn-ghost btn-sm"><i class="ri-arrow-left-line"></i> Trở về</a>
+      <span style="font-weight:600; margin-left:16px; color:#aaa" id="save-status">Đã lưu</span>
+    </div>
+    <div style="display:flex; gap:12px">
+      <button class="btn btn-outline btn-sm" onclick="savePost(false)">Lưu nháp</button>
+      <button class="btn btn-primary btn-sm" onclick="savePost(true)" id="btn-publish">Xuất bản</button>
+    </div>
+  </div>
+
+  <div class="editor-container">
+    <input type="text" class="title-input" id="post-title" placeholder="Nhập tiêu đề bài viết..." onblur="updateTitle()">
+    
+    <div class="cover-upload" onclick="uploadCover()">
+      <div id="cover-placeholder"><i class="ri-image-add-line" style="font-size:2rem; display:block; margin-bottom:8px"></i> Thêm ảnh bìa</div>
+      <img id="cover-img" src="" style="display:none;">
+    </div>
+    <input type="file" id="file-cover" style="display:none" accept="image/*" onchange="handleCoverUpload(event)">
+    <input type="file" id="file-block-image" style="display:none" accept="image/*" onchange="handleBlockImageUpload(event)">
+
+    <div id="blocks-container">
+      <!-- Blocks go here -->
+    </div>
+    
+    <div class="add-block-bar">
+      <button class="btn-tool" onclick="addBlock('paragraph')"><i class="ri-text"></i> + Nội dung</button>
+      <button class="btn-tool" onclick="addBlock('heading')"><i class="ri-heading"></i> + Mục</button>
+      <button class="btn-tool" onclick="triggerBlockImage()"><i class="ri-image-line"></i> + Ảnh</button>
+      <button class="btn-tool" onclick="showTableModal()"><i class="ri-table-line"></i> + Bảng</button>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <div id="modal-overlay"></div>
+
+  <script src="../js/api.js?v=1.1"></script>
+  <script src="../js/ui.js?v=1.1"></script>
+  <script>
+    let postId = null;
+    let postData = null;
+    let blocks = [];
+    let saveTimeout = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      API.auth.requireRole('admin');
+      
+      const params = new URLSearchParams(window.location.search);
+      postId = params.get('id');
+      
+      if (!postId) {
+        // Show modal to create title first
+        showCreateTitleModal();
+      } else {
+        await loadPost();
+      }
+    });
+
+    function showCreateTitleModal() {
+      UI.modal({
+        title: 'Tạo bài viết mới',
+        body: `<input type="text" id="new-title" class="editor-modal-input" placeholder="Nhập tiêu đề..." autofocus>`,
+        confirmText: 'Tiếp tục',
+        onConfirm: async () => {
+          const title = document.getElementById('new-title').value.trim();
+          if (!title) throw new Error('Vui lòng nhập tiêu đề');
+          const res = await API.blog.create(title);
+          window.location.href = `blog-editor.html?id=${res.id}`;
+          return true; // prevent close, page will redirect
+        }
+      });
+    }
+
+    async function loadPost() {
+      try {
+        postData = await API.blog.getById(postId);
+        document.getElementById('post-title').value = postData.Title;
+        if (postData.CoverImage) {
+          document.getElementById('cover-img').src = postData.CoverImage;
+          document.getElementById('cover-img').style.display = 'block';
+          document.getElementById('cover-placeholder').style.display = 'none';
+        }
+        if (postData.Published) {
+          document.getElementById('btn-publish').innerText = 'Đã xuất bản (Cập nhật)';
+        }
+        
+        blocks = postData.blocks || [];
+        renderBlocks();
+      } catch (err) {
+        UI.toast('Lỗi tải bài viết', 'error');
+      }
+    }
+
+    function renderBlocks() {
+      const container = document.getElementById('blocks-container');
+      container.innerHTML = '';
+      
+      blocks.forEach((b, index) => {
+        const c = typeof b.Content === 'string' && b.Content.startsWith('{') ? JSON.parse(b.Content) : { text: b.Content || '' };
+        
+        const row = document.createElement('div');
+        row.className = 'block-row';
+        row.dataset.id = b.Id;
+        
+        const actions = `
+          <div class="block-actions">
+            <button onclick="moveBlock(${index}, -1)" ${index===0?'disabled':''}><i class="ri-arrow-up-line"></i></button>
+            <button onclick="moveBlock(${index}, 1)" ${index===blocks.length-1?'disabled':''}><i class="ri-arrow-down-line"></i></button>
+            <button onclick="deleteBlock('${b.Id}')"><i class="ri-delete-bin-line"></i></button>
+          </div>
+        `;
+
+        let contentHtml = '';
+        if (b.Type === 'heading') {
+          contentHtml = `<input type="text" class="block-input b-heading" value="${c.text||''}" placeholder="Tiêu đề mục..." onblur="updateBlockContent('${b.Id}', this.value, 'heading')">`;
+        } 
+        else if (b.Type === 'paragraph') {
+          contentHtml = `<textarea class="block-input b-paragraph" placeholder="Nhập nội dung..." oninput="autoGrow(this)" onblur="updateBlockContent('${b.Id}', this.value, 'paragraph')">${c.text||''}</textarea>`;
+        } 
+        else if (b.Type === 'image') {
+          contentHtml = `
+            <div class="b-image-wrap">
+              <img src="${c.url}" class="b-image" style="width:${c.width||'100%'}">
+              <input type="text" class="b-image-caption block-input" value="${c.caption||''}" placeholder="Nhập chú thích ảnh..." onblur="updateBlockContent('${b.Id}', this.value, 'image-caption')">
+            </div>`;
+        } 
+        else if (b.Type === 'table') {
+          let tableHtml = '<table class="b-table">';
+          if (c.data) {
+            c.data.forEach((row, rIdx) => {
+              tableHtml += '<tr>';
+              row.forEach((col, cIdx) => {
+                const tag = rIdx === 0 ? 'th' : 'td';
+                tableHtml += `<${tag}><input type="text" value="${col}" onblur="updateTableCell('${b.Id}', ${rIdx}, ${cIdx}, this.value)"></${tag}>`;
+              });
+              tableHtml += '</tr>';
+            });
+          }
+          tableHtml += '</table>';
+          contentHtml = tableHtml;
+        }
+        
+        row.innerHTML = contentHtml + actions;
+        container.appendChild(row);
+      });
+      
+      // trigger resize for textareas
+      document.querySelectorAll('textarea').forEach(autoGrow);
+    }
+
+    function autoGrow(element) {
+      element.style.height = '5px';
+      element.style.height = (element.scrollHeight) + 'px';
+    }
+
+    async function addBlock(type, initialContent = {}) {
+      try {
+        let c = initialContent;
+        if (type === 'heading' || type === 'paragraph') c = { text: '' };
+        
+        const pos = blocks.length;
+        const res = await API.blog.addBlock(postId, type, c, pos);
+        blocks.push({ Id: res.id, Type: type, Content: JSON.stringify(c), Position: pos });
+        renderBlocks();
+        
+        // Focus new block if text
+        setTimeout(() => {
+          const rows = document.querySelectorAll('.block-row');
+          const last = rows[rows.length - 1];
+          if (last) {
+            const input = last.querySelector('input:not(.b-image-caption), textarea');
+            if (input) input.focus();
+            window.scrollTo({ top: last.offsetTop, behavior: 'smooth' });
+          }
+        }, 100);
+      } catch (err) {
+        UI.toast('Lỗi thêm block', 'error');
+      }
+    }
+
+    async function updateBlockContent(blockId, value, fieldType) {
+      const bIndex = blocks.findIndex(x => x.Id === blockId);
+      if (bIndex < 0) return;
+      let b = blocks[bIndex];
+      let c = typeof b.Content === 'string' ? JSON.parse(b.Content) : b.Content;
+      
+      if (fieldType === 'heading' || fieldType === 'paragraph') c.text = value;
+      if (fieldType === 'image-caption') c.caption = value;
+      
+      b.Content = JSON.stringify(c);
+      setStatus('Đang lưu...');
+      try {
+        await API.blog.updateBlock(postId, blockId, { content: c });
+        setStatus('Đã lưu');
+      } catch (e) {
+        setStatus('Lỗi lưu', 'error');
+      }
+    }
+
+    async function updateTableCell(blockId, rIdx, cIdx, value) {
+      const bIndex = blocks.findIndex(x => x.Id === blockId);
+      if (bIndex < 0) return;
+      let b = blocks[bIndex];
+      let c = JSON.parse(b.Content);
+      c.data[rIdx][cIdx] = value;
+      b.Content = JSON.stringify(c);
+      
+      setStatus('Đang lưu...');
+      try {
+        await API.blog.updateBlock(postId, blockId, { content: c });
+        setStatus('Đã lưu');
+      } catch(e) {}
+    }
+
+    async function deleteBlock(blockId) {
+      if (!confirm('Xóa block này?')) return;
+      try {
+        await API.blog.deleteBlock(postId, blockId);
+        blocks = blocks.filter(x => x.Id !== blockId);
+        renderBlocks();
+      } catch (err) {}
+    }
+
+    async function moveBlock(index, dir) {
+      if (index + dir < 0 || index + dir >= blocks.length) return;
+      // swap
+      const temp = blocks[index];
+      blocks[index] = blocks[index + dir];
+      blocks[index + dir] = temp;
+      
+      // update positions
+      blocks.forEach((b, i) => b.Position = i);
+      renderBlocks();
+      
+      const payload = blocks.map(b => ({ id: b.Id, position: b.Position }));
+      await API.blog.reorderBlocks(postId, payload);
+    }
+
+    // --- Table & Image Modals ---
+    function showTableModal() {
+      UI.modal({
+        title: 'Tạo Bảng',
+        body: `
+          <div style="display:flex; gap:16px;">
+            <div><label>Số hàng</label><input type="number" id="tbl-rows" class="editor-modal-input" value="3" min="1"></div>
+            <div><label>Số cột</label><input type="number" id="tbl-cols" class="editor-modal-input" value="3" min="1"></div>
+          </div>
+        `,
+        confirmText: 'Tạo',
+        onConfirm: async () => {
+          const rows = parseInt(document.getElementById('tbl-rows').value) || 3;
+          const cols = parseInt(document.getElementById('tbl-cols').value) || 3;
+          const data = [];
+          for (let i = 0; i < rows; i++) {
+            data.push(Array(cols).fill(''));
+          }
+          await addBlock('table', { rows, cols, data });
+        }
+      });
+    }
+
+    function triggerBlockImage() { document.getElementById('file-block-image').click(); }
+    
+    async function handleBlockImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      UI.showLoading();
+      try {
+        const url = await API.utils.uploadImage(file);
+        await addBlock('image', { url, width: '100%', caption: '' });
+      } catch (err) {
+        UI.toast('Upload ảnh thất bại', 'error');
+      } finally {
+        UI.hideLoading();
+        e.target.value = '';
+      }
+    }
+
+    function uploadCover() { document.getElementById('file-cover').click(); }
+    
+    async function handleCoverUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      UI.showLoading();
+      try {
+        const url = await API.utils.uploadImage(file);
+        document.getElementById('cover-img').src = url;
+        document.getElementById('cover-img').style.display = 'block';
+        document.getElementById('cover-placeholder').style.display = 'none';
+        
+        await API.blog.update(postId, { coverImage: url });
+      } catch (err) {
+        UI.toast('Upload ảnh bìa thất bại', 'error');
+      } finally {
+        UI.hideLoading();
+        e.target.value = '';
+      }
+    }
+
+    async function updateTitle() {
+      const title = document.getElementById('post-title').value.trim();
+      if (!title) return;
+      setStatus('Đang lưu...');
+      try {
+        await API.blog.update(postId, { title });
+        setStatus('Đã lưu');
+      } catch (e) { setStatus('Lỗi', 'error'); }
+    }
+
+    function setStatus(msg, type='normal') {
+      const el = document.getElementById('save-status');
+      el.innerText = msg;
+      el.style.color = type === 'error' ? 'var(--error)' : '#aaa';
+    }
+
+    async function savePost(publish) {
+      UI.showLoading();
+      try {
+        await updateTitle(); // Ensure title is saved
+        await API.blog.update(postId, { published: publish });
+        UI.toast(publish ? 'Đã xuất bản thành công!' : 'Đã lưu nháp!');
+        if (publish) document.getElementById('btn-publish').innerText = 'Đã xuất bản (Cập nhật)';
+      } catch (e) {
+        UI.toast('Lỗi lưu bài viết', 'error');
+      } finally {
+        UI.hideLoading();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -8,6 +8,8 @@
 -- USE BeTrapDB;
 -- GO
 
+DROP TABLE IF EXISTS BlogBlocks CASCADE;
+DROP TABLE IF EXISTS BlogPosts CASCADE;
 DROP TABLE IF EXISTS Consultations CASCADE;
 DROP TABLE IF EXISTS Favorites CASCADE;
 DROP TABLE IF EXISTS Reviews CASCADE;
@@ -215,3 +217,25 @@ INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, 
 -- Seed Chat
 -- (Deleted old mock chats)
 
+-- 9. Bảng BlogPosts
+CREATE TABLE BlogPosts (
+    Id          VARCHAR(50) PRIMARY KEY,
+    AuthorId    VARCHAR(50) REFERENCES Users(Id),
+    Title       VARCHAR(300) NOT NULL,
+    Slug        VARCHAR(300) UNIQUE,
+    CoverImage  VARCHAR(500),
+    Published   BOOLEAN DEFAULT false,
+    PublishedAt TIMESTAMP,
+    CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 10. Bảng BlogBlocks
+CREATE TABLE BlogBlocks (
+    Id        VARCHAR(50) PRIMARY KEY,
+    PostId    VARCHAR(50) NOT NULL REFERENCES BlogPosts(Id) ON DELETE CASCADE,
+    Type      VARCHAR(50) NOT NULL,
+    Content   TEXT,
+    Position  INT NOT NULL DEFAULT 0,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

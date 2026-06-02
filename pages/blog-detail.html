@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Blog Chi Tiết</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css?v=1.6">
+  <link rel="stylesheet" href="../css/components.css?v=1.6">
+  <style>
+    .page-header {
+      background: var(--grad-hero);
+      padding: calc(var(--nav-h) + var(--sp-xl)) 0 var(--sp-2xl);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #rain-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+    .blog-cover {
+      width: 100%; max-width: 900px; margin: -60px auto 40px;
+      height: 400px; object-fit: cover; border-radius: var(--r-md);
+      box-shadow: var(--shadow-md); position: relative; z-index: 3;
+      background: var(--cream-dark);
+    }
+    
+    .blog-content-layout {
+      display: flex;
+      gap: var(--sp-2xl);
+      max-width: 1000px;
+      margin: 0 auto var(--sp-3xl);
+      align-items: flex-start;
+    }
+    
+    .blog-sidebar {
+      width: 250px;
+      position: sticky;
+      top: calc(var(--nav-h) + 24px);
+      flex-shrink: 0;
+    }
+    @media (max-width: 900px) {
+      .blog-content-layout { flex-direction: column; }
+      .blog-sidebar { position: static; width: 100%; }
+    }
+    
+    .toc {
+      background: white;
+      padding: var(--sp-md);
+      border-radius: var(--r-md);
+      border: 1px solid rgba(212,175,55,.2);
+      box-shadow: var(--shadow-sm);
+    }
+    .toc h4 { font-size: 1rem; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .toc ul { list-style: none; padding: 0; }
+    .toc li { margin-bottom: 8px; font-size: 0.9rem; }
+    .toc a { color: var(--text-muted); transition: color .2s; }
+    .toc a:hover { color: var(--gold); }
+    
+    .blog-body {
+      flex: 1;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--text-body);
+    }
+    
+    /* Blog blocks styling */
+    .block { margin-bottom: var(--sp-lg); }
+    .block-heading { font-family: var(--font-h); font-weight: 700; color: var(--text-dark); margin-top: var(--sp-xl); margin-bottom: var(--sp-md); font-size: 1.75rem; }
+    .block-paragraph { margin-bottom: var(--sp-md); }
+    .block-image { width: 100%; max-width: 100%; border-radius: var(--r-sm); margin: var(--sp-md) auto; display: block; }
+    .block-image-caption { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: -10px; margin-bottom: var(--sp-md); }
+    .block-table-wrap { overflow-x: auto; margin-bottom: var(--sp-md); }
+    .block-table { width: 100%; border-collapse: collapse; }
+    .block-table th, .block-table td { border: 1px solid #e0e0e0; padding: 12px; text-align: left; }
+    .block-table th { background: var(--cream); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="page-header" id="header">
+    <canvas id="rain-canvas"></canvas>
+    <div class="container" style="position:relative; z-index:2">
+      <div class="section-pill" id="blog-date">...</div>
+      <h1 id="blog-title" style="max-width: 800px; margin: 16px auto; font-size: clamp(2rem, 4vw, 3rem);">Đang tải bài viết...</h1>
+    </div>
+  </div>
+
+  <div class="container" id="main-container">
+    <img id="blog-cover" class="blog-cover" src="" style="display:none;" alt="Cover">
+    
+    <div class="blog-content-layout">
+      <aside class="blog-sidebar">
+        <div class="toc">
+          <h4>Mục Lục</h4>
+          <ul id="toc-list">
+            <li><i class="ri-loader-4-line ri-spin"></i> Đang tải...</li>
+          </ul>
+        </div>
+      </aside>
+      
+      <article class="blog-body" id="blog-content">
+        <!-- Nội dung đổ vào đây -->
+      </article>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="../js/api.js?v=1.1"></script>
+  <script src="../js/ui.js?v=1.1"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      UI.renderFooter('footer-container');
+      initRainEffect();
+      await loadBlog();
+    });
+
+    async function loadBlog() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('blog-title').innerText = 'Không tìm thấy bài viết';
+        return;
+      }
+
+      try {
+        const post = await API.blog.getById(id);
+        document.title = post.Title + ' — BêTráp Blog';
+        document.getElementById('blog-title').innerText = post.Title;
+        document.getElementById('blog-date').innerText = UI.formatDate(post.PublishedAt || post.CreatedAt);
+        
+        if (post.CoverImage) {
+          const cover = document.getElementById('blog-cover');
+          cover.src = post.CoverImage;
+          cover.style.display = 'block';
+        } else {
+          document.getElementById('header').style.paddingBottom = '60px'; // Bỏ margin lẹm xuống nếu không có ảnh
+        }
+
+        const contentEl = document.getElementById('blog-content');
+        const tocEl = document.getElementById('toc-list');
+        let html = '';
+        let tocHtml = '';
+        let headingCount = 0;
+
+        if (post.blocks && post.blocks.length > 0) {
+          post.blocks.forEach(b => {
+            const c = typeof b.Content === 'string' && b.Content.startsWith('{') ? JSON.parse(b.Content) : b.Content;
+            
+            if (b.Type === 'heading') {
+              headingCount++;
+              const hid = 'heading-' + headingCount;
+              html += `<h2 class="block block-heading" id="${hid}">${c.text || c}</h2>`;
+              tocHtml += `<li><a href="#${hid}">${c.text || c}</a></li>`;
+            } 
+            else if (b.Type === 'paragraph') {
+              html += `<p class="block block-paragraph">${c.text || c}</p>`;
+            } 
+            else if (b.Type === 'image') {
+              html += `<img src="${c.url}" class="block block-image" style="width:${c.width||'100%'};" alt="Image">`;
+              if (c.caption) html += `<div class="block-image-caption">${c.caption}</div>`;
+            } 
+            else if (b.Type === 'table') {
+              let t = '<div class="block block-table-wrap"><table class="block-table">';
+              if (c.data && c.data.length > 0) {
+                c.data.forEach((row, rIdx) => {
+                  t += '<tr>';
+                  row.forEach(col => {
+                    if (rIdx === 0) t += `<th>${col}</th>`;
+                    else t += `<td>${col}</td>`;
+                  });
+                  t += '</tr>';
+                });
+              }
+              t += '</table></div>';
+              html += t;
+            }
+          });
+        } else {
+          html = '<p class="text-muted">Nội dung đang được cập nhật...</p>';
+        }
+
+        contentEl.innerHTML = html;
+        tocEl.innerHTML = tocHtml || '<li>Không có mục lục</li>';
+
+      } catch (err) {
+        document.getElementById('blog-title').innerText = 'Lỗi tải bài viết';
+        document.getElementById('blog-content').innerHTML = '<p class="text-error">Không thể tải nội dung. Vui lòng thử lại.</p>';
+      }
+    }
+
+    function initRainEffect() {
+      const canvas = document.getElementById('rain-canvas');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = document.querySelector('.page-header').offsetHeight;
+      
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = document.querySelector('.page-header').offsetHeight;
+      });
+
+      const particles = [];
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * w, y: Math.random() * h,
+          l: Math.random() * 1, xs: -2 + Math.random() * 2, ys: Math.random() * 8 + 8
+        });
+      }
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(212, 185, 150, 0.4)';
+        ctx.lineWidth = 1;
+        for (let p of particles) {
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys); ctx.stroke();
+        }
+        for (let p of particles) {
+          p.x += p.xs; p.y += p.ys;
+          if (p.x > w || p.y > h) { p.x = Math.random() * w; p.y = -20; }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+  </script>
+</body>
+</html>

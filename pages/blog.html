@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Nhật Ký BêTráp — Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css?v=1.6">
+  <link rel="stylesheet" href="../css/components.css?v=1.6">
+  <style>
+    /* Rain Effect */
+    #rain-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+    .page-header {
+      background: var(--grad-hero);
+      padding: calc(var(--nav-h) + var(--sp-2xl)) 0 var(--sp-2xl);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Timeline styles */
+    .timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--sp-2xl) 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 16px;
+      width: 2px;
+      background: rgba(212, 185, 150, 0.3); /* gold faint */
+    }
+    .timeline-month {
+      position: relative;
+      padding-left: 48px;
+      margin-bottom: var(--sp-2xl);
+    }
+    .timeline-month-label {
+      position: relative;
+      font-family: var(--font-h);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: var(--sp-lg);
+      display: inline-block;
+    }
+    .timeline-month-label::before {
+      content: '';
+      position: absolute;
+      left: -37px; top: 8px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 3px solid var(--cream);
+      box-shadow: 0 0 0 3px rgba(212, 185, 150, 0.2);
+    }
+    .timeline-month.empty .timeline-month-label {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      font-family: var(--font);
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+    .timeline-month.empty .timeline-month-label::before {
+      background: var(--text-muted);
+      box-shadow: none;
+      width: 10px; height: 10px;
+      left: -36px; top: 6px;
+    }
+    
+    .blog-card {
+      display: flex;
+      gap: var(--sp-lg);
+      background: white;
+      border-radius: var(--r-md);
+      padding: var(--sp-md);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--t-normal);
+      border: 1px solid rgba(212, 185, 150, 0.15);
+      margin-bottom: var(--sp-md);
+      text-decoration: none;
+      color: inherit;
+    }
+    .blog-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--gold);
+    }
+    .blog-card-img {
+      width: 160px;
+      height: 120px;
+      border-radius: var(--r-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--cream);
+    }
+    .blog-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .blog-card-title {
+      font-family: var(--font-h);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .blog-card-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .blog-card { flex-direction: column; }
+      .blog-card-img { width: 100%; height: 180px; }
+    }
+    
+    .load-more {
+      text-align: center;
+      margin-top: var(--sp-xl);
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="page-header">
+    <canvas id="rain-canvas"></canvas>
+    <div class="container" style="position:relative; z-index:2">
+      <h1 class="font-billgates" style="font-size: clamp(3rem, 6vw, 4.5rem); color: var(--gold-dark);">Nhật Ký BêTráp</h1>
+      <p style="font-size: 1.1rem; max-width: 600px; margin: 16px auto 0;">Chuyện nghề, chuyện đời và những khoảnh khắc đẹp nhất trong các nghi lễ cưới hỏi truyền thống Việt Nam.</p>
+    </div>
+  </div>
+
+  <div class="container page-content">
+    <div class="timeline" id="blog-timeline">
+      <!-- Mẫu skeleton khi đang load -->
+      <div style="text-align:center; padding: 40px;"><div class="spinner"></div></div>
+    </div>
+    
+    <div class="load-more" id="load-more-container" style="display: none;">
+      <button class="btn btn-outline" onclick="loadMoreMonths()">Xem thêm <i class="ri-arrow-down-line"></i></button>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="../js/api.js?v=1.1"></script>
+  <script src="../js/ui.js?v=1.1"></script>
+  <script>
+    let currentOffset = 0;
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      UI.renderFooter('footer-container');
+      initRainEffect();
+      await loadBlogs();
+    });
+
+    async function loadBlogs(isLoadMore = false) {
+      const timelineEl = document.getElementById('blog-timeline');
+      const loadMoreEl = document.getElementById('load-more-container');
+      
+      if (!isLoadMore) timelineEl.innerHTML = '';
+      
+      try {
+        const months = await API.blog.getMonths(currentOffset);
+        
+        if (months.length === 0) {
+          if (!isLoadMore) {
+            timelineEl.innerHTML = '<div class="empty-state"><i class="ri-article-line empty-icon"></i><h3>Chưa có bài viết nào</h3></div>';
+          }
+          loadMoreEl.style.display = 'none';
+          return;
+        }
+
+        // Tạo 5 tháng hiển thị, nếu DB trả ít hơn thì chỉ hiện bấy nhiêu.
+        // Có thể lấp đầy các tháng trống ở giữa nếu cần, nhưng DB trả về các tháng CÓ bài.
+        // Theo yêu cầu: nếu có tháng trống giữa các tháng có bài, thì hiện dòng trống.
+        // Ở đây mình lấy tháng đầu và cuối của mảng months, duyệt tuần tự để điền các tháng trống.
+        
+        let html = '';
+        const startYear = months[0].year;
+        const startMonth = months[0].month;
+        const endYear = months[months.length - 1].year;
+        const endMonth = months[months.length - 1].month;
+        
+        let currY = startYear, currM = startMonth;
+        
+        while (currY > endYear || (currY === endYear && currM >= endMonth)) {
+          // Kiểm tra xem tháng này có bài không
+          const hasBlog = months.find(m => m.year === currY && m.month === currM);
+          
+          if (hasBlog) {
+            // Có bài -> gọi API lấy bài của tháng này
+            const blogs = await API.blog.getByMonth(currY, currM);
+            let blogsHtml = blogs.map(b => `
+              <a href="blog-detail.html?id=${b.Slug || b.Id}" class="blog-card">
+                ${b.CoverImage ? `<img src="${b.CoverImage}" class="blog-card-img" alt="Cover">` : '<div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:#ddd"><i class="ri-image-line"></i></div>'}
+                <div class="blog-card-content">
+                  <div class="blog-card-title">${b.Title}</div>
+                  <div class="blog-card-meta">
+                    <span><i class="ri-calendar-line"></i> ${UI.formatDate(b.PublishedAt)}</span>
+                  </div>
+                </div>
+              </a>
+            `).join('');
+            
+            html += `
+              <div class="timeline-month">
+                <div class="timeline-month-label">Tháng ${currM}/${currY}</div>
+                ${blogsHtml}
+              </div>
+            `;
+          } else {
+            // Không có bài -> dòng trống
+            html += `
+              <div class="timeline-month empty">
+                <div class="timeline-month-label">Tháng ${currM}/${currY} — Chưa có bài viết nào</div>
+              </div>
+            `;
+          }
+          
+          // Lùi 1 tháng
+          currM--;
+          if (currM === 0) {
+            currM = 12;
+            currY--;
+          }
+        }
+        
+        if (isLoadMore) {
+          timelineEl.insertAdjacentHTML('beforeend', html);
+        } else {
+          timelineEl.innerHTML = html;
+        }
+        
+        // Nếu load đủ 5 tháng, có thể có thêm, hiện nút Xem thêm
+        if (months.length === 5) {
+          loadMoreEl.style.display = 'block';
+          currentOffset += 5;
+        } else {
+          loadMoreEl.style.display = 'none';
+        }
+        
+      } catch(e) {
+        if (!isLoadMore) timelineEl.innerHTML = '<div class="text-center text-error mt-lg">Lỗi tải dữ liệu. Vui lòng thử lại sau.</div>';
+      }
+    }
+
+    function loadMoreMonths() {
+      const btn = document.querySelector('#load-more-container .btn');
+      btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:2px;display:inline-block"></span>';
+      loadBlogs(true).then(() => {
+        btn.innerHTML = 'Xem thêm <i class="ri-arrow-down-line"></i>';
+      });
+    }
+
+    // Hiệu ứng mưa canvas
+    function initRainEffect() {
+      const canvas = document.getElementById('rain-canvas');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = document.querySelector('.page-header').offsetHeight;
+      
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = document.querySelector('.page-header').offsetHeight;
+      });
+
+      const particles = [];
+      const numRaindrops = 80;
+
+      for (let i = 0; i < numRaindrops; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          l: Math.random() * 1, // độ dài vệt mưa
+          xs: -4 + Math.random() * 4 + 2, // tốc độ x
+          ys: Math.random() * 10 + 10 // tốc độ rơi y
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(212, 185, 150, 0.4)'; // màu vàng gold nhạt
+        ctx.lineWidth = 1;
+        ctx.lineCap = 'round';
+
+        for (let i = 0; i < particles.length; i++) {
+          let p = particles[i];
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+          ctx.stroke();
+        }
+        move();
+        requestAnimationFrame(draw);
+      }
+
+      function move() {
+        for (let i = 0; i < particles.length; i++) {
+          let p = particles[i];
+          p.x += p.xs;
+          p.y += p.ys;
+          if (p.x > w || p.y > h) {
+            p.x = Math.random() * w;
+            p.y = -20;
+          }
+        }
+      }
+      draw();
+    }
+  </script>
+</body>
+</html>

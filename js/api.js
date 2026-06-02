@@ -338,6 +338,30 @@ const API = (() => {
     }
   };
 
+  // ── BLOG ──────────────────────────────────────────────────────────────────
+  const blog = {
+    getMonths: async (offset = 0) => get('/blogs/months?offset=' + offset),
+    getByMonth: async (year, month) => get(`/blogs?year=${year}&month=${month}`),
+    getAll: async (limit, offset) => {
+      let q = [];
+      if(limit) q.push(`limit=${limit}`);
+      if(offset) q.push(`offset=${offset}`);
+      return get('/blogs' + (q.length ? '?' + q.join('&') : ''));
+    },
+    getById: async (id) => get('/blogs/' + id),
+    create: async (title) => post('/blogs', { title }, true),
+    update: async (id, data) => put('/blogs/' + id, data, true),
+    delete: async (id) => del('/blogs/' + id, true),
+    addBlock: async (postId, type, content, position) =>
+      post('/blogs/' + postId + '/blocks', { type, content, position }, true),
+    updateBlock: async (postId, blockId, data) =>
+      put('/blogs/' + postId + '/blocks/' + blockId, data, true),
+    deleteBlock: async (postId, blockId) =>
+      del('/blogs/' + postId + '/blocks/' + blockId, true),
+    reorderBlocks: async (postId, blocks) =>
+      put('/blogs/' + postId + '/blocks/reorder', { blocks }, true),
+  };
+
   // ── STATS ─────────────────────────────────────────────────────────────────
   const stats = {
     global: async () => {
@@ -371,7 +395,7 @@ const API = (() => {
     }
   };
 
-  return { auth, svc, txn, consultation, chat, review, favorites, stats, users, utils, admin };
+  return { auth, svc, txn, consultation, chat, review, favorites, stats, users, utils, admin, blog };
 })();
 
 // Helper: get root path relative to current page

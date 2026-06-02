@@ -969,6 +969,135 @@ app.get('/api/admin/transactions', authMiddleware, adminOnly, async (req, res) =
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 8. BLOG
+// ═══════════════════════════════════════════════════════════════════════════
+
+app.get('/api/blogs', async (req, res) => {
+    try {
+        const { year, month, limit, offset } = req.query;
+        let query = `SELECT Id, Title, Slug, CoverImage, Published, PublishedAt, CreatedAt 
+                     FROM BlogPosts WHERE Published=true`;
+        if (year && month) {
+            query += ` AND EXTRACT(YEAR FROM PublishedAt) = ${parseInt(year)} AND EXTRACT(MONTH FROM PublishedAt) = ${parseInt(month)}`;
+        }
+        query += ` ORDER BY PublishedAt DESC`;
+        if (limit) query += ` LIMIT ${parseInt(limit)}`;
+        if (offset) query += ` OFFSET ${parseInt(offset)}`;
+        
+        const result = await sql.query(query);
+        res.json(result.recordset);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/blogs/months', async (req, res) => {
+    try {
+        const { offset = 0 } = req.query;
+        const result = await sql.query`
+            SELECT DISTINCT EXTRACT(YEAR FROM PublishedAt) as year, EXTRACT(MONTH FROM PublishedAt) as month
+            FROM BlogPosts WHERE Published=true AND PublishedAt IS NOT NULL
+            ORDER BY year DESC, month DESC
+            LIMIT 5 OFFSET ${parseInt(offset)}`;
+        res.json(result.recordset.map(r => ({ year: r.year, month: r.month })));
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/blogs/:id', async (req, res) => {
+    try {
+        let isSlug = !req.params.id.startsWith('POST_');
+        let postRes;
+        if (isSlug) {
+            postRes = await sql.query`SELECT * FROM BlogPosts WHERE Slug=${req.params.id}`;
+        } else {
+            postRes = await sql.query`SELECT * FROM BlogPosts WHERE Id=${req.params.id}`;
+        }
+        
+        if (!postRes.recordset.length) return res.status(404).json({ error: 'Blog not found' });
+        const post = postRes.recordset[0];
+        const blocksRes = await sql.query`SELECT * FROM BlogBlocks WHERE PostId=${post.Id} ORDER BY Position ASC`;
+        post.blocks = blocksRes.recordset;
+        res.json(post);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/blogs', authMiddleware, adminOnly, async (req, res) => {
+    const { title } = req.body;
+    if (!title) return res.status(400).json({ error: 'Missing title' });
+    try {
+        const id = 'POST_' + uid();
+        const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') + '-' + uid().slice(0, 4);
+        await sql.query`INSERT INTO BlogPosts (Id, AuthorId, Title, Slug) VALUES (${id}, ${req.user.userId}, ${title}, ${slug})`;
+        res.json({ id, slug, message: 'Created successfully' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.put('/api/blogs/:id', authMiddleware, adminOnly, async (req, res) => {
+    const { title, coverImage, published } = req.body;
+    try {
+        let updateQ = `UPDATE BlogPosts SET UpdatedAt=CURRENT_TIMESTAMP`;
+        if (title !== undefined) updateQ += `, Title='${title.replace(/'/g,"''")}'`;
+        if (coverImage !== undefined) updateQ += `, CoverImage=${coverImage ? `'${coverImage}'` : 'NULL'}`;
+        if (published !== undefined) {
+            updateQ += `, Published=${published ? 'true' : 'false'}`;
+            if (published) updateQ += `, PublishedAt=COALESCE(PublishedAt, CURRENT_TIMESTAMP)`;
+        }
+        updateQ += ` WHERE Id='${req.params.id}'`;
+        await sql.query(updateQ);
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/blogs/:id', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        await sql.query`DELETE FROM BlogPosts WHERE Id=${req.params.id}`;
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/blogs/:id/blocks', authMiddleware, adminOnly, async (req, res) => {
+    const { type, content, position } = req.body;
+    if (!type) return res.status(400).json({ error: 'Missing block type' });
+    try {
+        const blockId = 'BLK_' + uid();
+        const contentStr = typeof content === 'object' ? JSON.stringify(content) : content;
+        await sql.query`INSERT INTO BlogBlocks (Id, PostId, Type, Content, Position) VALUES (${blockId}, ${req.params.id}, ${type}, ${contentStr}, ${position || 0})`;
+        res.json({ id: blockId, message: 'Block added' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.put('/api/blogs/:id/blocks/:blockId', authMiddleware, adminOnly, async (req, res) => {
+    const { content, position } = req.body;
+    try {
+        let updateQ = `UPDATE BlogBlocks SET Id=Id`;
+        if (content !== undefined) {
+            const contentStr = typeof content === 'object' ? JSON.stringify(content) : content;
+            updateQ += `, Content='${contentStr.replace(/'/g,"''")}'`;
+        }
+        if (position !== undefined) updateQ += `, Position=${position}`;
+        updateQ += ` WHERE Id='${req.params.blockId}' AND PostId='${req.params.id}'`;
+        await sql.query(updateQ);
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/blogs/:id/blocks/:blockId', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        await sql.query`DELETE FROM BlogBlocks WHERE Id=${req.params.blockId} AND PostId=${req.params.id}`;
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.put('/api/blogs/:id/blocks/reorder', authMiddleware, adminOnly, async (req, res) => {
+    const { blocks } = req.body;
+    if (!Array.isArray(blocks)) return res.status(400).json({ error: 'Invalid data' });
+    try {
+        for (let b of blocks) {
+            await sql.query`UPDATE BlogBlocks SET Position=${b.position} WHERE Id=${b.id} AND PostId=${req.params.id}`;
+        }
+        res.json({ success: true });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'BêTráp API v2.0 — Running ✅' }));
 
@@ -981,6 +1110,29 @@ app.use((err, req, res, next) => {
 // Auto-migration for Vercel
 sql.query(`ALTER TABLE Services ADD COLUMN Gallery VARCHAR(5000);`).catch(() => {});
 sql.query(`ALTER TABLE Services ALTER COLUMN Description TYPE TEXT;`).catch(() => {});
+sql.query(`
+    CREATE TABLE IF NOT EXISTS BlogPosts (
+        Id          VARCHAR(50) PRIMARY KEY,
+        AuthorId    VARCHAR(50) REFERENCES Users(Id),
+        Title       VARCHAR(300) NOT NULL,
+        Slug        VARCHAR(300) UNIQUE,
+        CoverImage  VARCHAR(500),
+        Published   BOOLEAN DEFAULT false,
+        PublishedAt TIMESTAMP,
+        CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UpdatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+`).catch(e => console.error(e));
+sql.query(`
+    CREATE TABLE IF NOT EXISTS BlogBlocks (
+        Id        VARCHAR(50) PRIMARY KEY,
+        PostId    VARCHAR(50) NOT NULL REFERENCES BlogPosts(Id) ON DELETE CASCADE,
+        Type      VARCHAR(50) NOT NULL,
+        Content   TEXT,
+        Position  INT NOT NULL DEFAULT 0,
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+`).catch(e => console.error(e));
 
 if (require.main === module) {
     app.listen(PORT, () => console.log(`🚀 BêTráp Server running on http://localhost:${PORT}`));

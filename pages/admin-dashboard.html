@@ -114,6 +114,9 @@
         <div class="menu-item" onclick="switchTab('services')" id="tab-services">
           <i class="ri-briefcase-4-line"></i> Dịch Vụ
         </div>
+        <div class="menu-item" onclick="switchTab('blogs')" id="tab-blogs">
+          <i class="ri-article-line"></i> Blog
+        </div>
       </div>
       <div style="padding: 24px; border-top: 1px solid rgba(0,0,0,0.05)">
         <button class="btn btn-ghost btn-block" style="color:#64748B; border: 1px solid #E2E8F0; border-radius: 12px;" onclick="logout()">
@@ -209,6 +212,27 @@
         </div>
       </section>
 
+      <section id="view-blogs" class="hidden">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Blog</h3>
+            <a href="blog-editor.html" class="btn btn-primary" style="border-radius:8px;padding:8px 16px;font-size:0.9rem">
+              <i class="ri-add-line"></i> Viết bài mới
+            </a>
+          </div>
+          <div style="overflow-x:auto">
+            <table id="blogs-table">
+              <thead>
+                <tr>
+                  <th>Tiêu Đề</th><th>Trạng Thái</th><th>Ngày Đăng</th><th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -260,15 +284,18 @@
 
     let allUsers = [];
     let allServices = [];
+    let allBlogs = [];
 
     async function loadData() {
       try {
         allUsers = await API.admin.getUsers();
         allServices = await API.admin.getServices();
+        allBlogs = await API.blog.getAll();
         updateStats();
         renderUsers();
         renderProviders();
         renderServices();
+        renderBlogs();
       } catch (err) {
         UI.toast('Lỗi tải dữ liệu: ' + err.message, 'error');
       }
@@ -424,14 +451,52 @@
       document.getElementById('view-users').classList.add('hidden');
       document.getElementById('view-providers').classList.add('hidden');
       document.getElementById('view-services').classList.add('hidden');
+      document.getElementById('view-blogs').classList.add('hidden');
       document.getElementById('view-' + tabId).classList.remove('hidden');
       
       const titles = {
         'users': 'Quản lý Người Dùng',
         'providers': 'Quản lý Nhà Cung Cấp',
-        'services': 'Quản lý Dịch Vụ'
+        'services': 'Quản lý Dịch Vụ',
+        'blogs': 'Quản lý Blog'
       };
       document.getElementById('page-title').textContent = titles[tabId];
+    }
+
+    function renderBlogs() {
+      const tbody = document.querySelector('#blogs-table tbody');
+      tbody.innerHTML = '';
+      allBlogs.forEach(b => {
+        let statusBadge = b.Published 
+          ? '<span class="badge" style="background:rgba(34,197,94,0.1);color:#16A34A">Đã xuất bản</span>'
+          : '<span class="badge" style="background:#F1F5F9;color:#64748B">Bản nháp</span>';
+          
+        const dateRaw = b.PublishedAt || b.CreatedAt;
+        const date = dateRaw ? new Date(dateRaw).toLocaleDateString('vi-VN') : '-';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:600;color:#1E293B;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${b.Title}">${b.Title}</td>
+          <td>${statusBadge}</td>
+          <td><span style="color:#64748B;font-size:0.85rem"><i class="ri-calendar-line"></i> ${date}</span></td>
+          <td>
+            <a href="blog-editor.html?id=${b.Id}" class="btn btn-sm btn-ghost" style="padding:4px 8px; font-size:0.8rem">Sửa</a>
+            <button class="btn btn-sm btn-ghost" style="padding:4px 8px; font-size:0.8rem; color:#DC2626" onclick="deleteBlog('${b.Id}')">Xoá</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteBlog(id) {
+      if(!confirm('Bạn có chắc muốn xoá bài viết này?')) return;
+      try {
+        await API.blog.delete(id);
+        UI.toast('Đã xoá bài viết', 'success');
+        await loadData();
+      } catch(e) {
+        UI.toast('Lỗi: ' + e.message, 'error');
+      }
     }
 
     document.getElementById('create-provider-form').addEventListener('submit', async (e) => {

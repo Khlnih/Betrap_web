@@ -39,6 +39,7 @@ const UI = (() => {
     const isLanding = !location.pathname.includes('/pages/');
     const links = `
       <a href="${root}pages/services.html">Dịch vụ</a>
+      <a href="${root}pages/blog.html">Blog</a>
       <a href="${root}index.html#about">Về chúng tôi</a>
       <a href="${root}index.html#testimonials">Đánh giá</a>
       <a href="${root}index.html#contact">Liên hệ</a>
