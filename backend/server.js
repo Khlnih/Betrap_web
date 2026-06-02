@@ -975,13 +975,16 @@ app.get('/api/admin/transactions', authMiddleware, adminOnly, async (req, res) =
 
 app.get('/api/blogs', async (req, res) => {
     try {
-        const { year, month, limit, offset } = req.query;
+        const { year, month, limit, offset, all } = req.query;
         let query = `SELECT Id, Title, Slug, CoverImage, Published, PublishedAt, CreatedAt 
-                     FROM BlogPosts WHERE Published=true`;
+                     FROM BlogPosts WHERE 1=1`;
         if (year && month) {
             query += ` AND EXTRACT(YEAR FROM PublishedAt) = ${parseInt(year)} AND EXTRACT(MONTH FROM PublishedAt) = ${parseInt(month)}`;
         }
-        query += ` ORDER BY PublishedAt DESC`;
+        if (all !== 'true') {
+            query += ` AND Published=true`;
+        }
+        query += ` ORDER BY CreatedAt DESC`;
         if (limit) query += ` LIMIT ${parseInt(limit)}`;
         if (offset) query += ` OFFSET ${parseInt(offset)}`;
         

@@ -47,18 +47,15 @@ const API = (() => {
   const del  = (path, auth)       => req('DELETE', path, null, auth);
 
   // ── Upload ────────────────────────────────────────────────────────────────
-  const uploadFile = async (path, file) => {
+  const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('image', file);
-    
+    const token = localStorage.getItem('bt_token');
     const headers = {};
-    const token = getToken();
-    if (!token) throw new Error('Chưa đăng nhập.');
-    headers['Authorization'] = 'Bearer ' + token;
-    
-    const res = await fetch(BASE_URL + path, { method: 'POST', headers, body: formData });
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(BASE_URL + '/upload', { method: 'POST', headers, body: formData });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
     return data;
   };
 
@@ -348,6 +345,7 @@ const API = (() => {
       if(offset) q.push(`offset=${offset}`);
       return get('/blogs' + (q.length ? '?' + q.join('&') : ''));
     },
+    getAllAdmin: async () => get('/blogs?all=true', true),
     getById: async (id) => get('/blogs/' + id),
     create: async (title) => post('/blogs', { title }, true),
     update: async (id, data) => put('/blogs/' + id, data, true),
