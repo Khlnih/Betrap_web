@@ -1060,7 +1060,7 @@ app.post('/api/blogs/:id/blocks', authMiddleware, adminOnly, async (req, res) =>
     try {
         const blockId = 'BLK_' + uid();
         const contentStr = typeof content === 'object' ? JSON.stringify(content) : content;
-        await sql.query`INSERT INTO BlogBlocks (Id, PostId, Type, Content, Position) VALUES (${blockId}, ${req.params.id}, ${type}, ${contentStr}, ${position || 0})`;
+        await sql.query`INSERT INTO BlogBlocks (Id, PostId, "Type", Content, "Position") VALUES (${blockId}, ${req.params.id}, ${type}, ${contentStr}, ${position || 0})`;
         res.json({ id: blockId, message: 'Block added' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -1073,7 +1073,7 @@ app.put('/api/blogs/:id/blocks/:blockId', authMiddleware, adminOnly, async (req,
             const contentStr = typeof content === 'object' ? JSON.stringify(content) : content;
             updateQ += `, Content='${contentStr.replace(/'/g,"''")}'`;
         }
-        if (position !== undefined) updateQ += `, Position=${position}`;
+        if (position !== undefined) updateQ += `, "Position"=${position}`;
         updateQ += ` WHERE Id='${req.params.blockId}' AND PostId='${req.params.id}'`;
         await sql.query(updateQ);
         res.json({ success: true });
@@ -1092,7 +1092,7 @@ app.put('/api/blogs/:id/blocks/reorder', authMiddleware, adminOnly, async (req, 
     if (!Array.isArray(blocks)) return res.status(400).json({ error: 'Invalid data' });
     try {
         for (let b of blocks) {
-            await sql.query`UPDATE BlogBlocks SET Position=${b.position} WHERE Id=${b.id} AND PostId=${req.params.id}`;
+            await sql.query(`UPDATE BlogBlocks SET "Position"=${b.position} WHERE Id='${b.id}' AND PostId='${req.params.id}'`);
         }
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -1127,9 +1127,9 @@ sql.query(`
     CREATE TABLE IF NOT EXISTS BlogBlocks (
         Id        VARCHAR(50) PRIMARY KEY,
         PostId    VARCHAR(50) NOT NULL REFERENCES BlogPosts(Id) ON DELETE CASCADE,
-        Type      VARCHAR(50) NOT NULL,
+        "Type"    VARCHAR(50) NOT NULL,
         Content   TEXT,
-        Position  INT NOT NULL DEFAULT 0,
+        "Position" INT NOT NULL DEFAULT 0,
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 `).catch(e => console.error(e));

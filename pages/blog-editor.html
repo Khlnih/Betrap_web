@@ -166,7 +166,12 @@
         }
         
         blocks = postData.blocks || [];
-        renderBlocks();
+        if (blocks.length === 0) {
+            // Tự động thêm block Heading đầu tiên như yêu cầu
+            await addBlock('heading', { text: '' });
+        } else {
+            renderBlocks();
+        }
       } catch (err) {
         UI.toast('Lỗi tải bài viết', 'error');
       }
