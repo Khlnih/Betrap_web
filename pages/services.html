@@ -13,8 +13,8 @@
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <style>
     /* ── Hero ── */
-    .svc-hero { width:100%; margin:0 auto; margin-top: var(--nav-h, 72px); }
-    .svc-hero img { width:100%; max-height:550px; object-fit:cover; object-position:center; display:block; }
+    .svc-hero { width:100%; margin:0 auto; }
+    .svc-hero img { width:100%; max-height:600px; object-fit:cover; object-position:center 20%; display:block; }
 
     /* ── 3 Big Category Cards ── */
     .cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; margin:60px 0; }
@@ -365,6 +365,8 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
+      const nav = document.getElementById('navbar');
+      if (nav) nav.classList.remove('solid'); // Make navbar transparent for the hero banner
       UI.renderFooter('footer-container');
 
       // Preload tất cả dịch vụ theo từng category
