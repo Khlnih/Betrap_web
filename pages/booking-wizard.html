@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Đặt Combo Tráp + Áo Dài — BêTráp</title>
+  <meta name="description" content="Đặt combo tráp ăn hỏi và áo dài phù hợp style cùng lúc tại BêTráp">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css?v=3">
+  <link rel="stylesheet" href="../css/components.css?v=3">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <style>
+    body { background:#faf7f4; }
+    /* ── Progress Bar ── */
+    .wiz-header {
+      background:white; border-bottom:1px solid rgba(220,165,174,.15);
+      padding:20px 0; position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 12px rgba(0,0,0,.05);
+    }
+    .wiz-progress {
+      display:flex; align-items:center; gap:0;
+      max-width:600px; margin:0 auto; padding:0 20px;
+    }
+    .wiz-step {
+      display:flex; align-items:center; gap:10px; flex:1; position:relative;
+    }
+    .wiz-step-circle {
+      width:36px; height:36px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; font-size:.85rem; transition:all .3s ease;
+      border:2px solid #e5e7eb; background:white; color:#9ca3af;
+    }
+    .wiz-step.done .wiz-step-circle { background:var(--gold); border-color:var(--gold); color:white; }
+    .wiz-step.active .wiz-step-circle { background:var(--gold); border-color:var(--gold); color:white; box-shadow:0 0 0 4px rgba(184,148,90,.2); }
+    .wiz-step-label { font-size:.75rem; font-weight:600; color:#9ca3af; white-space:nowrap; }
+    .wiz-step.done .wiz-step-label,
+    .wiz-step.active .wiz-step-label { color:var(--text-dark); }
+    .wiz-line { flex:1; height:2px; background:#e5e7eb; margin:0 8px; transition:background .3s; }
+    .wiz-line.done { background:var(--gold); }
+
+    /* ── Container ── */
+    .wiz-body { max-width:860px; margin:0 auto; padding:40px 20px 80px; }
+    .wiz-panel { display:none; animation:fadeInUp .4s ease; }
+    .wiz-panel.active { display:block; }
+
+    .wiz-title { font-family:var(--font-h); font-size:clamp(1.5rem,3vw,2rem); color:var(--text-dark); margin-bottom:8px; }
+    .wiz-subtitle { color:var(--text-muted); font-size:.95rem; margin-bottom:32px; }
+
+    /* ── Trap Grid ── */
+    .trap-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; }
+    .trap-card {
+      background:white; border-radius:16px; overflow:hidden;
+      border:2px solid transparent; cursor:pointer;
+      box-shadow:0 4px 16px rgba(0,0,0,.07);
+      transition:all .25s ease;
+    }
+    .trap-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:0 10px 28px rgba(184,148,90,.2); }
+    .trap-card.selected { border-color:var(--gold); background:linear-gradient(135deg,#fff9f3,white); }
+    .trap-card-img { width:100%; aspect-ratio:4/3; object-fit:cover; }
+    .trap-card-body { padding:16px; }
+    .trap-card-name { font-weight:700; font-size:.95rem; color:var(--text-dark); margin-bottom:4px; }
+    .trap-card-loc  { font-size:.78rem; color:var(--text-muted); margin-bottom:12px; }
+    .trap-card-sel  { display:flex; align-items:center; justify-content:space-between; }
+    .trap-check { width:20px; height:20px; border-radius:50%; border:2px solid #ddd; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .trap-card.selected .trap-check { background:var(--gold); border-color:var(--gold); }
+    .trap-card.selected .trap-check::after { content:'✓'; color:white; font-size:.75rem; font-weight:800; }
+
+    /* ── Áo Dài Grid ── */
+    .aodai-notice {
+      background:linear-gradient(135deg,#fff8f0,#fff3e8);
+      border:1px solid rgba(184,148,90,.3); border-radius:12px;
+      padding:14px 18px; margin-bottom:24px;
+      display:flex; align-items:flex-start; gap:10px;
+      font-size:.85rem; color:#8B5E3C; line-height:1.6;
+    }
+    .aodai-notice i { font-size:1.2rem; color:var(--gold); flex-shrink:0; margin-top:2px; }
+    .aodai-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+    .aodai-card {
+      background:white; border-radius:12px; overflow:hidden;
+      border:2px solid #f0f0f0; cursor:pointer;
+      transition:all .25s;
+    }
+    .aodai-card:hover { border-color:rgba(184,148,90,.5); }
+    .aodai-card.selected { border-color:var(--gold); background:#fff9f3; }
+    .aodai-card-img { width:100%; aspect-ratio:3/4; object-fit:cover; }
+    .aodai-card-body { padding:12px; display:flex; align-items:center; gap:8px; }
+    .aodai-cb { width:18px; height:18px; border-radius:4px; border:2px solid #ddd; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .aodai-card.selected .aodai-cb { background:var(--gold); border-color:var(--gold); }
+    .aodai-card.selected .aodai-cb::after { content:'✓'; color:white; font-size:.65rem; font-weight:900; }
+    .aodai-name { font-size:.82rem; font-weight:600; color:var(--text-dark); }
+
+    /* ── Bước 3 hỏi bê tráp ── */
+    .ask-card {
+      background:white; border-radius:20px; padding:40px;
+      text-align:center; max-width:500px; margin:0 auto;
+      box-shadow:0 8px 32px rgba(0,0,0,.08);
+    }
+    .ask-emoji { font-size:3.5rem; margin-bottom:16px; }
+    .ask-title { font-family:var(--font-h); font-size:1.5rem; color:var(--text-dark); margin-bottom:8px; }
+    .ask-desc  { color:var(--text-muted); font-size:.9rem; margin-bottom:32px; line-height:1.6; }
+    .ask-btns  { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+    .ask-btn-yes { background:var(--gold); color:white; padding:14px 32px; border-radius:100px; font-weight:700; font-size:1rem; border:none; cursor:pointer; transition:opacity .2s; }
+    .ask-btn-yes:hover { opacity:.85; }
+    .ask-btn-no  { background:white; color:var(--text-muted); padding:14px 32px; border-radius:100px; font-weight:600; font-size:1rem; border:2px solid #e5e7eb; cursor:pointer; transition:all .2s; }
+    .ask-btn-no:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* ── Bước 4 Form ── */
+    .form-card { background:white; border-radius:20px; padding:36px; box-shadow:0 4px 24px rgba(0,0,0,.07); }
+    .form-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:560px) { .form-grid2 { grid-template-columns:1fr; } }
+    .form-label-bold { font-weight:700; font-size:.88rem; color:var(--text-dark); margin-bottom:6px; display:block; }
+    .form-input {
+      width:100%; padding:11px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+      font-size:.9rem; font-family:inherit; transition:border-color .2s; outline:none;
+    }
+    .form-input:focus { border-color:var(--gold); }
+    .form-optional { font-size:.78rem; color:var(--text-muted); margin-left:6px; font-weight:400; }
+
+    /* ── Nav Footer ── */
+    .wiz-nav {
+      position:fixed; bottom:0; left:0; right:0;
+      background:white; border-top:1px solid rgba(220,165,174,.15);
+      padding:16px 20px; display:flex; justify-content:space-between; align-items:center;
+      box-shadow:0 -4px 20px rgba(0,0,0,.06); z-index:100;
+    }
+    .wiz-nav-info { font-size:.82rem; color:var(--text-muted); }
+    .wiz-nav-info strong { color:var(--text-dark); }
+
+    .empty-wiz { text-align:center; padding:60px 20px; color:var(--text-muted); }
+    .empty-wiz i { font-size:3rem; display:block; margin-bottom:12px; color:#ddd; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <!-- Progress Header -->
+  <div class="wiz-header">
+    <div class="wiz-progress">
+      <div class="wiz-step active" id="ws-1">
+        <div class="wiz-step-circle" id="wsc-1">1</div>
+        <span class="wiz-step-label" id="wsl-1">Chọn Tráp</span>
+      </div>
+      <div class="wiz-line" id="wl-1"></div>
+      <div class="wiz-step" id="ws-2">
+        <div class="wiz-step-circle" id="wsc-2">2</div>
+        <span class="wiz-step-label" id="wsl-2">Áo Dài</span>
+      </div>
+      <div class="wiz-line" id="wl-2"></div>
+      <div class="wiz-step" id="ws-3">
+        <div class="wiz-step-circle" id="wsc-3">3</div>
+        <span class="wiz-step-label" id="wsl-3">Bê Tráp?</span>
+      </div>
+      <div class="wiz-line" id="wl-3"></div>
+      <div class="wiz-step" id="ws-4">
+        <div class="wiz-step-circle" id="wsc-4">4</div>
+        <span class="wiz-step-label" id="wsl-4">Đặt lịch</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wiz-body">
+    <!-- Bước 1: Chọn Tráp -->
+    <div class="wiz-panel active" id="panel-1">
+      <div class="wiz-title">Chọn Tráp Ăn Hỏi</div>
+      <div class="wiz-subtitle">Chọn bộ tráp phù hợp với phong cách ngày lễ của bạn</div>
+      <div class="trap-grid" id="trap-grid">
+        <div class="empty-wiz"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- Bước 2: Chọn Áo Dài -->
+    <div class="wiz-panel" id="panel-2">
+      <div class="wiz-title">Chọn Áo Dài Phù Hợp</div>
+      <div class="wiz-subtitle" id="p2-subtitle">Áo dài do nhà cung cấp gợi ý — phù hợp style với tráp bạn đã chọn</div>
+      <div class="aodai-notice">
+        <i class="ri-links-line"></i>
+        <span id="p2-notice-text">Các bộ áo dài bên dưới được <strong>cùng nhà cung cấp với tráp</strong> đề xuất, đảm bảo phối hợp màu sắc và phong cách đồng điệu. Bạn có thể chọn một hoặc nhiều bộ, hoặc bỏ qua.</span>
+      </div>
+      <div class="aodai-grid" id="aodai-grid">
+        <div class="empty-wiz"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- Bước 3: Hỏi Bê Tráp -->
+    <div class="wiz-panel" id="panel-3">
+      <div class="ask-card">
+        <div class="ask-emoji">👥</div>
+        <div class="ask-title">Bạn cần đội bê tráp không?</div>
+        <div class="ask-desc">Đội bê tráp chuyên nghiệp, trang phục đồng bộ, đúng giờ và tận tâm trong suốt buổi lễ.</div>
+        <div class="ask-btns">
+          <button class="ask-btn-yes" onclick="chooseBetrap(true)">
+            <i class="ri-check-line"></i> Có, tôi muốn
+          </button>
+          <button class="ask-btn-no" onclick="chooseBetrap(false)">
+            Không, bỏ qua <i class="ri-arrow-right-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bước 4: Form đặt lịch -->
+    <div class="wiz-panel" id="panel-4">
+      <div class="wiz-title">Thông Tin Đặt Lịch</div>
+      <div class="wiz-subtitle">Điền thông tin để chúng tôi liên hệ xác nhận và chuẩn bị cho ngày lễ của bạn</div>
+      
+      <!-- Tóm tắt đã chọn -->
+      <div id="summary-box" style="background:white;border-radius:14px;padding:20px 24px;margin-bottom:24px;border:1px solid rgba(220,165,174,.2);box-shadow:0 2px 10px rgba(0,0,0,.05);">
+        <div style="font-weight:700;color:var(--text-dark);margin-bottom:10px;font-size:.9rem;"><i class="ri-shopping-bag-line" style="color:var(--gold)"></i> Tóm tắt lựa chọn</div>
+        <div id="summary-trap" style="font-size:.85rem;color:var(--text-muted);margin-bottom:4px;"></div>
+        <div id="summary-aodai" style="font-size:.85rem;color:var(--text-muted);margin-bottom:4px;"></div>
+        <div id="summary-betrap" style="font-size:.85rem;color:var(--text-muted);"></div>
+      </div>
+
+      <div class="form-card">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div class="form-grid2">
+            <div>
+              <label class="form-label-bold">Ngày diễn ra <span style="color:var(--error)">*</span></label>
+              <input type="date" id="f-date" class="form-input">
+            </div>
+            <div>
+              <label class="form-label-bold">Giờ chuẩn bị <span style="color:var(--error)">*</span></label>
+              <input type="time" id="f-time" class="form-input" value="06:00">
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label-bold">Địa chỉ tổ chức <span style="color:var(--error)">*</span></label>
+            <input type="text" id="f-address" class="form-input" placeholder="Số nhà, tên đường, quận/huyện...">
+          </div>
+
+          <div>
+            <label class="form-label-bold">Số bộ áo dài cần thuê <span style="color:var(--error)">*</span></label>
+            <input type="text" id="f-qty-aodai" class="form-input" placeholder="VD: 7 bộ">
+          </div>
+
+          <!-- Chỉ hiện khi có bê tráp -->
+          <div id="f-row-betrap" style="display:none;">
+            <label class="form-label-bold">Số người trong đội bê tráp <span style="color:var(--error)">*</span></label>
+            <input type="text" id="f-qty-betrap" class="form-input" placeholder="VD: 7 người (4 nữ + 3 nam)">
+          </div>
+
+          <div>
+            <label class="form-label-bold">Tông màu / Concept <span class="form-optional">(không bắt buộc)</span></label>
+            <input type="text" id="f-color" class="form-input" placeholder="VD: Hồng pastel, Đỏ truyền thống, Be...">
+          </div>
+
+          <div>
+            <label class="form-label-bold">Ghi chú thêm <span class="form-optional">(không bắt buộc)</span></label>
+            <textarea id="f-note" class="form-input" rows="3" style="resize:vertical;" placeholder="Yêu cầu đặc biệt, câu hỏi thêm..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /wiz-body -->
+
+  <!-- Bottom Nav -->
+  <div class="wiz-nav">
+    <div>
+      <button id="btn-back" class="btn btn-ghost" onclick="goBack()" style="display:none;">
+        <i class="ri-arrow-left-line"></i> Quay lại
+      </button>
+    </div>
+    <div class="wiz-nav-info" id="nav-info">Bước <strong id="step-display">1</strong> / 4</div>
+    <div>
+      <button id="btn-next" class="btn btn-primary" onclick="goNext()">
+        Tiếp theo <i class="ri-arrow-right-line"></i>
+      </button>
+      <button id="btn-submit" class="btn btn-primary" style="display:none;" onclick="submitBooking()">
+        <i class="ri-calendar-check-line"></i> Đặt Dịch Vụ
+      </button>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <div id="modal-overlay"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js?v=1.2"></script>
+  <script src="../js/ui.js?v=1.2"></script>
+  <script>
+    let step = 1;
+    let selectedTrap = null;    // { id, name, providerId }
+    let selectedAodais = [];    // [{ id, name }]
+    let wantBetrap = false;
+    let allTraps = [];
+    let betrapServices = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      UI.initPage();
+      const sess = API.auth.currentSession();
+      if (!sess) {
+        UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>{ location.href='login.html'; return true; } });
+      }
+      await loadTraps();
+    });
+
+    async function loadTraps() {
+      const grid = document.getElementById('trap-grid');
+      try {
+        allTraps = await API.svc.getAll({ category: 'lam-trap' });
+        betrapServices = await API.svc.getAll({ category: 'be-trap' });
+        if (!allTraps.length) {
+          grid.innerHTML = '<div class="empty-wiz"><i class="ri-inbox-line"></i><div>Hiện chưa có tráp nào<br><small>Vui lòng quay lại sau</small></div></div>';
+          return;
+        }
+        grid.innerHTML = allTraps.map(t => {
+          const img = t.image && t.image.startsWith('http') ? t.image : (rootPath()+(t.image||''));
+          return `<div class="trap-card" id="tc-${t.id}" onclick="selectTrap('${t.id}')">
+            <img src="${img}" alt="${t.name}" class="trap-card-img" onerror="this.src='https://placehold.co/400x300?text=Tráp'">
+            <div class="trap-card-body">
+              <div class="trap-card-name">${t.name}</div>
+              <div class="trap-card-loc"><i class="ri-map-pin-line"></i> ${t.location||'—'}</div>
+              <div class="trap-card-sel">
+                <span style="font-size:.78rem;color:var(--gold);font-weight:600;">Chọn tráp này</span>
+                <div class="trap-check" id="trapchk-${t.id}"></div>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = '<div class="empty-wiz"><i class="ri-error-warning-line"></i><div>Lỗi tải dịch vụ</div></div>';
+      }
+    }
+
+    function selectTrap(id) {
+      document.querySelectorAll('.trap-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('tc-'+id).classList.add('selected');
+      selectedTrap = allTraps.find(t => t.id === id);
+    }
+
+    async function loadAodais() {
+      const grid = document.getElementById('aodai-grid');
+      grid.innerHTML = '<div class="empty-wiz"><span class="spinner"></span></div>';
+      try {
+        const linked = await API.svc.getAodaiLinks(selectedTrap.id);
+        if (!linked.length) {
+          grid.innerHTML = '<div class="empty-wiz"><i class="ri-shirt-line"></i><div>Tráp này chưa có áo dài liên kết<br><small>Bạn có thể bỏ qua bước này</small></div></div>';
+          return;
+        }
+        grid.innerHTML = linked.map(a => {
+          const img = a.image && a.image.startsWith('http') ? a.image : (rootPath()+(a.image||''));
+          return `<div class="aodai-card" id="ac-${a.id}" onclick="toggleAodai('${a.id}','${a.name.replace(/'/g,"\\'")}')">
+            <img src="${img}" alt="${a.name}" class="aodai-card-img" onerror="this.src='https://placehold.co/300x400?text=Áo+Dài'">
+            <div class="aodai-card-body">
+              <div class="aodai-cb" id="adcb-${a.id}"></div>
+              <div class="aodai-name">${a.name}</div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = '<div class="empty-wiz"><i class="ri-error-warning-line"></i><div>Lỗi tải áo dài</div></div>';
+      }
+    }
+
+    function toggleAodai(id, name) {
+      const idx = selectedAodais.findIndex(a => a.id === id);
+      const card = document.getElementById('ac-'+id);
+      if (idx >= 0) {
+        selectedAodais.splice(idx, 1);
+        card.classList.remove('selected');
+      } else {
+        selectedAodais.push({ id, name });
+        card.classList.add('selected');
+      }
+    }
+
+    function chooseBetrap(want) {
+      wantBetrap = want;
+      document.getElementById('f-row-betrap').style.display = want ? 'block' : 'none';
+      goToStep(4);
+    }
+
+    // ── Navigation ──
+    function setStep(s) {
+      step = s;
+      document.getElementById('step-display').textContent = s;
+      // Update progress UI
+      for (let i = 1; i <= 4; i++) {
+        const ws = document.getElementById('ws-'+i);
+        ws.className = 'wiz-step' + (i < s ? ' done' : (i === s ? ' active' : ''));
+      }
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById('wl-'+i).className = 'wiz-line' + (i < s ? ' done' : '');
+      }
+      // Panels
+      document.querySelectorAll('.wiz-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-'+s).classList.add('active');
+      // Buttons
+      document.getElementById('btn-back').style.display = s > 1 ? 'inline-flex' : 'none';
+      document.getElementById('btn-next').style.display = s < 4 && s !== 3 ? 'inline-flex' : 'none';
+      document.getElementById('btn-submit').style.display = s === 4 ? 'inline-flex' : 'none';
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
+    function goToStep(s) { setStep(s); }
+
+    async function goNext() {
+      if (step === 1) {
+        if (!selectedTrap) { UI.toast('Vui lòng chọn một bộ tráp để tiếp tục', 'error'); return; }
+        await loadAodais();
+        goToStep(2);
+      } else if (step === 2) {
+        updateSummary();
+        goToStep(3);
+      }
+    }
+
+    function goBack() {
+      if (step === 2) goToStep(1);
+      else if (step === 3) goToStep(2);
+      else if (step === 4) goToStep(3);
+    }
+
+    function updateSummary() {
+      document.getElementById('summary-trap').innerHTML = `<i class="ri-checkbox-circle-line" style="color:var(--gold)"></i> <strong>Tráp:</strong> ${selectedTrap?.name || '—'}`;
+      const adText = selectedAodais.length ? selectedAodais.map(a => a.name).join(', ') : 'Chưa chọn áo dài';
+      document.getElementById('summary-aodai').innerHTML = `<i class="ri-shirt-line" style="color:var(--gold)"></i> <strong>Áo dài:</strong> ${adText}`;
+      document.getElementById('summary-betrap').innerHTML = `<i class="ri-group-line" style="color:var(--gold)"></i> <strong>Đội bê tráp:</strong> ${wantBetrap ? 'Có' : 'Không'}`;
+    }
+
+    async function submitBooking() {
+      const sess = API.auth.currentSession();
+      if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập.', confirmText:'Đăng nhập', onConfirm:()=>{ location.href='login.html'; return true; } });
+
+      const date    = document.getElementById('f-date').value;
+      const time    = document.getElementById('f-time').value;
+      const address = document.getElementById('f-address').value.trim();
+      const qtyAodai = document.getElementById('f-qty-aodai').value.trim();
+      const qtyBetrap = document.getElementById('f-qty-betrap').value.trim();
+      const color   = document.getElementById('f-color').value.trim();
+      const note    = document.getElementById('f-note').value.trim();
+
+      if (!date)    return UI.toast('Vui lòng chọn ngày diễn ra', 'error');
+      if (!time)    return UI.toast('Vui lòng chọn giờ chuẩn bị', 'error');
+      if (!address) return UI.toast('Vui lòng nhập địa chỉ tổ chức', 'error');
+      if (!qtyAodai) return UI.toast('Vui lòng nhập số bộ áo dài cần thuê', 'error');
+      if (wantBetrap && !qtyBetrap) return UI.toast('Vui lòng nhập số người đội bê tráp', 'error');
+
+      // Build note string
+      const noteParts = [];
+      if (qtyAodai) noteParts.push(`Số bộ áo dài: ${qtyAodai}`);
+      if (selectedAodais.length) noteParts.push(`Áo dài chọn: ${selectedAodais.map(a=>a.name).join(', ')}`);
+      if (wantBetrap) noteParts.push(`Có thêm đội bê tráp: ${qtyBetrap}`);
+      if (color) noteParts.push(`Tông màu: ${color}`);
+      if (note) noteParts.push(note);
+      const fullNote = noteParts.join(' | ');
+
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;"></span> Đang xử lý...';
+
+      try {
+        // Đơn 1: Tráp ăn hỏi
+        const trapTxn = await API.txn.create({ serviceId: selectedTrap.id, date, time, address, note: fullNote });
+
+        // Đơn 2: Áo dài (dùng áo dài đầu tiên đã chọn hoặc bất kỳ áo dài nào của provider đó)
+        if (selectedAodais.length > 0) {
+          await API.txn.create({ serviceId: selectedAodais[0].id, date, time, address, note: fullNote }).catch(() => {});
+        }
+
+        // Đơn 3: Bê tráp nếu có
+        if (wantBetrap && betrapServices.length > 0) {
+          const betrapNote = fullNote + ` | Số người bê tráp: ${qtyBetrap}`;
+          await API.txn.create({ serviceId: betrapServices[0].id, date, time, address, note: betrapNote }).catch(() => {});
+        }
+
+        UI.toast('🎉 Đặt dịch vụ thành công!', 'success');
+        setTimeout(() => { location.href = `checkout.html?id=${trapTxn.id}`; }, 800);
+      } catch(e) {
+        UI.toast(e.message || 'Lỗi khi đặt dịch vụ', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ri-calendar-check-line"></i> Đặt Dịch Vụ';
+      }
+    }
+  </script>
+</body>
+</html>

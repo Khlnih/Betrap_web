@@ -3,725 +3,568 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Dịch Vụ — BêTráp</title>
+  <meta name="description" content="Khám phá các dịch vụ cưới hỏi chuyên nghiệp tại BêTráp: bê tráp, tráp ăn hỏi, thuê áo dài, MC sự kiện và media.">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/main.css?v=2">
-  <link rel="stylesheet" href="../css/components.css?v=2">
-  <link rel="stylesheet" href="../css/animations.css?v=2">
+  <link rel="stylesheet" href="../css/main.css?v=3">
+  <link rel="stylesheet" href="../css/components.css?v=3">
+  <link rel="stylesheet" href="../css/animations.css?v=3">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  <style>
-    .services-layout{display:grid;grid-template-columns:260px 1fr;gap:var(--sp-2xl);padding:var(--sp-xl) 0}
-    .filter-sidebar{background:white;border-radius:var(--r-lg);padding:var(--sp-xl);box-shadow:var(--shadow-md);position:sticky;top:calc(var(--nav-h) + var(--sp-lg));height:fit-content;border:1px solid rgba(0,0,0,.03)}
-    .filter-section{margin-bottom:var(--sp-lg)}
-    .filter-title{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:var(--sp-md)}
-    .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
-    .search-bar{display:flex;gap:var(--sp-md);margin-bottom:var(--sp-lg)}
-    .search-input{flex:1;padding:12px 18px;border:1.5px solid rgba(220,165,174,.15);border-radius:var(--r-full);font-size:.9rem;outline:none;transition:border-color var(--t-fast)}
-    .search-input:focus{border-color:var(--gold)}
-    .price-inputs{display:flex;gap:var(--sp-sm);align-items:center}
-    .price-input{width:100%;padding:8px 12px;border:1.5px solid rgba(220,165,174,.15);border-radius:var(--r-sm);font-size:.8rem;outline:none}
-    .price-input:focus{border-color:var(--gold)}
-    .result-count{font-size:.875rem;color:var(--text-muted);margin-bottom:var(--sp-md)}
-    @media(max-width:1024px){.services-layout{grid-template-columns:1fr}.filter-sidebar{display:none}.services-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:640px){.services-grid{grid-template-columns:1fr}}
-    /* ── Photo Card Style ── */
-    .photo-card {
-      border-radius: 16px; overflow: hidden; cursor: pointer;
-      position: relative; aspect-ratio: 3/4;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      transition: transform .3s ease, box-shadow .3s ease;
-    }
-    .photo-card:hover { transform: translateY(-6px); box-shadow: 0 12px 36px rgba(0,0,0,0.2); }
-    .photo-card img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform .5s ease;
-    }
-    .photo-card:hover img { transform: scale(1.05); }
-    .photo-card-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 55%);
-      display: flex; align-items: flex-end; justify-content: center;
-      padding-bottom: 20px;
-      opacity: 0; transition: opacity .3s ease;
-    }
-    .photo-card:hover .photo-card-overlay { opacity: 1; }
-    .photo-card-overlay button {
-      background: rgba(255,255,255,0.95); color: #5a4030;
-      border: none; border-radius: 100px;
-      padding: 10px 24px; font-size: .9rem; font-weight: 700;
-      cursor: pointer; transition: background .2s;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-    }
-    .photo-card-overlay button:hover { background: #fff; }
-    /* ── Floating Book Button ── */
-    #float-book-btn {
-      position: fixed; bottom: 32px; right: 32px; z-index: 999;
-      background: var(--gold); color: white;
-      border: none; border-radius: 100px;
-      padding: 16px 28px; font-size: 1rem; font-weight: 700;
-      box-shadow: 0 8px 24px rgba(184,148,90,.45);
-      cursor: pointer; display: none; align-items: center; gap: 10px;
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-    #float-book-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(184,148,90,.55); }
-    #float-book-btn.visible { display: flex; }
-    /* ── Horizontal Description Card (Áo Dài / Làm Tráp) ── */
-    .desc-card {
-      display: flex; border-radius: 16px; overflow: hidden;
-      background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      border: 1px solid rgba(0,0,0,0.05);
-      transition: transform .3s ease, box-shadow .3s ease;
-      grid-column: 1 / -1;
-    }
-    .desc-card:hover { transform: translateY(-4px); box-shadow: 0 10px 32px rgba(0,0,0,0.13); }
-    .desc-card-img {
-      width: 320px; min-height: 240px; flex-shrink: 0; overflow: hidden;
-    }
-    .desc-card-img img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform .5s ease;
-    }
-    .desc-card:hover .desc-card-img img { transform: scale(1.05); }
-    .desc-card-body {
-      flex: 1; padding: 28px 32px;
-      display: flex; flex-direction: column; justify-content: center; gap: 10px;
-    }
-    .desc-card-cat {
-      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--gold);
-    }
-    .desc-card-title {
-      font-family: var(--font-h); font-size: 1.25rem;
-      color: var(--text-dark); line-height: 1.3;
-    }
-    .desc-card-desc {
-      font-size: .88rem; color: var(--text-muted);
-      line-height: 1.65; display: -webkit-box;
-      -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .desc-card-meta {
-      font-size: .8rem; color: var(--text-muted);
-      display: flex; align-items: center; gap: 12px;
-    }
-    @media(max-width:640px) {
-      .desc-card { flex-direction: column; }
-      .desc-card-img { width: 100%; height: 200px; }
-    }
-  </style>
   <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <style>
+    /* ── Hero ── */
+    .svc-hero {
+      background: linear-gradient(135deg, #3d2016 0%, #6b3a28 40%, #9a5c3c 100%);
+      padding: 80px 0 60px; text-align:center; position:relative; overflow:hidden;
+    }
+    .svc-hero::before {
+      content:''; position:absolute; inset:0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .svc-hero h1 { font-family:var(--font-h); color:white; font-size:clamp(2rem,5vw,3.2rem); margin-bottom:12px; }
+    .svc-hero p  { color:rgba(255,255,255,.75); font-size:1.1rem; max-width:480px; margin:0 auto; }
+
+    /* ── 3 Big Category Cards ── */
+    .cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; margin:60px 0; }
+    @media(max-width:900px) { .cat-grid { grid-template-columns:1fr; gap:20px; } }
+    .cat-card {
+      border-radius:20px; overflow:hidden; position:relative; cursor:pointer;
+      aspect-ratio:4/3; box-shadow:0 8px 32px rgba(0,0,0,.18);
+      transition:transform .35s ease, box-shadow .35s ease;
+    }
+    .cat-card:hover { transform:translateY(-8px); box-shadow:0 20px 48px rgba(0,0,0,.28); }
+    .cat-card img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+    .cat-card:hover img { transform:scale(1.06); }
+    .cat-card-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(20,10,5,.85) 0%, rgba(20,10,5,.2) 55%, transparent 100%);
+      display:flex; flex-direction:column; justify-content:flex-end; padding:28px;
+    }
+    .cat-card-tag { font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+    .cat-card-title { font-family:var(--font-h); color:white; font-size:1.6rem; line-height:1.2; margin-bottom:8px; }
+    .cat-card-desc { color:rgba(255,255,255,.7); font-size:.85rem; line-height:1.5; margin-bottom:16px; }
+    .cat-card-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
+      border:1px solid rgba(255,255,255,.3); color:white;
+      padding:9px 20px; border-radius:100px; font-size:.85rem; font-weight:600;
+      transition:background .2s;
+    }
+    .cat-card:hover .cat-card-btn { background:var(--gold); border-color:var(--gold); }
+
+    /* ── Sub Panel (Cưới Hỏi 4 lựa chọn) ── */
+    .sub-panel {
+      display:none; background:#fff8f5; border-radius:20px;
+      padding:40px; margin-bottom:48px;
+      border:1px solid rgba(220,165,174,.2);
+      box-shadow:0 4px 24px rgba(180,120,90,.08);
+      animation:fadeInUp .4s ease;
+    }
+    .sub-panel.active { display:block; }
+    .sub-panel-title { font-family:var(--font-h); font-size:1.5rem; color:var(--text-dark); margin-bottom:6px; }
+    .sub-panel-desc  { font-size:.9rem; color:var(--text-muted); margin-bottom:28px; }
+    .sub-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    @media(max-width:900px) { .sub-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:560px) { .sub-grid { grid-template-columns:1fr; } }
+    .sub-card {
+      background:white; border-radius:14px; overflow:hidden;
+      box-shadow:0 2px 12px rgba(0,0,0,.06); border:1.5px solid transparent;
+      cursor:pointer; transition:all .25s ease;
+    }
+    .sub-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:0 8px 24px rgba(184,148,90,.2); }
+    .sub-card.featured { border-color:var(--gold); background:linear-gradient(135deg,#fff8f0,#fff); }
+    .sub-card-img { width:100%; aspect-ratio:4/3; object-fit:cover; }
+    .sub-card-body { padding:14px; }
+    .sub-card-badge { font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }
+    .sub-card-title { font-weight:700; font-size:.92rem; color:var(--text-dark); margin-bottom:4px; line-height:1.3; }
+    .sub-card-desc  { font-size:.78rem; color:var(--text-muted); line-height:1.5; margin-bottom:12px; }
+    .sub-card-btn { display:block; width:100%; padding:9px; border-radius:8px; font-size:.82rem; font-weight:700; text-align:center; transition:all .2s; }
+    .sub-card-btn-primary { background:var(--gold); color:white; }
+    .sub-card-btn-outline { border:1.5px solid var(--gold); color:var(--gold); background:white; }
+    .sub-card-btn:hover { opacity:.85; }
+
+    /* ── Photo Grid (dịch vụ lẻ) ── */
+    .svc-panel { margin-bottom:60px; }
+    .svc-section-title { font-family:var(--font-h); font-size:1.35rem; color:var(--text-dark); margin-bottom:16px; }
+    .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    @media(max-width:800px) { .photo-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:500px) { .photo-grid { grid-template-columns:1fr; } }
+    .photo-card {
+      border-radius:14px; overflow:hidden; cursor:pointer;
+      position:relative; aspect-ratio:3/4;
+      box-shadow:0 4px 16px rgba(0,0,0,.1);
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .photo-card:hover { transform:translateY(-5px); box-shadow:0 12px 32px rgba(0,0,0,.18); }
+    .photo-card img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+    .photo-card:hover img { transform:scale(1.05); }
+    .photo-card-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 55%);
+      display:flex; flex-direction:column; justify-content:flex-end; padding:16px;
+      opacity:0; transition:opacity .3s;
+    }
+    .photo-card:hover .photo-card-overlay { opacity:1; }
+    .photo-card-name { color:white; font-weight:700; font-size:.92rem; margin-bottom:8px; }
+    .photo-card-overlay button {
+      background:rgba(255,255,255,.92); color:#5a3020;
+      border:none; border-radius:100px;
+      padding:8px 20px; font-size:.82rem; font-weight:700; cursor:pointer;
+    }
+    /* Load more */
+    .load-more-wrap { text-align:center; margin:24px 0 0; }
+
+    /* ── Detail Lightbox ── */
+    #detail-modal {
+      position:fixed; inset:0; z-index:9999;
+      background:rgba(0,0,0,.92);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .3s;
+    }
+    #detail-modal.open { opacity:1; pointer-events:all; }
+    #detail-modal-close {
+      position:absolute; top:20px; right:24px;
+      background:rgba(255,255,255,.15); border:none; width:44px; height:44px;
+      border-radius:50%; font-size:1.5rem; color:white; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:background .2s;
+    }
+    #detail-modal-close:hover { background:rgba(255,255,255,.3); }
+    .detail-inner {
+      width:90vw; max-width:900px; max-height:90vh;
+      background:white; border-radius:20px; overflow:hidden;
+      display:flex; transform:scale(.95); transition:transform .3s;
+    }
+    #detail-modal.open .detail-inner { transform:scale(1); }
+    .detail-img { flex:1.2; min-height:400px; overflow:hidden; }
+    .detail-img img { width:100%; height:100%; object-fit:cover; }
+    .detail-info { flex:1; padding:40px; overflow-y:auto; display:flex; flex-direction:column; justify-content:center; gap:14px; }
+    .detail-cat { font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+    .detail-name { font-family:var(--font-h); font-size:1.8rem; color:var(--text-dark); line-height:1.2; }
+    .detail-desc { font-size:.9rem; line-height:1.75; color:var(--text-muted); }
+    @media(max-width:700px) {
+      .detail-inner { flex-direction:column; }
+      .detail-img { min-height:220px; }
+      .detail-info { padding:24px; }
+    }
+
+    /* MC/Media dạng card thường */
+    .svc-card-h { background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.06); display:flex; gap:0; transition:box-shadow .25s; cursor:pointer; }
+    .svc-card-h:hover { box-shadow:0 6px 24px rgba(0,0,0,.12); }
+    .svc-card-h-img { width:180px; flex-shrink:0; overflow:hidden; }
+    .svc-card-h-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+    .svc-card-h:hover .svc-card-h-img img { transform:scale(1.05); }
+    .svc-card-h-body { flex:1; padding:20px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; }
+    .svc-cards-vert { display:flex; flex-direction:column; gap:16px; }
+    @media(max-width:600px) { .svc-card-h { flex-direction:column; } .svc-card-h-img { width:100%; height:180px; } }
+  </style>
 </head>
 <body>
   <div id="nav-container"></div>
-  <div class="page-header" data-aos="fade-down">
-    <div class="container">
-      <h1>Tìm Dịch Vụ</h1>
-      <p>Hàng trăm dịch vụ đám hỏi uy tín tại Hà Nội</p>
+
+  <!-- Hero -->
+  <div class="svc-hero">
+    <div class="container" data-aos="fade-down">
+      <h1>Dịch Vụ BêTráp</h1>
+      <p>Trải nghiệm dịch vụ cưới hỏi chuyên nghiệp, tận tâm cho ngày trọng đại của bạn</p>
     </div>
   </div>
 
-  <div class="container page-content" style="padding-top:0">
-    <!-- Mobile filter chips -->
-    <div class="filter-bar" id="mobile-cats">
-      <button class="filter-chip" data-cat="be-trap">Cưới Hỏi</button>
-      <button class="filter-chip" data-cat="ao-dai">Áo Dài</button>
-      <button class="filter-chip" data-cat="lam-trap">Tráp Ăn Hỏi</button>
-      <button class="filter-chip" data-cat="media">Media</button>
-      <button class="filter-chip" data-cat="mc-su-kien">MC Sự Kiện</button>
-    </div>
+  <div class="container page-content">
 
-    <div class="services-layout">
-      <!-- Sidebar Filters -->
-      <aside class="filter-sidebar" data-aos="fade-right" data-aos-delay="100">
-        <h4 style="margin-bottom:var(--sp-lg)">Bộ Lọc</h4>
-        <div class="filter-section">
-          <div class="filter-title">Danh Mục</div>
-          <div style="display:flex;flex-direction:column;gap:var(--sp-sm)">
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="be-trap" checked> Cưới Hỏi</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="ao-dai"> Áo Dài</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="lam-trap"> Tráp Ăn Hỏi</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="media"> Media</label>
-            <label style="display:flex;align-items:center;gap:var(--sp-sm);font-size:.875rem;cursor:pointer"><input type="radio" name="cat" value="mc-su-kien"> MC Sự Kiện</label>
-          </div>
+    <!-- 3 Card Danh Mục Lớn -->
+    <div class="cat-grid" id="main-cat-grid">
+      <!-- Cưới Hỏi -->
+      <div class="cat-card" onclick="openCuoiHoi()" data-aos="fade-up" data-aos-delay="0">
+        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&auto=format&fit=crop" alt="Cưới Hỏi">
+        <div class="cat-card-overlay">
+          <div class="cat-card-tag">💍 Trọn gói</div>
+          <div class="cat-card-title">Cưới Hỏi</div>
+          <div class="cat-card-desc">Bê tráp, tráp ăn hỏi, áo dài và combo trọn vẹn cho ngày lễ</div>
+          <span class="cat-card-btn"><i class="ri-arrow-right-line"></i> Khám phá</span>
         </div>
-        <div class="filter-section">
-          <div class="filter-title">Khu Vực</div>
-          <select id="location-filter" class="form-control" style="font-size:.875rem;padding:10px 14px">
-            <option value="">Tất cả khu vực</option>
-            <option>Hà Nội</option>
-            <option>Quận Ba Đình</option>
-            <option>Quận Hoàn Kiếm</option>
-            <option>Quận Tây Hồ</option>
-            <option>Quận Long Biên</option>
-            <option>Quận Cầu Giấy</option>
-            <option>Quận Đống Đa</option>
-            <option>Quận Hai Bà Trưng</option>
-            <option>Quận Hoàng Mai</option>
-            <option>Quận Thanh Xuân</option>
-            <option>Quận Hà Đông</option>
-            <option>Quận Nam Từ Liêm</option>
-            <option>Quận Bắc Từ Liêm</option>
-          </select>
+      </div>
+      <!-- MC Sự Kiện -->
+      <div class="cat-card" onclick="openSection('mc')" data-aos="fade-up" data-aos-delay="100">
+        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop" alt="MC Sự Kiện">
+        <div class="cat-card-overlay">
+          <div class="cat-card-tag">🎙️ Chuyên nghiệp</div>
+          <div class="cat-card-title">MC Sự Kiện</div>
+          <div class="cat-card-desc">MC lịch lãm, giọng truyền cảm cho lễ ăn hỏi và tiệc cưới</div>
+          <span class="cat-card-btn"><i class="ri-arrow-right-line"></i> Xem MC</span>
         </div>
-        <button class="btn btn-primary btn-block" onclick="applyFilters()">Áp Dụng</button>
-        <button class="btn btn-ghost btn-block mt-sm" onclick="resetFilters()">Đặt Lại</button>
-        
-        <div style="margin-top:32px;padding:24px 20px;background:rgba(220,165,174,.08);border:1px solid rgba(220,165,174,.2);border-radius:var(--r-md);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:8px">💬</div>
-          <h4 style="font-family:var(--font-h);color:var(--text-dark);margin-bottom:8px">Cần Tư Vấn Thêm?</h4>
-          <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5">Để lại thông tin, đội ngũ BêTráp sẽ liên hệ tư vấn và báo giá miễn phí cho bạn.</p>
-          <button class="btn btn-outline btn-block" onclick="showConsultModal('')" style="padding:10px 4px;font-size:0.9rem;color:var(--gold);border-color:var(--gold);white-space:normal;line-height:1.3;"><i class="ri-customer-service-2-line"></i> Đăng Ký Tư Vấn</button>
+      </div>
+      <!-- Media -->
+      <div class="cat-card" onclick="openSection('media')" data-aos="fade-up" data-aos-delay="200">
+        <img src="https://images.unsplash.com/photo-1556103255-4443dbae8e5a?w=800&auto=format&fit=crop" alt="Media">
+        <div class="cat-card-overlay">
+          <div class="cat-card-tag">📷 Kỷ niệm</div>
+          <div class="cat-card-title">Ảnh & Video</div>
+          <div class="cat-card-desc">Ghi lại từng khoảnh khắc đẹp nhất trong ngày trọng đại</div>
+          <span class="cat-card-btn"><i class="ri-arrow-right-line"></i> Xem Media</span>
         </div>
-      </aside>
-
-      <!-- Results -->
-      <div data-aos="fade-left" data-aos-delay="200">
-        <div class="search-bar">
-          <input id="search-input" type="text" class="search-input" placeholder="🔍 Tìm tên dịch vụ, mô tả...">
-          <button class="btn btn-primary" onclick="applyFilters()"><i class="ri-search-line"></i></button>
-        </div>
-        <div class="result-count" id="result-count"></div>
-        <div class="services-grid stagger-children" id="services-grid"></div>
       </div>
     </div>
-  </div>
+
+    <!-- ── Sub Panel: Cưới Hỏi ── -->
+    <div id="panel-cuoi-hoi" class="sub-panel">
+      <button onclick="closeAllPanels()" style="float:right;background:none;border:none;font-size:1.3rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
+      <div class="sub-panel-title">💍 Dịch Vụ Cưới Hỏi</div>
+      <div class="sub-panel-desc">Chọn dịch vụ phù hợp hoặc đặt combo tráp + áo dài cùng nhau</div>
+      <div class="sub-grid">
+        <!-- Bê Tráp -->
+        <div class="sub-card" onclick="scrollToSection('sec-betrap')">
+          <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&auto=format&fit=crop" alt="Bê Tráp" class="sub-card-img">
+          <div class="sub-card-body">
+            <div class="sub-card-badge">👥 Đội hình</div>
+            <div class="sub-card-title">Thuê Đội Bê Tráp</div>
+            <div class="sub-card-desc">Đội cưới hỏi chuyên nghiệp, trang phục chỉn chu, đúng giờ</div>
+            <span class="sub-card-btn sub-card-btn-outline">Xem dịch vụ</span>
+          </div>
+        </div>
+        <!-- Tráp Ăn Hỏi -->
+        <div class="sub-card" onclick="scrollToSection('sec-trap')">
+          <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&auto=format&fit=crop" alt="Tráp" class="sub-card-img">
+          <div class="sub-card-body">
+            <div class="sub-card-badge">🧧 Lễ vật</div>
+            <div class="sub-card-title">Tráp Ăn Hỏi</div>
+            <div class="sub-card-desc">Tráp truyền thống và hiện đại, được trang trí tỉ mỉ công phu</div>
+            <span class="sub-card-btn sub-card-btn-outline">Xem tráp</span>
+          </div>
+        </div>
+        <!-- Áo Dài -->
+        <div class="sub-card" onclick="scrollToSection('sec-aodai')">
+          <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&auto=format&fit=crop" alt="Áo Dài" class="sub-card-img" style="filter:hue-rotate(280deg) saturate(.8)">
+          <div class="sub-card-body">
+            <div class="sub-card-badge">👘 Trang phục</div>
+            <div class="sub-card-title">Thuê Áo Dài</div>
+            <div class="sub-card-desc">Nhiều mẫu mã đa dạng, từ truyền thống đến hiện đại</div>
+            <span class="sub-card-btn sub-card-btn-outline">Xem áo dài</span>
+          </div>
+        </div>
+        <!-- Combo -->
+        <div class="sub-card featured" onclick="goCombo()">
+          <div style="width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#f9e8d0,#f0c8a0,#e8a87c);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;">
+            <div style="font-size:2.5rem;">✨</div>
+            <div style="font-size:.75rem;font-weight:700;color:#8B5E3C;letter-spacing:.1em;text-transform:uppercase;">Gợi ý nổi bật</div>
+          </div>
+          <div class="sub-card-body">
+            <div class="sub-card-badge" style="color:#C9872E;">✨ Combo tiết kiệm</div>
+            <div class="sub-card-title">Combo Tráp + Áo Dài</div>
+            <div class="sub-card-desc">Chọn tráp trước, hệ thống gợi ý áo dài phù hợp từ cùng nhà cung cấp</div>
+            <span class="sub-card-btn sub-card-btn-primary">Đặt Combo →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Sections ảnh dịch vụ lẻ ── -->
+    <!-- Bê Tráp -->
+    <div class="svc-panel" id="sec-betrap" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="svc-section-title">👥 Đội Bê Tráp Cưới Hỏi</div>
+        <button onclick="openBookSimple('be-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+      </div>
+      <div class="photo-grid" id="grid-betrap"></div>
+      <div class="load-more-wrap" id="more-betrap" style="display:none">
+        <button class="btn btn-outline" onclick="loadMoreSvc('be-trap')">Xem thêm <i class="ri-arrow-down-line"></i></button>
+      </div>
+    </div>
+
+    <!-- Tráp -->
+    <div class="svc-panel" id="sec-trap" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="svc-section-title">🧧 Tráp Ăn Hỏi</div>
+        <button onclick="openBookSimple('lam-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+      </div>
+      <div class="photo-grid" id="grid-trap"></div>
+    </div>
+
+    <!-- Áo Dài -->
+    <div class="svc-panel" id="sec-aodai" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="svc-section-title">👘 Thuê Áo Dài</div>
+        <button onclick="openBookSimple('ao-dai')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+      </div>
+      <div class="photo-grid" id="grid-aodai"></div>
+    </div>
+
+    <!-- MC -->
+    <div class="svc-panel" id="sec-mc" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="svc-section-title">🎙️ MC Sự Kiện</div>
+      </div>
+      <div class="svc-cards-vert" id="grid-mc"></div>
+    </div>
+
+    <!-- Media -->
+    <div class="svc-panel" id="sec-media" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="svc-section-title">📷 Ảnh & Video</div>
+      </div>
+      <div class="svc-cards-vert" id="grid-media"></div>
+    </div>
+
+  </div><!-- /container -->
 
   <div id="footer-container"></div>
   <div id="toast-container"></div>
+  <div id="modal-overlay"></div>
 
-  <!-- Floating Đặt Ngay Button -->
-  <button id="float-book-btn" onclick="openQuickBook(null)">
-    <i class="ri-calendar-check-line"></i> Đặt ngay
-  </button>
-
-  <!-- Notice Overlay -->
-  <div id="notice-overlay" style="position:fixed;inset:0;z-index:9999;background:rgba(20,15,15,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:1;transition:opacity .4s ease;">
-    <div style="background:#fffefc;border-radius:24px;padding:var(--sp-2xl);max-width:460px;width:100%;position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.15);transform:translateY(0);animation:fadeInUp .5s ease;">
-      <button onclick="closeNotice()" style="position:absolute;top:20px;right:20px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;transition:color 0.2s;"><i class="ri-close-line"></i></button>
-      <h2 style="font-family:var(--font-h);color:#8a6a5c;font-size:1.8rem;margin-bottom:var(--sp-xl)">Lưu ý khi đặt lịch</h2>
-      <div style="display:flex;flex-direction:column;gap:var(--sp-lg);">
-        <div style="display:flex;align-items:flex-start;gap:12px;">
-          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
-          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Đặt lịch trước ít nhất 1 tháng để được tư vấn tốt nhất</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:12px;">
-          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
-          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Cọc 30% để giữ chỗ đội cưới hỏi</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:12px;">
-          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
-          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Tư vấn miễn phí qua điện thoại hoặc trực tiếp</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:12px;">
-          <i class="ri-checkbox-circle-line" style="color:#d8aba5;font-size:1.5rem;margin-top:-2px"></i>
-          <span style="color:#776d68;font-size:1.05rem;line-height:1.5;font-weight:500">Báo giá chi tiết trong vòng 24 giờ</span>
-        </div>
+  <!-- Detail Lightbox -->
+  <div id="detail-modal">
+    <button id="detail-modal-close" onclick="closeDetail()"><i class="ri-close-line"></i></button>
+    <div class="detail-inner">
+      <div class="detail-img"><img id="dm-img" src="" alt=""></div>
+      <div class="detail-info">
+        <div class="detail-cat" id="dm-cat"></div>
+        <div class="detail-name" id="dm-name"></div>
+        <div class="detail-desc" id="dm-desc"></div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Chi Tiết -->
-  <div id="betrap-detail-modal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;">
-    <!-- Nút thoát -->
-    <button onclick="closeBetrapDetail()" style="position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.15);border:none;width:44px;height:44px;border-radius:50%;font-size:1.6rem;color:#fff;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-      <i class="ri-close-line"></i>
-    </button>
-    <!-- Chế độ 1: Chỉ ảnh (Bê Tráp) -->
-    <div id="bd-image-only" style="max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center;transform:scale(0.95);transition:transform .3s ease">
-      <img id="bd-img" src="" style="max-width:90vw;max-height:88vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
-    </div>
-    <!-- Chế độ 2: Ảnh + Mô tả (Áo Dài / Làm Tráp) -->
-    <div id="bd-image-desc" style="display:none;width:90vw;max-width:1000px;max-height:90vh;background:#fff;border-radius:20px;overflow:hidden;transform:scale(0.95);transition:transform .3s ease;box-shadow:0 24px 60px rgba(0,0,0,0.4)">
-      <div style="display:flex;height:100%">
-        <div style="flex:1.1;overflow:hidden;min-height:420px">
-          <img id="bd-img2" src="" style="width:100%;height:100%;object-fit:cover">
+  <!-- Book Simple Modal -->
+  <div id="book-simple-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;">
+    <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:440px;position:relative;transform:translateY(20px);transition:transform .3s;" id="book-simple-inner">
+      <button onclick="closeBookSimple()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
+      <h3 id="bs-title" style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:6px;color:var(--text-dark);"></h3>
+      <p id="bs-subtitle" style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px;"></p>
+      <div style="display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow-y:auto;padding-right:4px;margin-bottom:20px;">
+        <div id="bs-row-svc" style="display:none;">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Chọn dịch vụ</label>
+          <select id="bs-svc-select" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;"></select>
         </div>
-        <div style="flex:1;padding:40px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;gap:14px">
-          <div id="bd-cat-label" style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)"></div>
-          <h2 id="bd-name" style="font-family:var(--font-h);color:var(--text-dark);font-size:1.8rem;line-height:1.2;margin:0"></h2>
-          <div id="bd-desc" style="font-size:.93rem;line-height:1.75;color:var(--text-muted)"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Đặt Dịch Vụ -->
-  <div id="betrap-book-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);opacity:0;pointer-events:none;transition:opacity .3s ease;">
-    <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:440px;position:relative;transform:translateY(20px);transition:transform .3s ease;">
-      <button onclick="closeQuickBook()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
-      <h3 id="qb-title" style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:6px;color:var(--text-dark)">Thông Tin Đặt Lịch</h3>
-      <p id="qb-subtitle" style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px"></p>
-      <div style="max-height:60vh;overflow-y:auto;padding-right:6px;margin-bottom:20px;display:flex;flex-direction:column;gap:14px">
-
-        <!-- Chọn dịch vụ (chỉ hiện khi cần) -->
-        <div id="qb-row-service" style="display:none">
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Chọn dịch vụ</label>
-          <select id="qb-service-select" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
-            <option value="">-- Chọn dịch vụ --</option>
-          </select>
-        </div>
-
-        <!-- Ngày + Giờ (Tất cả) -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
-            <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Ngày diễn ra</label>
-            <input type="date" id="qb-date" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+            <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Ngày diễn ra *</label>
+            <input type="date" id="bs-date" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
           </div>
           <div>
-            <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Giờ chuẩn bị</label>
-            <input type="time" id="qb-time" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+            <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Giờ chuẩn bị *</label>
+            <input type="time" id="bs-time" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
           </div>
         </div>
-
-        <!-- Địa chỉ (Tất cả) -->
         <div>
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Địa chỉ tổ chức</label>
-          <input type="text" id="qb-address" class="form-control" placeholder="Số nhà, tên đườ ng..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Địa chỉ tổ chức *</label>
+          <input type="text" id="bs-address" class="form-control" placeholder="Số nhà, tên đường..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
         </div>
-
-        <!-- Số lượng (Bê Tráp / Áo Dài) -->
-        <div id="qb-row-qty">
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Số lượng</label>
-          <input type="text" id="qb-quantity" class="form-control" placeholder="Ví dụ: 7 người, 7 bộ..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
+        <div id="bs-row-qty">
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Số lượng</label>
+          <input type="text" id="bs-qty" class="form-control" placeholder="VD: 7 người, 7 bộ..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
         </div>
-
-        <!-- Tông màu (Áo Dài) -->
-        <div id="qb-row-color" style="display:none">
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Tông màu / concept</label>
-          <input type="text" id="qb-color" class="form-control" placeholder="Ví dụ: Hồng pastel, Đỏ cười..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
-        </div>
-
-        <!-- Chủ đề / kiểu mâm (Làm Tráp) -->
-        <div id="qb-row-theme" style="display:none">
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Chủ đề / kiểu mâm</label>
-          <input type="text" id="qb-theme" class="form-control" placeholder="Ví dụ: Mâm truyền thống, hiện đại..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
-        </div>
-
-        <!-- Loại dịch vụ Media -->
-        <div id="qb-row-media" style="display:none">
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Loại dịch vụ</label>
-          <select id="qb-media-type" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
-            <option value="">-- Chọn loại --</option>
-            <option>Ảnh cưới / Lễ ăn hỏi</option>
-            <option>Quay phim</option>
-            <option>Ảnh + Phim</option>
-            <option>Drone</option>
-          </select>
-        </div>
-
-        <!-- Loại sự kiện MC -->
-        <div id="qb-row-event" style="display:none">
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Loại sự kiện</label>
-          <select id="qb-event-type" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px">
-            <option value="">-- Chọn loại --</option>
-            <option>Lễ ăn hỏi</option>
-            <option>Tiệc cưới</option>
-            <option>Tiệc báo hỷ</option>
-            <option>Lễ gia tiên</option>
-          </select>
-        </div>
-
-        <!-- Ghi chú (Tất cả) -->
         <div>
-          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem">Ghi chú thêm</label>
-          <textarea id="qb-note" class="form-control" rows="2" placeholder="Yêu cầu đặc biệt..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px"></textarea>
+          <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Ghi chú thêm</label>
+          <textarea id="bs-note" class="form-control" rows="2" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;resize:none;"></textarea>
         </div>
       </div>
-      <button id="qb-submit" class="btn btn-primary btn-block" style="padding:13px;font-size:1rem">Đăng ký
-      </button>
+      <button id="bs-submit" class="btn btn-primary btn-block" style="padding:13px;font-size:1rem;">Đăng ký</button>
     </div>
   </div>
 
   <script src="../js/db.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/ui.js"></script>
+  <script src="../js/api.js?v=1.2"></script>
+  <script src="../js/ui.js?v=1.2"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    const CAT_LABELS = { 'be-trap':'Đội Bê Tráp','lam-trap':'Tráp Ăn Hỏi','ao-dai':'Áo Dài','mc-su-kien':'MC Sự Kiện','media':'Media' };
+    let allSvcs = {};
+    let currentBookCat = '';
+    let currentBookSvcId = null;
+    const PAGE_SIZE = 6;
+    let betrapPage = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
       UI.renderFooter('footer-container');
 
-      window.closeNotice = function() {
-        const el = document.getElementById('notice-overlay');
-        if(el) {
-          el.style.opacity = '0';
-          el.style.pointerEvents = 'none';
-          setTimeout(() => el.remove(), 400);
-        }
-      };
+      // Preload tất cả dịch vụ theo từng category
+      const categories = ['be-trap','lam-trap','ao-dai','mc-su-kien','media'];
+      await Promise.all(categories.map(async cat => {
+        allSvcs[cat] = await API.svc.getAll({ category: cat });
+      }));
 
-      // Read URL param
-      const cat = new URLSearchParams(location.search).get('cat') || 'be-trap';
-      if (cat) {
-        const radio = document.querySelector(`input[name="cat"][value="${cat}"]`);
-        if (radio) radio.checked = true;
-        const chip = document.querySelector(`[data-cat="${cat}"]`);
-        if (chip) { document.querySelectorAll('[data-cat]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
-      }
-
-      // Mobile chips
-      document.querySelectorAll('[data-cat]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
-          btn.classList.add('active');
-          const r = document.querySelector(`input[name="cat"][value="${btn.dataset.cat}"]`);
-          if (r) r.checked = true;
-          applyFilters();
-        });
-      });
-
-      // Sidebar radio
-      document.querySelectorAll('input[name="cat"]').forEach(r => r.addEventListener('change', applyFilters));
-      document.getElementById('location-filter').addEventListener('change', applyFilters);
-      document.getElementById('search-input').addEventListener('input', debounce(applyFilters, 400));
-
-      applyFilters();
-
-      document.getElementById('qb-submit').addEventListener('click', async () => {
-        const sess = API.auth.currentSession();
-        if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
-
-        const date    = document.getElementById('qb-date').value;
-        const time    = document.getElementById('qb-time').value;
-        const address = document.getElementById('qb-address').value;
-        if (!date || !time) return UI.toast('Vui lòng điền ngày và giờ', 'error');
-        if (!address || address.trim().length < 5) return UI.toast('Vui lòng nhập địa chỉ tổ chức', 'error');
-
-        // Nếu chưa có serviceId, kiểm tra dropdown chọn dịch vụ
-        let finalServiceId = activeBookService?.id || activeBookId;
-        const svcSelect = document.getElementById('qb-service-select');
-        if (!finalServiceId && svcSelect && svcSelect.value) {
-          finalServiceId = svcSelect.value;
-        }
-        if (!finalServiceId) return UI.toast('Vui lòng chọn dịch vụ cụ thể', 'error');
-
-        // Build note based on category
-        const cat = activeBookService?.category || '';
-        let noteParts = [];
-        const qty     = document.getElementById('qb-quantity')?.value;
-        const color   = document.getElementById('qb-color')?.value;
-        const theme   = document.getElementById('qb-theme')?.value;
-        const media   = document.getElementById('qb-media-type')?.value;
-        const event   = document.getElementById('qb-event-type')?.value;
-        const baseNote= document.getElementById('qb-note')?.value;
-
-        if (qty)     noteParts.push(`Số lượng: ${qty}`);
-        if (color)   noteParts.push(`Tông màu: ${color}`);
-        if (theme)   noteParts.push(`Kiểu mâm: ${theme}`);
-        if (media)   noteParts.push(`Loại dịch vụ: ${media}`);
-        if (event)   noteParts.push(`Sự kiện: ${event}`);
-        if (baseNote) noteParts.push(baseNote);
-        const note = noteParts.join(' | ');
-
-        const btn = document.getElementById('qb-submit');
-        btn.disabled = true; btn.textContent = 'Đang xử lý...';
-        try {
-          const txn = await API.txn.create({ serviceId: finalServiceId, date, time, address, note });
-          location.href = `checkout.html?id=${txn.id}`;
-        } catch (e) {
-          UI.toast(e.message, 'error');
-          btn.disabled = false; btn.textContent = 'Đăng ký';
-        }
-      });
+      // Check URL param
+      const p = new URLSearchParams(location.search);
+      const cat = p.get('cat');
+      if (cat === 'cuoi-hoi' || cat === 'be-trap' || cat === 'lam-trap' || cat === 'ao-dai') openCuoiHoi();
+      else if (cat === 'mc-su-kien') openSection('mc');
+      else if (cat === 'media') openSection('media');
     });
 
-    let lastCat = null;
-    let currentSvcs = [];
-    let activeCat = 'be-trap'; // track danh mục đang xem
-
-    async function applyFilters() {
-      const cat      = document.querySelector('input[name="cat"]:checked')?.value || '';
-      const location = document.getElementById('location-filter').value;
-      const sort     = 'rating';
-      const search   = document.getElementById('search-input').value;
-      activeCat = cat || 'be-trap'; // cập nhật danh mục đang xem
-      showCategoryModal(cat);
-
-      const svcs = await API.svc.getAll({ category:cat, location, sort, search });
-      currentSvcs = svcs;
-      renderServices(svcs);
+    function openCuoiHoi() {
+      closeAllPanels();
+      document.getElementById('panel-cuoi-hoi').classList.add('active');
+      // Hiển thị tất cả 3 sections
+      ['sec-betrap','sec-trap','sec-aodai'].forEach(id => document.getElementById(id).style.display = 'block');
+      renderPhotoGrid('be-trap', 'grid-betrap');
+      renderPhotoGrid('lam-trap', 'grid-trap');
+      renderPhotoGrid('ao-dai', 'grid-aodai');
+      setTimeout(() => document.getElementById('panel-cuoi-hoi').scrollIntoView({ behavior:'smooth', block:'start' }), 50);
     }
 
-    function showCategoryModal(cat) {
-      if (cat === lastCat) return; // Only show when category changes
-      lastCat = cat;
-
-      if (localStorage.getItem('hide_modal_' + cat) === 'true') return;
-
-      const setHide = () => { localStorage.setItem('hide_modal_' + cat, 'true'); return true; };
-
-      if (cat === 'be-trap') {
-        if (typeof closeNotice === 'function') closeNotice();
-        UI.modal({
-          title: 'Đội Cưới Hỏi',
-          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Đội cưới hỏi chuyên nghiệp với phong cách trẻ trung, lịch sự và chỉn chu trong từng nghi thức cưới hỏi. Nam mặc quần âu, giày tây lịch lãm; nữ duyên dáng với áo dài nhiều mẫu đẹp, đi giày bệt hoặc cao gót theo yêu cầu concept của khách hàng.<br><br>Đội hình được sắp xếp đồng đều, tác phong chuyên nghiệp, đúng giờ và hỗ trợ tận tâm trong suốt buổi lễ. Không chỉ hỗ trợ đám hỏi, đội còn hỗ trợ rót nước, mời khách và phối hợp nghi lễ để ngày vui diễn ra trọn vẹn, trang trọng và mang đậm nét đẹp truyền thống Việt Nam.</div>',
-          cancelText: 'Đóng',
-          confirmText: 'Không hiện lại',
-          confirmClass: 'btn-outline',
-          onConfirm: setHide
-        });
-      } else if (cat === 'ao-dai') {
-        if (typeof closeNotice === 'function') closeNotice();
-        UI.modal({
-          title: 'Thuê Áo Dài',
-          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify">Cho thuê áo dài dành cho đội bê trap với nhiều mẫu mã đa dạng, từ truyền thống đến hiện đại, phù hợp cho lễ ăn hỏi, cưới hỏi và các sự kiện đặc biệt. Áo dài được chuẩn bị sạch sẽ, chỉn chu, chất liệu đẹp và lên form tôn dáng, giúp đội hình đồng đều và nổi bật trong ngày lễ.<br><br>Có nhiều tone màu và concept để lựa chọn. Trang phục dành cho cả nam và nữ, dễ phối phụ kiện và phù hợp với nhiều phong cách nghi lễ Việt Nam. Cam kết chuẩn bị đúng mẫu, đúng size và đúng thời gian để mang đến hình ảnh chuyên nghiệp và đẹp mắt cho ngày vui của khách hàng.</div>',
-          cancelText: 'Đóng',
-          confirmText: 'Không hiện lại',
-          confirmClass: 'btn-outline',
-          onConfirm: setHide
-        });
-      } else if (cat === 'mc-su-kien') {
-        if (typeof closeNotice === 'function') closeNotice();
-        UI.modal({
-          title: 'MC Sự Kiện',
-          body: '<div style="line-height:1.6;font-size:.95rem;color:var(--text-dark);text-align:justify;font-family:var(--font)">Cung cấp MC chuyên nghiệp cho các sự kiện cưới hỏi, tiệc báo hỷ, lễ gia tiên. Đội ngũ MC có kinh nghiệm, khả năng hoạt náo tốt, xử lý tình huống linh hoạt, giọng nói truyền cảm, mang đến không khí trang trọng nhưng không kém phần ấm cúng và vui tươi cho ngày trọng đại của bạn.<br><br>Chúng tôi cam kết MC trang phục chỉn chu, đúng giờ, làm việc bằng chữ "tâm" để ngày vui của bạn thật sự trọn vẹn và ý nghĩa.</div>',
-          cancelText: 'Đóng',
-          confirmText: 'Không hiện lại',
-          confirmClass: 'btn-outline',
-          onConfirm: setHide
-        });
+    function openSection(type) {
+      closeAllPanels();
+      if (type === 'mc') {
+        document.getElementById('sec-mc').style.display = 'block';
+        renderCardList('mc-su-kien', 'grid-mc');
+      } else if (type === 'media') {
+        document.getElementById('sec-media').style.display = 'block';
+        renderCardList('media', 'grid-media');
       }
+      setTimeout(() => (document.getElementById('sec-'+type) || document.getElementById('sec-mc')).scrollIntoView({ behavior:'smooth' }), 50);
     }
 
-    function renderServices(svcs) {
-      const grid = document.getElementById('services-grid');
-      document.getElementById('result-count').textContent = `Tìm thấy ${svcs.length} dịch vụ`;
+    function scrollToSection(secId) {
+      document.getElementById(secId).scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function closeAllPanels() {
+      document.getElementById('panel-cuoi-hoi').classList.remove('active');
+      ['sec-betrap','sec-trap','sec-aodai','sec-mc','sec-media'].forEach(id => document.getElementById(id).style.display = 'none');
+    }
+
+    function goCombo() {
+      window.location.href = 'booking-wizard.html';
+    }
+
+    // ── Render Photo Grid ──
+    function renderPhotoGrid(cat, gridId) {
+      const svcs = allSvcs[cat] || [];
+      const grid = document.getElementById(gridId);
       if (!svcs.length) {
-        grid.innerHTML = `
-          <div class="empty-state" style="grid-column:1/-1; text-align:center; padding: 40px 20px; background: white; border-radius: var(--r-lg); box-shadow: var(--shadow-sm);">
-            <div class="empty-icon" style="font-size: 3rem; margin-bottom: 10px;">📦</div>
-            <h3 style="font-family: var(--font-h); color: var(--text-dark); margin-bottom: 8px;">Hiện tại chưa có dịch vụ nào</h3>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Danh mục này đang được chúng tôi cập nhật dữ liệu. Vui lòng quay lại sau nhé!</p>
-            <button class="btn btn-primary" onclick="resetFilters()">Xem tất cả dịch vụ khác</button>
-          </div>`;
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)"><i class="ri-image-line" style="font-size:2rem;display:block;margin-bottom:8px;"></i>Chưa có dịch vụ nào</div>';
         return;
       }
-      const isBetrap = svcs.length > 0 && svcs[0].category === 'be-trap';
-      const isDescCat = svcs.length > 0 && (svcs[0].category === 'ao-dai' || svcs[0].category === 'lam-trap');
-      // Reset grid to 3 columns always
-      const gridEl = document.getElementById('services-grid');
-      gridEl.style.gridTemplateColumns = '';
-      gridEl.style.gap = '';
-      grid.innerHTML = svcs.map(s => {
-        if (s.category === 'be-trap' || s.category === 'ao-dai' || s.category === 'lam-trap') {
-          // Photo-only grid card for all three categories
-          return `
-            <div class="photo-card" onclick="openBetrapDetail('${s.id}')">
-              <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" loading="lazy">
-              <div class="photo-card-overlay">
-                <button onclick="event.stopPropagation();openBetrapDetail('${s.id}')">Xem chi tiết</button>
-              </div>
-            </div>`;
-        } else {
-          return `
-            <a href="service-detail.html?id=${s.id}" class="service-card">
-              <div style="overflow:hidden;height:200px">
-                <img src="${s.image.startsWith('http') ? s.image : rootPath() + s.image}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease">
-              </div>
-              <div class="service-card-body">
-                <span style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">${UI.categoryIcon(s.category)} ${UI.categoryLabel(s.category)}</span>
-                <div class="service-card-title mt-xs">${s.name}</div>
-                <div class="service-card-provider"><i class="ri-map-pin-line"></i> ${s.location} · ${s.providerName || API.svc.getProviderName(s.providerId)}</div>
-                <div class="stars">${UI.stars(s.rating)} <span style="font-size:.75rem;color:var(--text-muted)">(${s.reviewCount})</span></div>
-                <div class="service-card-footer">
-                  <span class="btn btn-primary btn-sm">Xem chi tiết</span>
-                </div>
-              </div>
-            </a>`;
-        }
-      }).join('');
-      // Show/hide floating book button
-      const hasBetrap = svcs.some(s => s.category === 'be-trap' || s.category === 'ao-dai' || s.category === 'lam-trap');
-      const fbtn = document.getElementById('float-book-btn');
-      if (hasBetrap) fbtn.classList.add('visible');
-      else fbtn.classList.remove('visible');
+      grid.innerHTML = svcs.map(s => photoCardHtml(s)).join('');
     }
 
-    function openBetrapDetail(id) {
-      const svc = currentSvcs.find(s => s.id === id);
-      if (!svc) return;
-      const modal = document.getElementById('betrap-detail-modal');
-      const imageOnly = document.getElementById('bd-image-only');
-      const imageDesc = document.getElementById('bd-image-desc');
-      const imgSrc = svc.image.startsWith('http') ? svc.image : rootPath() + svc.image;
+    function photoCardHtml(s) {
+      const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || ''));
+      return `<div class="photo-card" onclick="openDetail('${s.id}')">
+        <img src="${imgSrc}" alt="${s.name}" loading="lazy" onerror="this.src='https://placehold.co/400x530?text=BêTráp'">
+        <div class="photo-card-overlay">
+          <div class="photo-card-name">${s.name}</div>
+          <button onclick="event.stopPropagation();openDetail('${s.id}')">Xem chi tiết</button>
+        </div>
+      </div>`;
+    }
 
-      if (svc.category === 'ao-dai' || svc.category === 'lam-trap') {
-        // Image + description mode
-        document.getElementById('bd-img2').src = imgSrc;
-        document.getElementById('bd-name').textContent = svc.name;
-        document.getElementById('bd-cat-label').textContent = UI.categoryLabel ? UI.categoryLabel(svc.category) : svc.category;
-        let desc = (svc.description || '').replace(/\n/g, '<br>');
-        document.getElementById('bd-desc').innerHTML = desc;
-        imageOnly.style.display = 'none';
-        imageDesc.style.display = 'block';
-        setTimeout(() => { imageDesc.style.transform = 'scale(1)'; }, 10);
-      } else {
-        // Image only mode (be-trap)
-        document.getElementById('bd-img').src = imgSrc;
-        imageDesc.style.display = 'none';
-        imageOnly.style.display = 'flex';
-        setTimeout(() => { imageOnly.style.transform = 'scale(1)'; }, 10);
+    // ── Render Card List (MC/Media) ──
+    function renderCardList(cat, gridId) {
+      const svcs = allSvcs[cat] || [];
+      const grid = document.getElementById(gridId);
+      if (!svcs.length) {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Chưa có dịch vụ nào</div>';
+        return;
       }
-      modal.style.opacity = '1';
-      modal.style.pointerEvents = 'auto';
-    }
-    function closeBetrapDetail() {
-      const modal = document.getElementById('betrap-detail-modal');
-      modal.style.opacity = '0';
-      modal.style.pointerEvents = 'none';
-      document.getElementById('bd-image-only').style.transform = 'scale(0.95)';
-      document.getElementById('bd-image-desc').style.transform = 'scale(0.95)';
+      grid.innerHTML = svcs.map(s => {
+        const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image||''));
+        return `<div class="svc-card-h" onclick="openBookSimple('${cat}','${s.id}')">
+          <div class="svc-card-h-img"><img src="${imgSrc}" alt="${s.name}" onerror="this.src='https://placehold.co/180x140?text=BêTráp'"></div>
+          <div class="svc-card-h-body">
+            <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
+            <div style="font-weight:700;font-size:1rem;color:var(--text-dark);">${s.name}</div>
+            <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">${(s.description||'').slice(0,120)}${s.description && s.description.length>120?'...':''}</div>
+            <div style="font-size:.8rem;color:var(--text-muted);"><i class="ri-map-pin-line"></i> ${s.location||'—'}</div>
+            <button class="btn btn-primary btn-sm" style="width:fit-content;margin-top:6px;" onclick="event.stopPropagation();openBookSimple('${cat}','${s.id}')"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    let activeBookId = null;
-    let activeBookService = null;
+    // ── Detail Lightbox ──
+    function openDetail(svcId) {
+      let svc = null;
+      for (const cat of Object.keys(allSvcs)) {
+        svc = allSvcs[cat].find(s => s.id === svcId);
+        if (svc) break;
+      }
+      if (!svc) return;
+      const imgSrc = svc.image && svc.image.startsWith('http') ? svc.image : (rootPath() + (svc.image||''));
+      document.getElementById('dm-img').src = imgSrc;
+      document.getElementById('dm-name').textContent = svc.name;
+      document.getElementById('dm-cat').textContent = CAT_LABELS[svc.category] || svc.category;
+      document.getElementById('dm-desc').innerHTML = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
+      document.getElementById('detail-modal').classList.add('open');
+    }
+    function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
+    document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
 
-    // ── Form fields shown per category ──
-    const CAT_CONFIG = {
-      'be-trap':    { title: 'Đặt Đội Cưới Hỏi',    subtitle: 'Vui lòng điền thông tin ngày lễ của bạn', qty: true,  color: false, theme: false, media: false, event: false },
-      'ao-dai':     { title: 'Thuê Áo Dài',         subtitle: 'Chọn màu sắc và số lượng bộ áo dài cần thuê',   qty: true,  color: true,  theme: false, media: false, event: false },
-      'lam-trap':   { title: 'Đặt Tráp Ăn Hỏi',       subtitle: 'Cho chúng tôi biết chủ đề và kiểu mâm bạn muốn',   qty: false, color: false, theme: true,  media: false, event: false },
-      'media':      { title: 'Đặt Dịch Vụ Media',  subtitle: 'Chọn loại hình dịch vụ ảnh/video cần thực hiện',  qty: false, color: false, theme: false, media: true,  event: false },
-      'mc-su-kien': { title: 'Đặt MC Sự Kiện',    subtitle: 'Cho biết loại sự kiện và thông tin cần thiết',   qty: false, color: false, theme: false, media: false, event: true  },
+    // ── Book Simple (Be-trap / MC / Media) ──
+    const BS_CONFIG = {
+      'be-trap':    { title:'Đặt Đội Bê Tráp',   subtitle:'Điền thông tin ngày lễ của bạn', qty:true },
+      'lam-trap':   { title:'Đặt Tráp Ăn Hỏi',   subtitle:'Cho chúng tôi biết kiểu tráp bạn muốn', qty:false },
+      'ao-dai':     { title:'Thuê Áo Dài',        subtitle:'Số bộ và ngày cần thuê', qty:true },
+      'mc-su-kien': { title:'Đặt MC Sự Kiện',     subtitle:'Thông tin buổi lễ của bạn', qty:false },
+      'media':      { title:'Đặt Media',           subtitle:'Gói chụp ảnh / quay phim', qty:false },
     };
 
-    function openQuickBook(id) {
-      if (id) {
-        activeBookId = id;
-        activeBookService = currentSvcs.find(s => s.id === id) || null;
-      } else {
-        // Float button: dùng danh mục đang xem
-        activeBookId = null;
-        activeBookService = { category: activeCat, id: null };
-      }
+    function openBookSimple(cat, svcId = null) {
       const sess = API.auth.currentSession();
       if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
 
-      // Configure form based on category
-      const cat = activeBookService?.category || 'be-trap';
-      const cfg = CAT_CONFIG[cat] || CAT_CONFIG['be-trap'];
-      document.getElementById('qb-title').textContent = cfg.title;
-      document.getElementById('qb-subtitle').textContent = cfg.subtitle;
-      document.getElementById('qb-row-qty').style.display   = cfg.qty   ? 'block' : 'none';
-      document.getElementById('qb-row-color').style.display = cfg.color ? 'block' : 'none';
-      document.getElementById('qb-row-theme').style.display = cfg.theme ? 'block' : 'none';
-      document.getElementById('qb-row-media').style.display = cfg.media ? 'block' : 'none';
-      document.getElementById('qb-row-event').style.display = cfg.event ? 'block' : 'none';
+      currentBookCat = cat;
+      currentBookSvcId = svcId;
+      const cfg = BS_CONFIG[cat] || BS_CONFIG['be-trap'];
+      document.getElementById('bs-title').textContent = cfg.title;
+      document.getElementById('bs-subtitle').textContent = cfg.subtitle;
+      document.getElementById('bs-row-qty').style.display = cfg.qty ? 'block' : 'none';
 
-      // Nếu không có serviceId cụ thể
-      const svcRow = document.getElementById('qb-row-service');
-      const svcSel = document.getElementById('qb-service-select');
-      const svcsInCat = currentSvcs.filter(s => s.category === cat);
-      
-      if (!id) {
-        if (cat === 'be-trap' && svcsInCat.length > 0) {
-          // Với dịch vụ Bê Tráp, chọn mặc định cái đầu tiên và ẩn dropdown
-          activeBookId = svcsInCat[0].id;
-          activeBookService = svcsInCat[0];
-          svcRow.style.display = 'none';
-        } else if (svcsInCat.length > 1) {
-          // Với các dịch vụ khác, hiển thị dropdown để chọn
-          svcRow.style.display = 'block';
-          svcSel.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' +
-            svcsInCat.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-        } else if (svcsInCat.length === 1) {
-          // Chỉ có 1 dịch vụ thì tự chọn luôn
-          activeBookId = svcsInCat[0].id;
-          activeBookService = svcsInCat[0];
-          svcRow.style.display = 'none';
-        } else {
-          svcRow.style.display = 'none';
-        }
+      // Populate service dropdown if no specific svcId
+      const svcRow = document.getElementById('bs-row-svc');
+      const svcSel = document.getElementById('bs-svc-select');
+      const svcs = allSvcs[cat] || [];
+      if (!svcId && svcs.length > 1) {
+        svcRow.style.display = 'block';
+        svcSel.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' + svcs.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       } else {
         svcRow.style.display = 'none';
+        if (!svcId && svcs.length === 1) currentBookSvcId = svcs[0].id;
       }
 
-      // Reset form
-      ['qb-date','qb-time','qb-address','qb-quantity','qb-color','qb-theme','qb-note'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.value = '';
-      });
-      ['qb-media-type','qb-event-type'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.selectedIndex = 0;
-      });
-      document.getElementById('qb-submit').disabled = false;
-      document.getElementById('qb-submit').textContent = 'Đăng ký';
+      // Reset
+      ['bs-date','bs-time','bs-address','bs-qty','bs-note'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('bs-submit').disabled = false;
+      document.getElementById('bs-submit').textContent = 'Đăng ký';
 
-      const el = document.getElementById('betrap-book-modal');
-      el.style.opacity = '1'; el.style.pointerEvents = 'auto';
-      el.firstElementChild.style.transform = 'translateY(0)';
-    }
-    function closeQuickBook() {
-      const el = document.getElementById('betrap-book-modal');
-      el.style.opacity = '0'; el.style.pointerEvents = 'none';
-      el.firstElementChild.style.transform = 'translateY(20px)';
+      const modal = document.getElementById('book-simple-modal');
+      modal.style.opacity = '1'; modal.style.pointerEvents = 'all';
+      document.getElementById('book-simple-inner').style.transform = 'translateY(0)';
     }
 
-    function showConsultModal(serviceId) {
-      const sess = API.auth.currentSession();
-      if (!sess) { UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đăng ký tư vấn.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' }); return; }
-      if (!sess.phone) { 
-        UI.modal({ 
-          title: 'Yêu Cầu Số Điện Thoại', 
-          body: 'Tính năng này yêu cầu bạn phải có số điện thoại. Vui lòng vào Cài đặt (Dashboard) để cập nhật số điện thoại trước khi đăng ký tư vấn!', 
-          confirmText: 'Đi tới Cập nhật', 
-          onConfirm: () => { location.href = 'dashboard.html'; return true; } 
-        }); 
-        return; 
+    function closeBookSimple() {
+      const modal = document.getElementById('book-simple-modal');
+      modal.style.opacity = '0'; modal.style.pointerEvents = 'none';
+      document.getElementById('book-simple-inner').style.transform = 'translateY(20px)';
+    }
+
+    document.getElementById('bs-submit').addEventListener('click', async () => {
+      const date = document.getElementById('bs-date').value;
+      const time = document.getElementById('bs-time').value;
+      const address = document.getElementById('bs-address').value.trim();
+      if (!date || !time) return UI.toast('Vui lòng điền ngày và giờ', 'error');
+      if (!address || address.length < 5) return UI.toast('Vui lòng nhập địa chỉ tổ chức', 'error');
+
+      let serviceId = currentBookSvcId;
+      const sel = document.getElementById('bs-svc-select');
+      if (!serviceId && sel && sel.value) serviceId = sel.value;
+      if (!serviceId) return UI.toast('Vui lòng chọn dịch vụ', 'error');
+
+      const qty = document.getElementById('bs-qty').value;
+      const note = document.getElementById('bs-note').value;
+      const noteStr = [qty ? 'Số lượng: '+qty : '', note].filter(Boolean).join(' | ');
+
+      const btn = document.getElementById('bs-submit');
+      btn.disabled = true; btn.textContent = 'Đang xử lý...';
+      try {
+        const txn = await API.txn.create({ serviceId, date, time, address, note: noteStr });
+        location.href = `checkout.html?id=${txn.id}`;
+      } catch(e) {
+        UI.toast(e.message, 'error');
+        btn.disabled = false; btn.textContent = 'Đăng ký';
       }
-
-      const body = `
-        <div class="form-group" style="text-align:left">
-          <label class="form-label">Ngày muốn tư vấn</label>
-          <input type="date" id="consult-date" class="form-control" min="${new Date().toISOString().split('T')[0]}">
-        </div>
-        <div class="form-group" style="text-align:left">
-          <label class="form-label">Giờ hẹn</label>
-          <input type="time" id="consult-time" class="form-control" value="09:00">
-        </div>
-        <div class="form-group" style="text-align:left">
-          <label class="form-label">Địa chỉ (hoặc Phương thức)</label>
-          <input type="text" id="consult-address" class="form-control" placeholder="Gặp trực tiếp, hoặc Qua điện thoại/Zalo...">
-        </div>
-        <div class="form-group" style="text-align:left">
-          <label class="form-label">Câu hỏi/Ghi chú thêm</label>
-          <textarea id="consult-note" class="form-control" rows="3" placeholder="Ví dụ: Tôi muốn hỏi thêm về các gói dịch vụ..."></textarea>
-        </div>
-      `;
-      UI.modal({
-        title: 'Đăng Ký Tư Vấn',
-        body: body,
-        confirmText: 'Gửi yêu cầu',
-        onConfirm: async () => {
-          const date = document.getElementById('consult-date').value;
-          const time = document.getElementById('consult-time').value;
-          const address = document.getElementById('consult-address').value;
-          const note = document.getElementById('consult-note').value;
-          if (!date || !address) { UI.toast('Vui lòng nhập đầy đủ ngày và địa chỉ/phương thức', 'error'); return false; }
-
-          try {
-            await API.consultation.create({ serviceId, date, time, address, note });
-            UI.toast('Đã gửi yêu cầu tư vấn thành công!', 'success');
-            return true;
-          } catch(e) {
-            UI.toast(e.message || 'Lỗi khi gửi yêu cầu', 'error');
-            return false;
-          }
-        }
-      });
-    }
-
-    function resetFilters() {
-      const defaultRadio = document.querySelector('input[name="cat"][value="be-trap"]');
-      if (defaultRadio) defaultRadio.checked = true;
-      document.querySelectorAll('[data-cat]').forEach(c=>c.classList.remove('active'));
-      const defaultChip = document.querySelector('[data-cat="be-trap"]');
-      if (defaultChip) defaultChip.classList.add('active');
-      document.getElementById('location-filter').value = '';
-      document.getElementById('search-input').value = '';
-      applyFilters();
-    }
-
-    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+    });
   </script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script>AOS.init({duration:800, once:true});</script>
+  <script>AOS.init({ duration:700, once:true });</script>
 </body>
 </html>

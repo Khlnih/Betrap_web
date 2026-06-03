@@ -315,6 +315,25 @@
           <label class="form-label">Tags (cách nhau bởi dấu phẩy)</label>
           <input id="so-tags" class="form-control" type="text" placeholder="VD: cưới hỏi, truyền thống, cao cấp">
         </div>
+
+        <!-- Section kết nối Áo dài – chỉ hiện khi category = lam-trap -->
+        <div id="aodai-link-group" style="display:none; margin-top:16px;">
+          <div style="border-top:2px solid rgba(220,165,174,.15);padding-top:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <i class="ri-links-line" style="color:var(--gold);font-size:1.1rem;"></i>
+              <span style="font-weight:700;font-size:.95rem;color:var(--text-dark);">Kết nối Áo Dài phù hợp Style</span>
+            </div>
+            <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5;background:var(--cream);padding:10px 12px;border-radius:8px;">
+              <i class="ri-information-line" style="color:var(--gold)"></i>
+              Chọn các bộ áo dài của bạn phù hợp với tráp này. Khách hàng sẽ thấy gợi ý này khi đặt combo.
+            </div>
+            <div id="aodai-checkbox-list" style="display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto;padding-right:4px;">
+              <div style="text-align:center;color:var(--text-muted);font-size:.85rem;padding:20px;">
+                <span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;"></span> Đang tải...
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="service-dialog-footer">
         <button class="btn btn-ghost" onclick="closeServiceModal()">Hủy</button>
@@ -910,6 +929,19 @@
       document.getElementById('so-location').value = editSvc ? (editSvc.location || '') : '';
       document.getElementById('so-tags').value     = editSvc && editSvc.tags ? editSvc.tags.join(', ') : '';
 
+      // Áo dài liên kết (chỉ với lam-trap)
+      const aodaiGroup = document.getElementById('aodai-link-group');
+      if (editSvc && editSvc.category === 'lam-trap') {
+        aodaiGroup.style.display = 'block';
+        API.svc.getAodaiLinks(editSvc.id).then(linked => {
+          const linkedIds = linked.map(a => a.id);
+          loadAodaiCheckboxList(editSvc.id, linkedIds);
+        });
+      } else {
+        aodaiGroup.style.display = 'none';
+        document.getElementById('aodai-checkbox-list').innerHTML = '';
+      }
+
       document.getElementById('service-overlay').classList.add('open');
     }
 
@@ -963,6 +995,9 @@
     document.getElementById('so-category').addEventListener('change', function() {
       const isMC = this.value === 'mc-su-kien' || this.value === 'media';
       document.getElementById('gallery-group').style.display = isMC ? 'block' : 'none';
+      const isTrap = this.value === 'lam-trap';
+      document.getElementById('aodai-link-group').style.display = isTrap ? 'block' : 'none';
+      if (isTrap) loadAodaiCheckboxList(document.getElementById('so-id').value, []);
     });
 
     document.getElementById('so-gallery-files').addEventListener('change', function() {
@@ -1030,9 +1065,19 @@
         
         if (id) {
           await API.svc.update(id, payload);
+          // Lưu liên kết Áo dài nếu là Tráp
+          if (category === 'lam-trap') {
+            const checkedIds = Array.from(document.querySelectorAll('#aodai-checkbox-list input[type=checkbox]:checked')).map(cb => cb.value);
+            await API.svc.setAodaiLinks(id, checkedIds).catch(() => {});
+          }
           UI.toast('✅ Đã cập nhật dịch vụ!', 'success');
         } else {
-          await API.svc.create(payload);
+          const created = await API.svc.create(payload);
+          // Lưu liên kết Áo dài nếu là Tráp
+          if (category === 'lam-trap' && created && created.id) {
+            const checkedIds = Array.from(document.querySelectorAll('#aodai-checkbox-list input[type=checkbox]:checked')).map(cb => cb.value);
+            await API.svc.setAodaiLinks(created.id, checkedIds).catch(() => {});
+          }
           UI.toast('✅ Đã tạo dịch vụ mới!', 'success');
         }
         closeServiceModal();
@@ -1042,6 +1087,35 @@
       } finally {
         btn.disabled = false;
         btn.textContent = oldText;
+      }
+    }
+
+    // Load danh sách Áo dài của provider để tick liên kết
+    async function loadAodaiCheckboxList(trapId, linkedIds = []) {
+      const container = document.getElementById('aodai-checkbox-list');
+      container.innerHTML = '<div style="text-align:center;padding:12px;"><span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;"></span></div>';
+      try {
+        // Lấy tất cả áo dài của chính provider này
+        const all = await API.svc.getMyServices();
+        const aodais = all.filter(s => s.category === 'ao-dai');
+        if (!aodais.length) {
+          container.innerHTML = '<div style="text-align:center;font-size:.82rem;color:var(--text-muted);padding:16px;"><i class="ri-information-line"></i> Bạn chưa có dịch vụ Áo Dài nào. Hãy tạo trước!</div>';
+          return;
+        }
+        container.innerHTML = aodais.map(a => `
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border-radius:8px;border:1px solid #eee;background:white;transition:background .15s;" 
+                 onmouseover="this.style.background='#faf7f3'" onmouseout="this.style.background='white'">
+            <input type="checkbox" value="${a.id}" ${linkedIds.includes(a.id) ? 'checked' : ''} 
+                   style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;">
+            ${a.image ? `<img src="${a.image}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;">` : '<div style="width:44px;height:44px;background:#f0f0f0;border-radius:6px;flex-shrink:0;"></div>'}
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:.85rem;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name}</div>
+              <div style="font-size:.75rem;color:var(--text-muted);">${a.location || ''}</div>
+            </div>
+          </label>
+        `).join('');
+      } catch(e) {
+        container.innerHTML = '<div style="color:var(--error);font-size:.82rem;padding:12px;">Lỗi tải danh sách áo dài</div>';
       }
     }
 

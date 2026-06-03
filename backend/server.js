@@ -1124,6 +1124,52 @@ app.put('/api/blogs/:id/blocks/reorder', authMiddleware, adminOnly, async (req, 
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 9. TRAP-AODAI LINKS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// GET danh sách áo dài đã liên kết với 1 Tráp
+app.get('/api/services/:id/aodai', async (req, res) => {
+    try {
+        const result = await sql.query`
+            SELECT s.Id, s.Name, s.Image, s.Description, s.Location, s.ProviderId
+            FROM TrapAodaiLinks t
+            JOIN Services s ON s.Id = t.AodaiId
+            WHERE t.TrapId = ${req.params.id} AND s.Active = true
+            ORDER BY s.Name`;
+        const items = result.recordset.map(s => ({
+            id: s.id || s.Id,
+            name: s.name || s.Name,
+            image: s.image || s.Image,
+            description: s.description || s.Description,
+            location: s.location || s.Location,
+            providerId: s.providerid || s.ProviderId
+        }));
+        res.json(items);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// PUT cập nhật danh sách áo dài liên kết với Tráp (provider only)
+app.put('/api/services/:id/aodai-links', authMiddleware, providerOnly, async (req, res) => {
+    const { aodaiIds } = req.body;
+    if (!Array.isArray(aodaiIds)) return res.status(400).json({ error: 'aodaiIds must be an array' });
+    try {
+        // Kiểm tra provider sở hữu tráp này
+        const check = await sql.query`SELECT ProviderId FROM Services WHERE Id = ${req.params.id}`;
+        if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
+        const row = check.recordset[0];
+        if ((row.providerid || row.ProviderId) !== req.user.userId)
+            return res.status(403).json({ error: 'Không có quyền.' });
+        // Xóa toàn bộ liên kết cũ rồi thêm lại
+        await sql.query`DELETE FROM TrapAodaiLinks WHERE TrapId = ${req.params.id}`;
+        for (const aodaiId of aodaiIds) {
+            const linkId = 'LNK_' + uid();
+            await sql.query`INSERT INTO TrapAodaiLinks (Id, TrapId, AodaiId) VALUES (${linkId}, ${req.params.id}, ${aodaiId})`;
+        }
+        res.json({ success: true, linked: aodaiIds.length });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'BêTráp API v2.0 — Running ✅' }));
 
@@ -1161,6 +1207,15 @@ sql.query(`
 `).catch(e => console.error(e));
 sql.query(`ALTER TABLE BlogBlocks RENAME COLUMN "Position" TO position;`).catch(() => {});
 sql.query(`ALTER TABLE BlogBlocks RENAME COLUMN "Type" TO type;`).catch(() => {});
+sql.query(`
+    CREATE TABLE IF NOT EXISTS TrapAodaiLinks (
+        Id        VARCHAR(50) PRIMARY KEY,
+        TrapId    VARCHAR(50) NOT NULL REFERENCES Services(Id) ON DELETE CASCADE,
+        AodaiId   VARCHAR(50) NOT NULL REFERENCES Services(Id) ON DELETE CASCADE,
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(TrapId, AodaiId)
+    );
+`).catch(e => console.error('TrapAodaiLinks:', e));
 
 // Test kết nối
 if (require.main === module) {

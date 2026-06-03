@@ -170,6 +170,17 @@ const API = (() => {
       return await req('PATCH', '/services/' + id + '/toggle', null, true);
     },
 
+    // Lấy danh sách áo dài liên kết với 1 Tráp
+    getAodaiLinks: async (trapId) => {
+      try { return await get('/services/' + trapId + '/aodai'); }
+      catch { return []; }
+    },
+
+    // Provider cập nhật liên kết Tráp-Áo dài
+    setAodaiLinks: async (trapId, aodaiIds) => {
+      return await put('/services/' + trapId + '/aodai-links', { aodaiIds }, true);
+    },
+
     getProviderName: (providerId) => {
       // Fallback — name thường đã có trong service object từ API
       return 'Nhà cung cấp';
