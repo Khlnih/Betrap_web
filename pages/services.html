@@ -135,8 +135,10 @@
       display:flex; transform:scale(.95); transition:transform .3s;
     }
     #detail-modal.open .detail-inner { transform:scale(1); }
-    .detail-img { flex:1.2; min-height:400px; overflow:hidden; }
-    .detail-img img { width:100%; height:100%; object-fit:cover; }
+    .detail-img { flex:1.2; min-height:400px; display:flex; flex-direction:column; overflow:hidden; background:#f5f5f5; }
+    .detail-img > img { width:100%; flex:1; object-fit:contain; min-height:0; }
+    .dm-thumb { width:64px; height:64px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; flex-shrink:0; opacity:0.6; transition:all .2s; }
+    .dm-thumb:hover, .dm-thumb.active { border-color:var(--gold); opacity:1; }
     .detail-info { flex:1; padding:40px; overflow-y:auto; display:flex; flex-direction:column; justify-content:center; gap:14px; }
     .detail-cat { font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
     .detail-name { font-family:var(--font-h); font-size:1.8rem; color:var(--text-dark); line-height:1.2; }
@@ -314,7 +316,10 @@
   <div id="detail-modal">
     <button id="detail-modal-close" onclick="closeDetail()"><i class="ri-close-line"></i></button>
     <div class="detail-inner">
-      <div class="detail-img"><img id="dm-img" src="" alt=""></div>
+      <div class="detail-img">
+        <img id="dm-img" src="" alt="">
+        <div id="dm-gallery" style="display:flex;gap:10px;padding:12px;overflow-x:auto;background:white;border-top:1px solid #eee;"></div>
+      </div>
       <div class="detail-info">
         <div class="detail-cat" id="dm-cat"></div>
         <div class="detail-name" id="dm-name"></div>
@@ -458,14 +463,17 @@
       }
       grid.innerHTML = svcs.map(s => {
         const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image||''));
-        return `<div class="svc-card-h" onclick="openBookSimple('${cat}','${s.id}')">
+        return `<div class="svc-card-h" onclick="openDetail('${s.id}')">
           <div class="svc-card-h-img"><img src="${imgSrc}" alt="${s.name}" onerror="this.src='https://placehold.co/180x140?text=BêTráp'"></div>
           <div class="svc-card-h-body">
             <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
             <div style="font-weight:700;font-size:1rem;color:var(--text-dark);">${s.name}</div>
             <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">${(s.description||'').slice(0,120)}${s.description && s.description.length>120?'...':''}</div>
             <div style="font-size:.8rem;color:var(--text-muted);"><i class="ri-map-pin-line"></i> ${s.location||'—'}</div>
-            <button class="btn btn-primary btn-sm" style="width:fit-content;margin-top:6px;" onclick="event.stopPropagation();openBookSimple('${cat}','${s.id}')"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+                <button class="btn btn-outline btn-sm" style="width:fit-content;" onclick="event.stopPropagation();openDetail('${s.id}')"><i class="ri-eye-line"></i> Xem chi tiết</button>
+                <button class="btn btn-primary btn-sm" style="width:fit-content;" onclick="event.stopPropagation();openBookSimple('${cat}','${s.id}')"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+            </div>
           </div>
         </div>`;
       }).join('');
@@ -480,7 +488,21 @@
       }
       if (!svc) return;
       const imgSrc = svc.image && svc.image.startsWith('http') ? svc.image : (rootPath() + (svc.image||''));
-      document.getElementById('dm-img').src = imgSrc;
+      const mainImg = document.getElementById('dm-img');
+      mainImg.src = imgSrc;
+      
+      const gallery = document.getElementById('dm-gallery');
+      gallery.innerHTML = '';
+      if (svc.gallery && svc.gallery.length > 0) {
+        const allImages = [imgSrc, ...svc.gallery.map(url => url.startsWith('http') ? url : rootPath() + url)];
+        gallery.innerHTML = allImages.map((url, i) => 
+          `<img src="${url}" class="dm-thumb ${i===0?'active':''}" onclick="document.getElementById('dm-img').src='${url}'; document.querySelectorAll('.dm-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">`
+        ).join('');
+        gallery.style.display = 'flex';
+      } else {
+        gallery.style.display = 'none';
+      }
+
       document.getElementById('dm-name').textContent = svc.name;
       document.getElementById('dm-cat').textContent = CAT_LABELS[svc.category] || svc.category;
       document.getElementById('dm-desc').innerHTML = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
