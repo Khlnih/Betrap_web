@@ -388,8 +388,8 @@ const API = (() => {
 
   const utils = {
     uploadImage: async (file) => {
-      const res = await uploadFile('/upload', file);
-      return res.url;
+      const data = await uploadImage(file);
+      return data.url;
     }
   };
 
