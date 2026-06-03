@@ -267,9 +267,6 @@
         <button onclick="openBookSimple('be-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
       </div>
       <div class="photo-grid" id="grid-betrap"></div>
-      <div class="load-more-wrap" id="more-betrap" style="display:none">
-        <button class="btn btn-outline" onclick="loadMoreSvc('be-trap')">Xem thêm <i class="ri-arrow-down-line"></i></button>
-      </div>
     </div>
 
     <!-- Tráp -->
@@ -431,15 +428,37 @@
       window.location.href = 'booking-wizard.html';
     }
 
+    let currentPages = { 'be-trap': 1, 'lam-trap': 1, 'ao-dai': 1 };
+
     // ── Render Photo Grid ──
-    function renderPhotoGrid(cat, gridId) {
+    function renderPhotoGrid(cat, gridId, page = 1) {
+      currentPages[cat] = page;
       const svcs = allSvcs[cat] || [];
       const grid = document.getElementById(gridId);
       if (!svcs.length) {
         grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)"><i class="ri-image-line" style="font-size:2rem;display:block;margin-bottom:8px;"></i>Chưa có dịch vụ nào</div>';
         return;
       }
-      grid.innerHTML = svcs.map(s => photoCardHtml(s)).join('');
+      
+      const ITEMS_PER_PAGE = 6;
+      const totalPages = Math.ceil(svcs.length / ITEMS_PER_PAGE);
+      const startIndex = (page - 1) * ITEMS_PER_PAGE;
+      const paginatedSvcs = svcs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+      
+      let html = paginatedSvcs.map(s => photoCardHtml(s)).join('');
+      
+      if (totalPages > 1) {
+        let paginationHtml = `<div style="grid-column:1/-1; display:flex; justify-content:center; gap:8px; margin-top:24px;">`;
+        paginationHtml += `<button class="btn btn-outline btn-sm" ${page === 1 ? 'disabled style="opacity:0.5"' : ''} onclick="renderPhotoGrid('${cat}', '${gridId}', ${page - 1})"><i class="ri-arrow-left-s-line"></i></button>`;
+        for(let i=1; i<=totalPages; i++) {
+          paginationHtml += `<button class="btn ${i === page ? 'btn-primary' : 'btn-outline'} btn-sm" onclick="renderPhotoGrid('${cat}', '${gridId}', ${i})">${i}</button>`;
+        }
+        paginationHtml += `<button class="btn btn-outline btn-sm" ${page === totalPages ? 'disabled style="opacity:0.5"' : ''} onclick="renderPhotoGrid('${cat}', '${gridId}', ${page + 1})"><i class="ri-arrow-right-s-line"></i></button>`;
+        paginationHtml += `</div>`;
+        html += paginationHtml;
+      }
+      
+      grid.innerHTML = html;
     }
 
     function photoCardHtml(s) {
