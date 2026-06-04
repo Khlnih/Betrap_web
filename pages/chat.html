@@ -68,8 +68,12 @@
 
       pollInterval = setInterval(async () => {
         await loadConversations();
-        if (activeConvId) await loadMessages(activeConvId, false);
-      }, 3000);
+        if (activeConvId) {
+          const msgEl = document.getElementById('chat-messages');
+          const nearBottom = msgEl && (msgEl.scrollHeight - msgEl.scrollTop - msgEl.clientHeight) < 120;
+          await loadMessages(activeConvId, nearBottom);
+        }
+      }, 5000);
     });
 
     async function loadConversations() {
