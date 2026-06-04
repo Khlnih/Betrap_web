@@ -326,7 +326,8 @@
     function selectTrap(id) {
       document.querySelectorAll('.trap-card').forEach(c => c.classList.remove('selected'));
       document.getElementById('tc-'+id).classList.add('selected');
-      selectedTrap = allTraps.find(t => t.id === id);
+      const t = allTraps.find(t => t.id === id);
+      selectedTrap = { id: t.id, name: t.name, providerId: t.providerId };
     }
 
     async function loadAodais() {
@@ -458,10 +459,13 @@
           await API.txn.create({ serviceId: selectedAodais[0].id, date, time, address, note: fullNote }).catch(() => {});
         }
 
-        // Đơn 3: Bê tráp nếu có
+        // Đơn 3: Bê tráp nếu có — ưu tiên dùng dịch vụ bê tráp cùng provider với tráp đã chọn
         if (wantBetrap && betrapServices.length > 0) {
           const betrapNote = fullNote + ` | Số người bê tráp: ${qtyBetrap}`;
-          await API.txn.create({ serviceId: betrapServices[0].id, date, time, address, note: betrapNote }).catch(() => {});
+          // Tìm dịch vụ bê tráp cùng provider trước, nếu không có thì dùng dịch vụ bất kỳ
+          const sameProviderBetrap = betrapServices.find(s => s.providerId === selectedTrap.providerId);
+          const betrapSvc = sameProviderBetrap || betrapServices[0];
+          await API.txn.create({ serviceId: betrapSvc.id, date, time, address, note: betrapNote }).catch(() => {});
         }
 
         UI.toast('🎉 Đặt dịch vụ thành công!', 'success');
