@@ -168,27 +168,31 @@ const uid = () => Math.random().toString(36).substr(2, 9);
 app.get('/api/services', async (req, res) => {
     try {
         const { category, location, search, sort, maxPrice, all } = req.query;
-        let query = `SELECT s.*, u.Name AS ProviderName FROM Services s
-                     LEFT JOIN Users u ON s.ProviderId = u.Id
-                     WHERE 1=1`;
-        if (!all) query += ` AND s.Active = true AND u.Verified = true`;
-        if (category) query += ` AND s.Category = '${category.replace(/'/g,"''")}'`;
-        if (location) query += ` AND s.Location LIKE '%${location.replace(/'/g,"''").replace(/[%_]/g,'')}%'`;
-        if (search)   query += ` AND (s.Name LIKE '%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%' OR s.Description LIKE '%${search.replace(/'/g,"''").replace(/[%_]/g,'')}%')`;
-        if (maxPrice) query += ` AND s.Price <= ${parseInt(maxPrice) || 0}`;
-        if (sort === 'price_asc')  query += ' ORDER BY s.Price ASC';
-        else if (sort === 'price_desc') query += ' ORDER BY s.Price DESC';
-        else query += ' ORDER BY s.Rating DESC';
+        // Build parameterized query to prevent SQL injection
+        const params = [];
+        let conditions = '1=1';
+        if (!all) conditions += ` AND s.Active = true AND u.Verified = true`;
+        if (category) { params.push(category); conditions += ` AND s.Category = $${params.length}`; }
+        if (location) { params.push(`%${location.replace(/[%_]/g, '')}%`); conditions += ` AND s.Location ILIKE $${params.length}`; }
+        if (search)   { params.push(`%${search.replace(/[%_]/g, '')}%`); conditions += ` AND (s.Name ILIKE $${params.length} OR s.Description ILIKE $${params.length})`; }
+        if (maxPrice) { params.push(parseInt(maxPrice) || 0); conditions += ` AND s.Price <= $${params.length}`; }
+        let orderBy = 'ORDER BY s.Rating DESC';
+        if (sort === 'price_asc')  orderBy = 'ORDER BY s.Price ASC';
+        else if (sort === 'price_desc') orderBy = 'ORDER BY s.Price DESC';
 
-        const result = await sql.query(query);
+        const queryText = `SELECT s.*, u.Name AS ProviderName FROM Services s
+                     LEFT JOIN Users u ON s.ProviderId = u.Id
+                     WHERE ${conditions} ${orderBy}`;
+        const result = await pool.query(queryText, params);
+        result.recordset = result.rows;
         const services = result.recordset.map(s => ({
-            id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
-            category: s.Category, name: s.Name, description: s.Description,
-            price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
-            active: s.Active, rating: s.Rating, reviewCount: s.ReviewCount,
-            tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
-            gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
-            createdAt: s.CreatedAt
+            id: s.id, providerId: s.providerid, providerName: s.providername,
+            category: s.category, name: s.name, description: s.description,
+            price: s.price, unit: s.unit, image: s.image, location: s.location,
+            active: s.active, rating: s.rating, reviewCount: s.reviewcount,
+            tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : [],
+            gallery: s.gallery ? (typeof s.gallery === 'string' ? JSON.parse(s.gallery) : s.gallery) : [],
+            createdAt: s.createdat
         }));
         res.json(services);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -319,13 +323,8 @@ app.post('/api/auth/login', async (req, res) => {
         if (!result.recordset.length) return res.status(401).json({ error: 'Email không tồn tại.' });
         const user = result.recordset[0];
 
-        // Support both plain text (legacy) and bcrypt hashed
-        let valid = false;
-        if (user.PasswordHash.startsWith('$2b$') || user.PasswordHash.startsWith('$2a$')) {
-            valid = await bcrypt.compare(password, user.PasswordHash);
-        } else {
-            valid = (user.PasswordHash === password);
-        }
+        // Verify bcrypt password
+        const valid = await bcrypt.compare(password, user.PasswordHash);
         if (!valid) return res.status(401).json({ error: 'Mật khẩu không đúng.' });
 
         let profile = {};
@@ -414,12 +413,7 @@ app.put('/api/auth/password', authMiddleware, async (req, res) => {
         const r = await sql.query`SELECT PasswordHash FROM Users WHERE Id=${req.user.userId}`;
         if (!r.recordset.length) return res.status(404).json({ error: 'User not found' });
         const user = r.recordset[0];
-        let valid = false;
-        if (user.PasswordHash.startsWith('$2b$') || user.PasswordHash.startsWith('$2a$')) {
-            valid = await bcrypt.compare(oldPassword, user.PasswordHash);
-        } else {
-            valid = (user.PasswordHash === oldPassword);
-        }
+        const valid = await bcrypt.compare(oldPassword, user.PasswordHash);
         if (!valid) return res.status(401).json({ error: 'Mật khẩu hiện tại không đúng.' });
         const hash = await bcrypt.hash(newPassword, 10);
         await sql.query`UPDATE Users SET PasswordHash=${hash}, UpdatedAt=GETDATE() WHERE Id=${req.user.userId}`;
@@ -441,6 +435,14 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
         const svcRes = await sql.query`SELECT * FROM Services WHERE Id=${serviceId} AND Active=true`;
         if (!svcRes.recordset.length) return res.status(404).json({ error: 'Dịch vụ không tồn tại.' });
         const svc = svcRes.recordset[0];
+        // Kiểm tra đặt trùng: cùng khách, cùng dịch vụ, cùng ngày, chưa bị huỷ
+        const dupCheck = await sql.query`
+            SELECT Id FROM Transactions
+            WHERE CustomerId=${req.user.userId} AND ServiceId=${serviceId}
+              AND Date=${date} AND Status IN ('pending','confirmed')`;
+        if (dupCheck.recordset.length) {
+            return res.status(400).json({ error: 'Bạn đã đặt dịch vụ này vào ngày này rồi. Vui lòng chọn ngày khác.' });
+        }
         const id = 'TXN_' + uid().toUpperCase();
         await sql.query`
             INSERT INTO Transactions (Id, CustomerId, ProviderId, ServiceId, ServiceName, Price, Date, Time, Address, Note, PaymentMethod)
@@ -672,11 +674,11 @@ app.get('/api/stats/provider', authMiddleware, providerOnly, async (req, res) =>
                 SUM(CASE WHEN Status='done'    THEN 1 ELSE 0 END) AS Done,
                 SUM(CASE WHEN PaymentStatus='paid' THEN Price ELSE 0 END) AS Revenue
                 FROM Transactions WHERE ProviderId=${uid}`,
-            sql.query`SELECT FORMAT(CreatedAt,'yyyy-MM') AS Month,
+            sql.query`SELECT TO_CHAR(CreatedAt,'YYYY-MM') AS Month,
                 SUM(CASE WHEN PaymentStatus='paid' THEN Price ELSE 0 END) AS Revenue,
                 COUNT(*) AS Orders
                 FROM Transactions WHERE ProviderId=${uid}
-                GROUP BY FORMAT(CreatedAt,'yyyy-MM') ORDER BY Month DESC`,
+                GROUP BY TO_CHAR(CreatedAt,'YYYY-MM') ORDER BY Month DESC`,
             sql.query`SELECT COUNT(*) AS Total FROM Services WHERE ProviderId=${uid} AND Active=true`
         ]);
         const s = orders.recordset[0];
@@ -929,6 +931,10 @@ app.patch('/api/admin/users/:id/toggle', authMiddleware, adminOnly, async (req, 
         const currentVerified = check.recordset[0].Verified;
         const newVerified = currentVerified ? false : true;
         await sql.query`UPDATE Users SET Verified=${newVerified}, UpdatedAt=GETDATE() WHERE Id=${req.params.id}`;
+        // Khi khoá provider → ẩn toàn bộ dịch vụ của họ; khi mở khoá → hiện lại
+        if (check.recordset[0].Role === 'provider') {
+            await sql.query`UPDATE Services SET Active=${newVerified}, UpdatedAt=GETDATE() WHERE ProviderId=${req.params.id}`;
+        }
         res.json({ success: true, verified: newVerified === true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
