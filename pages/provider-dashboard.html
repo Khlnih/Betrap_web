@@ -690,7 +690,10 @@
       'mc-su-kien': 'cat-badge-mc-su-kien',
     };
     function renderMyServices() {
-      renderMyServicesList(myServices);
+      const activeBtn = document.querySelector('.svc-cat-btn.active');
+      const cat = activeBtn ? activeBtn.getAttribute('data-cat') : '';
+      const filtered = cat ? myServices.filter(s => s.category === cat) : myServices;
+      renderMyServicesList(filtered);
     }
     function renderMyServicesList(services) {
       const el = document.getElementById('my-services-list');
