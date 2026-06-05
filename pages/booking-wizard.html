@@ -329,7 +329,7 @@
                   <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;">
                     <input type="radio" name="pkg-${t.id}" value="${p.name}" onchange="selectPackage('${t.id}', '${p.name}', ${p.price})" ${idx===0?'checked':''} style="accent-color:var(--gold)">
                     <span style="flex:1">${p.name}</span>
-                    <strong style="color:var(--gold)">${UI.formatVND(p.price)}</strong>
+                    <strong style="color:var(--gold)">${UI.formatCurrency(p.price)}</strong>
                   </label>
                 `).join('')}
               </div>
@@ -453,7 +453,7 @@
                 <input type="radio" name="betrap-pkg" value="${p.name}" data-price="${p.price}" ${idx===0?'checked':''} style="width:18px;height:18px;accent-color:var(--gold);">
                 <span style="font-weight:600;color:var(--text-dark);">${p.name}</span>
               </div>
-              <strong style="color:var(--gold)">${UI.formatVND(p.price)}</strong>
+              <strong style="color:var(--gold)">${UI.formatCurrency(p.price)}</strong>
             </label>
           `).join('');
         } else {

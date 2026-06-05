@@ -550,7 +550,7 @@
         svc.packages.forEach(p => {
           pkgHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.05);">
             <span style="font-size:0.85rem;color:var(--text-dark);font-weight:600;">${p.name}</span>
-            <span style="font-size:0.9rem;color:var(--gold);font-weight:700;">${UI.formatVND(p.price)}</span>
+            <span style="font-size:0.9rem;color:var(--gold);font-weight:700;">${UI.formatCurrency(p.price)}</span>
           </div>`;
         });
         pkgHtml += `</div>`;
