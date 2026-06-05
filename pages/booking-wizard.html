@@ -320,9 +320,17 @@
         }
         grid.innerHTML = allTraps.map(t => {
           const img = t.image && t.image.startsWith('http') ? t.image : (rootPath()+(t.image||''));
-          const isPremium = (t.name && (t.name.toLowerCase().includes('cao cấp') || t.name.toLowerCase().includes('vip'))) || 
-                            (t.packages && t.packages.some(p => p.name.toLowerCase().includes('cao cấp') || p.name.toLowerCase().includes('vip')));
-          const badgeHtml = isPremium ? `<div style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg, var(--gold), #d4af37);color:white;padding:3px 8px;border-radius:20px;font-size:0.7rem;font-weight:700;box-shadow:0 2px 8px rgba(184,148,90,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:3px;"><i class="ri-vip-crown-fill"></i> Cao cấp</div>` : '';
+          const nameLower = t.name ? t.name.toLowerCase() : '';
+          const pkgs = t.packages || [];
+          const hasCaoCap = nameLower.includes('cao cấp') || nameLower.includes('vip') || pkgs.some(p => p.name.toLowerCase().includes('cao cấp') || p.name.toLowerCase().includes('vip'));
+          const hasNangCao = nameLower.includes('nâng cao') || pkgs.some(p => p.name.toLowerCase().includes('nâng cao'));
+          
+          let badgeHtml = '';
+          if (hasCaoCap) {
+            badgeHtml = `<div style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg, var(--gold), #d4af37);color:white;padding:3px 8px;border-radius:20px;font-size:0.7rem;font-weight:700;box-shadow:0 2px 8px rgba(184,148,90,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:3px;"><i class="ri-vip-crown-fill"></i> Cao cấp</div>`;
+          } else if (hasNangCao) {
+            badgeHtml = `<div style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg, #4A90E2, #357ABD);color:white;padding:3px 8px;border-radius:20px;font-size:0.7rem;font-weight:700;box-shadow:0 2px 8px rgba(74,144,226,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:3px;"><i class="ri-star-fill"></i> Nâng cao</div>`;
+          }
           
           let packagesHtml = '';
           if (t.packages && t.packages.length > 0) {

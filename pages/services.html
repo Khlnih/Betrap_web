@@ -472,9 +472,17 @@
 
     function photoCardHtml(s) {
       const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || ''));
-      const isPremium = (s.name && (s.name.toLowerCase().includes('cao cấp') || s.name.toLowerCase().includes('vip'))) || 
-                        (s.packages && s.packages.some(p => p.name.toLowerCase().includes('cao cấp') || p.name.toLowerCase().includes('vip')));
-      const badgeHtml = isPremium ? `<div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg, var(--gold), #d4af37);color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;box-shadow:0 4px 12px rgba(184,148,90,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:4px;"><i class="ri-vip-crown-fill"></i> Cao cấp</div>` : '';
+      const nameLower = s.name ? s.name.toLowerCase() : '';
+      const pkgs = s.packages || [];
+      const hasCaoCap = nameLower.includes('cao cấp') || nameLower.includes('vip') || pkgs.some(p => p.name.toLowerCase().includes('cao cấp') || p.name.toLowerCase().includes('vip'));
+      const hasNangCao = nameLower.includes('nâng cao') || pkgs.some(p => p.name.toLowerCase().includes('nâng cao'));
+      
+      let badgeHtml = '';
+      if (hasCaoCap) {
+        badgeHtml = `<div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg, var(--gold), #d4af37);color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;box-shadow:0 4px 12px rgba(184,148,90,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:4px;"><i class="ri-vip-crown-fill"></i> Cao cấp</div>`;
+      } else if (hasNangCao) {
+        badgeHtml = `<div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg, #4A90E2, #357ABD);color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;box-shadow:0 4px 12px rgba(74,144,226,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:4px;"><i class="ri-star-fill"></i> Nâng cao</div>`;
+      }
 
       return `<div class="photo-card" onclick="openDetail('${s.id}')" style="position:relative;">
         ${badgeHtml}
