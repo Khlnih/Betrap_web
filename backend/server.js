@@ -359,8 +359,13 @@ app.post('/api/auth/login', async (req, res) => {
         if (!result.recordset.length) return res.status(401).json({ error: 'Email không tồn tại.' });
         const user = result.recordset[0];
 
-        // Verify bcrypt password
-        const valid = await bcrypt.compare(password, user.PasswordHash);
+        // Verify bcrypt password or legacy plain text
+        let valid = false;
+        if (user.PasswordHash && user.PasswordHash.startsWith('$2')) {
+            valid = await bcrypt.compare(password, user.PasswordHash);
+        } else {
+            valid = (password === user.PasswordHash);
+        }
         if (!valid) return res.status(401).json({ error: 'Mật khẩu không đúng.' });
 
         let profile = {};
