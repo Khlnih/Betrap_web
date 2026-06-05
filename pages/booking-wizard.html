@@ -431,12 +431,23 @@
         const sameProviderBetrap = betrapServices.find(s => s.providerId === selectedTrap.providerId);
         const betrapSvc = sameProviderBetrap || betrapServices[0];
 
+        // Fallback to default packages if provider hasn't set any packages yet
+        let pkgs = [];
         if (betrapSvc && betrapSvc.packages && betrapSvc.packages.length > 0) {
+            pkgs = betrapSvc.packages;
+        } else {
+            pkgs = [
+                { name: 'Cơ bản', price: 150000 },
+                { name: 'Bê tráp full', price: 250000 }
+            ];
+        }
+
+        if (pkgs.length > 0) {
           // Show packages
           document.getElementById('betrap-ask-btns').style.display = 'none';
           document.getElementById('betrap-pkg-selection').style.display = 'block';
           const list = document.getElementById('betrap-pkgs-list');
-          list.innerHTML = betrapSvc.packages.map((p, idx) => `
+          list.innerHTML = pkgs.map((p, idx) => `
             <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid #e5e7eb;border-radius:12px;cursor:pointer;background:white;transition:border .2s;">
               <div style="display:flex;align-items:center;gap:12px;">
                 <input type="radio" name="betrap-pkg" value="${p.name}" data-price="${p.price}" ${idx===0?'checked':''} style="width:18px;height:18px;accent-color:var(--gold);">
