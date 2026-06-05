@@ -147,8 +147,10 @@ function authMiddleware(req, res, next) {
     } catch { res.status(401).json({ error: 'Token không hợp lệ hoặc đã hết hạn.' }); }
 }
 
-function providerOnly(req, res, next) {
+async function providerOnly(req, res, next) {
     if (req.user.role !== 'provider') return res.status(403).json({ error: 'Chỉ nhà cung cấp mới có quyền này.' });
+    const check = await sql.query`SELECT Verified FROM Users WHERE Id = ${req.user.userId}`;
+    if (!check.recordset.length || !check.recordset[0].Verified) return res.status(403).json({ error: 'Tài khoản chưa được duyệt.' });
     next();
 }
 
@@ -167,7 +169,7 @@ const uid = () => Math.random().toString(36).substr(2, 9);
 // GET all services (with filters)
 app.get('/api/services', async (req, res) => {
     try {
-        const { category, location, search, sort, maxPrice, all } = req.query;
+        const { category, location, search, sort, maxPrice, all, page, limit } = req.query;
         // Build parameterized query to prevent SQL injection
         const params = [];
         let conditions = '1=1';
@@ -180,21 +182,40 @@ app.get('/api/services', async (req, res) => {
         if (sort === 'price_asc')  orderBy = 'ORDER BY s.Price ASC';
         else if (sort === 'price_desc') orderBy = 'ORDER BY s.Price DESC';
 
+        let limitClause = '';
+        if (page && limit) {
+            const limitNum = parseInt(limit) || 6;
+            const offset = (parseInt(page) - 1) * limitNum;
+            limitClause = ` LIMIT ${limitNum} OFFSET ${offset}`;
+        }
+
         const queryText = `SELECT s.*, u.Name AS ProviderName FROM Services s
                      LEFT JOIN Users u ON s.ProviderId = u.Id
-                     WHERE ${conditions} ${orderBy}`;
+                     WHERE ${conditions} ${orderBy}${limitClause}`;
+        
+        let total = 0;
+        if (page && limit) {
+            const countResult = await pool.query(`SELECT COUNT(*) as count FROM Services s LEFT JOIN Users u ON s.ProviderId = u.Id WHERE ${conditions}`, params);
+            total = parseInt(countResult.rows[0].count);
+        }
+
         const result = await pool.query(queryText, params);
         result.recordset = result.rows;
         const services = result.recordset.map(s => ({
             id: s.id, providerId: s.providerid, providerName: s.providername,
             category: s.category, name: s.name, description: s.description,
-            price: s.price, unit: s.unit, image: s.image, location: s.location,
+            price: s.price, unit: s.unit, tier: s.tier || null, image: s.image, location: s.location,
             active: s.active, rating: s.rating, reviewCount: s.reviewcount,
             tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : [],
             gallery: s.gallery ? (typeof s.gallery === 'string' ? JSON.parse(s.gallery) : s.gallery) : [],
             createdAt: s.createdat
         }));
-        res.json(services);
+        
+        if (page && limit) {
+            res.json({ data: services, total, page: parseInt(page), limit: parseInt(limit) });
+        } else {
+            res.json(services);
+        }
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -225,23 +246,24 @@ app.get('/api/services/:id', async (req, res) => {
 
 // POST create service (provider only)
 app.post('/api/services', authMiddleware, providerOnly, async (req, res) => {
-    const { category, name, description, price, unit, image, location, tags, gallery } = req.body;
+    const { category, name, description, price, unit, tier, image, location, tags, gallery } = req.body;
     if (!category || !name || !price) return res.status(400).json({ error: 'Thiếu thông tin dịch vụ.' });
     try {
         const id = 'SVC_' + uid();
         const tagsStr = JSON.stringify(tags || []);
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
+        const tierVal = tier || null;
         await sql.query`
-            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Tags, Gallery)
+            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Tier, Image, Location, Tags, Gallery)
             VALUES (${id}, ${req.user.userId}, ${category}, ${name}, ${description||null},
-                    ${parseFloat(price)}, ${unit||'buổi'}, ${image||null}, ${location||null}, ${tagsStr}, ${galleryStr})`;
+                    ${parseFloat(price)}, ${unit||'buổi'}, ${tierVal}, ${image||null}, ${location||null}, ${tagsStr}, ${galleryStr})`;
         res.json({ id, message: 'Tạo dịch vụ thành công!' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
 // PUT update service
 app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
-    const { name, description, price, unit, image, location, tags, gallery, active } = req.body;
+    const { name, description, price, unit, tier, image, location, tags, gallery, active } = req.body;
     try {
         const check = await sql.query`SELECT ProviderId FROM Services WHERE Id = ${req.params.id}`;
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
@@ -249,9 +271,10 @@ app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
         const tagsStr = tags ? JSON.stringify(tags) : null;
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         const isActive = active !== undefined ? active : true;
+        const tierVal = tier || null;
         await sql.query`
             UPDATE Services SET Name=${name}, Description=${description||null},
-            Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Image=${image||null},
+            Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Tier=${tierVal}, Image=${image||null},
             Location=${location||null}, Tags=${tagsStr}, Gallery=${galleryStr},
             Active=${isActive}, UpdatedAt=CURRENT_TIMESTAMP
             WHERE Id=${req.params.id}`;
@@ -289,7 +312,7 @@ app.get('/api/provider/services', authMiddleware, providerOnly, async (req, res)
         const services = result.recordset.map(s => ({
             id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
             category: s.Category, name: s.Name, description: s.Description,
-            price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
+            price: s.Price, unit: s.Unit, tier: s.Tier || null, image: s.Image, location: s.Location,
             active: s.Active === 1 || s.Active === true,
             rating: s.Rating, reviewCount: s.ReviewCount,
             tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
@@ -339,6 +362,7 @@ app.post('/api/auth/login', async (req, res) => {
         const session = {
             userId: user.Id, role: user.Role, name: user.Name,
             avatar: user.Avatar, email: user.Email, phone: user.Phone,
+            verified: user.Verified,
             location: profile.Location || '',
             bio: profile.Bio || '',
             bank: profile.Bank || '',
@@ -346,6 +370,34 @@ app.post('/api/auth/login', async (req, res) => {
         };
         const token = jwt.sign({ userId: user.Id, role: user.Role }, JWT_SECRET, { expiresIn: '30d' });
         res.json({ session, token });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+    try {
+        const result = await sql.query`SELECT * FROM Users WHERE Id = ${req.user.userId}`;
+        if (!result.recordset.length) return res.status(404).json({ error: 'User not found' });
+        const user = result.recordset[0];
+
+        let profile = {};
+        if (user.Role === 'customer') {
+            const p = await sql.query`SELECT * FROM CustomerProfiles WHERE UserId = ${user.Id}`;
+            if (p.recordset.length) profile = p.recordset[0];
+        } else {
+            const p = await sql.query`SELECT * FROM ProviderProfiles WHERE UserId = ${user.Id}`;
+            if (p.recordset.length) profile = p.recordset[0];
+        }
+
+        const session = {
+            userId: user.Id, role: user.Role, name: user.Name,
+            avatar: user.Avatar, email: user.Email, phone: user.Phone,
+            verified: user.Verified,
+            location: profile.Location || '',
+            bio: profile.Bio || '',
+            bank: profile.Bank || '',
+            weddingDate: profile.WeddingDate ? profile.WeddingDate.toISOString().split('T')[0] : ''
+        };
+        res.json({ session });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -374,7 +426,7 @@ app.post('/api/auth/register', async (req, res) => {
         } else {
             await sql.query`INSERT INTO ProviderProfiles (UserId, Location) VALUES (${id}, ${location||null})`;
         }
-        const session = { userId: id, role, name, avatar, email: email.toLowerCase(), phone: phone||'', location: location||'' };
+        const session = { userId: id, role, name, avatar, email: email.toLowerCase(), phone: phone||'', location: location||'', verified: false };
         const token = jwt.sign({ userId: id, role }, JWT_SECRET, { expiresIn: '30d' });
         res.json({ session, token });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -449,6 +501,14 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
             VALUES (${id}, ${req.user.userId}, ${svc.ProviderId}, ${serviceId}, ${svc.Name}, ${svc.Price},
                     ${date}, ${time}, ${address}, ${note||null}, ${paymentMethod||null})`;
         res.json({ id });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Admin verify provider
+app.put('/api/admin/providers/:id/verify', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        await sql.query`UPDATE Users SET Verified = true WHERE Id = ${req.params.id} AND Role = 'provider'`;
+        res.json({ success: true, message: 'Provider has been verified.' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -572,7 +632,8 @@ app.get('/api/reviews/service/:id', async (req, res) => {
             id: r.Id, serviceId: r.ServiceId, customerId: r.CustomerId,
             customerName: r.CustomerName, customerAvatar: r.CustomerAvatar,
             transactionId: r.TransactionId, rating: r.Rating,
-            comment: r.Comment, createdAt: r.CreatedAt
+            comment: r.Comment, createdAt: r.CreatedAt,
+            providerReply: r.ProviderReply, repliedAt: r.RepliedAt
         })));
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -626,8 +687,34 @@ app.get('/api/reviews/provider/:providerId', authMiddleware, async (req, res) =>
             id: r.Id, serviceId: r.ServiceId, serviceName: r.ServiceName,
             customerId: r.CustomerId, customerName: r.CustomerName, customerAvatar: r.CustomerAvatar,
             transactionId: r.TransactionId, rating: r.Rating,
-            comment: r.Comment, createdAt: r.CreatedAt
+            comment: r.Comment, createdAt: r.CreatedAt,
+            providerReply: r.ProviderReply, repliedAt: r.RepliedAt
         })));
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// PUT review reply - Provider replies to a review
+app.put('/api/reviews/:id/reply', authMiddleware, providerOnly, async (req, res) => {
+    const { reply } = req.body;
+    if (!reply) return res.status(400).json({ error: 'Nội dung trả lời không được để trống.' });
+    
+    try {
+        // Verify review belongs to provider
+        const check = await sql.query`
+            SELECT r.Id, s.ProviderId 
+            FROM Reviews r
+            JOIN Services s ON r.ServiceId = s.Id
+            WHERE r.Id = ${req.params.id}`;
+            
+        if (!check.recordset.length) return res.status(404).json({ error: 'Không tìm thấy đánh giá.' });
+        if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
+        
+        await sql.query`
+            UPDATE Reviews 
+            SET ProviderReply = ${reply}, RepliedAt = CURRENT_TIMESTAMP
+            WHERE Id = ${req.params.id}`;
+            
+        res.json({ success: true, message: 'Đã trả lời đánh giá.' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -661,7 +748,35 @@ app.get('/api/stats/customer', authMiddleware, async (req, res) => {
                    SUM(CASE WHEN Status='cancelled' THEN 1 ELSE 0 END) AS Cancelled
             FROM Transactions WHERE CustomerId=${uid}`;
         const s = r.recordset[0];
-        res.json({ total: s.Total||0, pending: s.Pending||0, confirmed: s.Confirmed||0, done: s.Done||0, cancelled: s.Cancelled||0 });
+        res.json({ total: s.Total||0, pending: s.Pending||0, confirmed: s.Confirmed||0, done: s.Done||0, cancelled: s.Cancelled||0        });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/stats/admin', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const txnStats = await sql.query`
+            SELECT COUNT(*) AS Total,
+                   SUM(CASE WHEN Status='pending'   THEN 1 ELSE 0 END) AS Pending,
+                   SUM(CASE WHEN Status='confirmed' THEN 1 ELSE 0 END) AS Confirmed,
+                   SUM(CASE WHEN Status='done'      THEN 1 ELSE 0 END) AS Done,
+                   SUM(CASE WHEN Status='cancelled' THEN 1 ELSE 0 END) AS Cancelled
+            FROM Transactions`;
+        
+        // Revenue by month (last 6 months)
+        const revenue = await sql.query`
+            SELECT TO_CHAR(CreatedAt, 'YYYY-MM') as month, 
+                   SUM(s.Price) as total_revenue
+            FROM Transactions t
+            JOIN Services s ON t.ServiceId = s.Id
+            WHERE t.Status = 'done' 
+              AND t.CreatedAt >= CURRENT_DATE - INTERVAL '6 months'
+            GROUP BY TO_CHAR(CreatedAt, 'YYYY-MM')
+            ORDER BY month ASC`;
+            
+        res.json({
+            transactions: txnStats.recordset[0] || { Total:0, Pending:0, Confirmed:0, Done:0, Cancelled:0 },
+            revenue: revenue.recordset.map(r => ({ month: r.month, amount: r.total_revenue || 0 }))
+        });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -981,21 +1096,27 @@ app.get('/api/admin/transactions', authMiddleware, adminOnly, async (req, res) =
 
 app.get('/api/blogs', async (req, res) => {
     try {
-        const { year, month, limit, offset, all } = req.query;
+        const { year, month, limit, offset, all, search } = req.query;
         let query = `SELECT Id, Title, Slug, CoverImage, Published, PublishedAt, CreatedAt 
                      FROM BlogPosts WHERE 1=1`;
+        const params = [];
         if (year && month) {
-            query += ` AND EXTRACT(YEAR FROM PublishedAt) = ${parseInt(year)} AND EXTRACT(MONTH FROM PublishedAt) = ${parseInt(month)}`;
+            params.push(parseInt(year), parseInt(month));
+            query += ` AND EXTRACT(YEAR FROM PublishedAt) = $${params.length-1} AND EXTRACT(MONTH FROM PublishedAt) = $${params.length}`;
         }
         if (all !== 'true') {
             query += ` AND Published=true`;
+        }
+        if (search) {
+            params.push(`%${search.replace(/[%_]/g, '')}%`);
+            query += ` AND Title ILIKE $${params.length}`;
         }
         query += ` ORDER BY CreatedAt DESC`;
         if (limit) query += ` LIMIT ${parseInt(limit)}`;
         if (offset) query += ` OFFSET ${parseInt(offset)}`;
         
-        const result = await sql.query(query);
-        const mapped = result.recordset.map(p => ({
+        const result = await pool.query(query, params);
+        const mapped = result.rows.map(p => ({
             Id: p.id || p.Id,
             Title: p.title || p.Title,
             Slug: p.slug || p.Slug,
@@ -1188,6 +1309,8 @@ app.use((err, req, res, next) => {
 // Auto-migration for Vercel
 sql.query(`ALTER TABLE Services ADD COLUMN Gallery VARCHAR(5000);`).catch(() => {});
 sql.query(`ALTER TABLE Services ALTER COLUMN Description TYPE TEXT;`).catch(() => {});
+sql.query(`ALTER TABLE Reviews ADD COLUMN ProviderReply TEXT;`).catch(() => {});
+sql.query(`ALTER TABLE Reviews ADD COLUMN RepliedAt TIMESTAMP;`).catch(() => {});
 sql.query(`
     CREATE TABLE IF NOT EXISTS BlogPosts (
         Id          VARCHAR(50) PRIMARY KEY,

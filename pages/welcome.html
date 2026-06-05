@@ -67,6 +67,49 @@
       { icon:'ri-add-circle-line', text:'Đăng gói dịch vụ của bạn để tiếp cận hàng nghìn khách hàng' },
       { icon:'ri-message-3-line', text:'Chat trực tiếp với khách hàng để tư vấn và chốt đơn' },
       { icon:'ri-bar-chart-line', text:'Theo dõi doanh thu và đơn hàng trên dashboard' },
+</head>
+<body>
+  <div class="welcome-card">
+    <div class="welcome-icon animate-bounceIn" id="welcome-icon">🎉</div>
+    <div class="welcome-name animate-fadeInUp delay-200" id="welcome-name">Xin chào!</div>
+    <p class="welcome-sub animate-fadeInUp delay-300">
+      Chào mừng bạn đến với <strong style="color:var(--gold-light)">BêTráp</strong> — nền tảng dịch vụ đám hỏi truyền thống Việt Nam.
+    </p>
+    <div class="role-badge animate-scaleIn delay-400" id="role-badge">
+      <i class="ri-user-line"></i> <span id="role-text">Khách hàng</span>
+    </div>
+
+    <div class="feature-list" id="feature-list"></div>
+
+    <button class="btn btn-gold btn-lg btn-block animate-fadeInUp delay-500" onclick="goToDashboard()" id="go-btn">
+      <i class="ri-dashboard-line"></i> Vào Dashboard Ngay
+    </button>
+
+    <div class="countdown">
+      Tự động chuyển sau <span id="timer">5</span> giây...
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    const sess = API.auth.currentSession();
+    if (!sess) { window.location.href = 'login.html'; }
+
+    document.getElementById('welcome-name').textContent = 'Xin chào, ' + sess.name + '!';
+
+    const isProvider = sess.role === 'provider';
+    document.getElementById('role-badge').innerHTML = isProvider
+      ? '<i class="ri-store-2-line"></i> Nhà Cung Cấp Dịch Vụ'
+      : '<i class="ri-user-heart-line"></i> Khách Hàng';
+    document.getElementById('welcome-icon').textContent = isProvider ? '🏪' : '👰';
+
+    const features = isProvider ? [
+      { icon:'ri-add-circle-line', text:'Đăng gói dịch vụ của bạn để tiếp cận hàng nghìn khách hàng' },
+      { icon:'ri-message-3-line', text:'Chat trực tiếp với khách hàng để tư vấn và chốt đơn' },
+      { icon:'ri-bar-chart-line', text:'Theo dõi doanh thu và đơn hàng trên dashboard' },
     ] : [
       { icon:'ri-search-eye-line', text:'Duyệt hàng trăm gói dịch vụ cưới hỏi theo khu vực' },
       { icon:'ri-message-3-line', text:'Chat trực tiếp với nhà cung cấp để hỏi thêm thông tin' },
@@ -82,7 +125,12 @@
     UI.launchConfetti(80);
 
     function goToDashboard() {
-      window.location.href = isProvider ? 'provider-dashboard.html' : 'dashboard.html';
+      if (isProvider) {
+        if (!sess.verified) window.location.href = 'pending.html';
+        else window.location.href = 'provider-dashboard.html';
+      } else {
+        window.location.href = 'dashboard.html';
+      }
     }
 
     // Countdown

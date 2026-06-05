@@ -357,11 +357,34 @@
   <script src="../js/ui.js?v=1.2"></script>
   <script>
     const CAT_LABELS = { 'be-trap':'Đội Bê Tráp','lam-trap':'Tráp Ăn Hỏi','ao-dai':'Áo Dài','mc-su-kien':'MC Sự Kiện','media':'Media' };
+    const TIER_LABELS = {
+      'co-ban':       { label:'Cơ Bản',       color:'#7a6045', bg:'#fef3e2' },
+      'nang-cao':     { label:'Nâng Cao',     color:'#7a4a1e', bg:'#fbe8d4' },
+      'cao-cap':      { label:'Cao Cấp',      color:'#5a2d82', bg:'#f3e8ff' },
+      'tieu-chuan':   { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
+      'full-service': { label:'Full Service', color:'#1e7a4a', bg:'#e8f7ef' },
+      'standard':     { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
+    };
+    const TIER_PRICES = {
+      'co-ban':       { 'lam-trap':'6 – 7 triệu/gói', 'be-trap':'150.000₫/người' },
+      'nang-cao':     { 'lam-trap':'7 – 7.5 triệu/gói' },
+      'cao-cap':      { 'lam-trap':'Trên 10 triệu/gói', 'mc-su-kien':'1.2 – 1.5 triệu/show' },
+      'tieu-chuan':   { 'mc-su-kien':'800k – 1 triệu/show' },
+      'full-service': { 'be-trap':'250.000₫/người' },
+      'standard':     { 'media':'1.6 – 2 triệu/buổi' },
+    };
+    function getTierPrice(tier, cat) {
+      if (!tier) return null;
+      return (TIER_PRICES[tier] && (TIER_PRICES[tier][cat] || TIER_PRICES[tier]['*'])) || null;
+    }
     let allSvcs = {};
     let currentBookCat = '';
     let currentBookSvcId = null;
     const PAGE_SIZE = 6;
     let betrapPage = 0;
+
+    let currentPages = { 'be-trap': 1, 'lam-trap': 1, 'ao-dai': 1, 'mc-su-kien': 1, 'media': 1 };
+    let hasMore = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
@@ -369,11 +392,10 @@
       if (nav) nav.classList.remove('solid'); // Make navbar transparent for the hero banner
       UI.renderFooter('footer-container');
 
-      // Preload tất cả dịch vụ theo từng category
+      // Preload page 1 cho tất cả dịch vụ
       const categories = ['be-trap','lam-trap','ao-dai','mc-su-kien','media'];
-      await Promise.all(categories.map(async cat => {
-        allSvcs[cat] = await API.svc.getAll({ category: cat });
-      }));
+      categories.forEach(c => allSvcs[c] = []);
+      await Promise.all(categories.map(cat => loadCategoryPage(cat)));
 
       // Check URL param
       const p = new URLSearchParams(location.search);
@@ -424,11 +446,31 @@
       window.location.href = 'booking-wizard.html';
     }
 
-    let currentPages = { 'be-trap': 1, 'lam-trap': 1, 'ao-dai': 1 };
+    async function loadCategoryPage(cat) {
+      const page = currentPages[cat] || 1;
+      const res = await API.svc.getAll({ category: cat, page, limit: PAGE_SIZE });
+      if (res && typeof res.total !== 'undefined') {
+        allSvcs[cat] = page === 1 ? res.data : [...allSvcs[cat], ...res.data];
+        hasMore[cat] = (page * res.limit) < res.total;
+      } else {
+        allSvcs[cat] = res || [];
+        hasMore[cat] = false;
+      }
+    }
+
+    async function loadMore(cat, gridId, isPhoto) {
+      currentPages[cat]++;
+      if (event && event.currentTarget) {
+        event.currentTarget.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
+        event.currentTarget.disabled = true;
+      }
+      await loadCategoryPage(cat);
+      if (isPhoto) renderPhotoGrid(cat, gridId);
+      else renderCardList(cat, gridId);
+    }
 
     // ── Render Photo Grid ──
-    function renderPhotoGrid(cat, gridId, page = 1) {
-      currentPages[cat] = page;
+    function renderPhotoGrid(cat, gridId) {
       const svcs = allSvcs[cat] || [];
       const grid = document.getElementById(gridId);
       if (!svcs.length) {
@@ -436,22 +478,12 @@
         return;
       }
       
-      const ITEMS_PER_PAGE = 6;
-      const totalPages = Math.ceil(svcs.length / ITEMS_PER_PAGE);
-      const startIndex = (page - 1) * ITEMS_PER_PAGE;
-      const paginatedSvcs = svcs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+      let html = svcs.map(s => photoCardHtml(s)).join('');
       
-      let html = paginatedSvcs.map(s => photoCardHtml(s)).join('');
-      
-      if (totalPages > 1) {
-        let paginationHtml = `<div style="grid-column:1/-1; display:flex; justify-content:center; gap:8px; margin-top:24px;">`;
-        paginationHtml += `<button class="btn btn-outline btn-sm" ${page === 1 ? 'disabled style="opacity:0.5"' : ''} onclick="renderPhotoGrid('${cat}', '${gridId}', ${page - 1})"><i class="ri-arrow-left-s-line"></i></button>`;
-        for(let i=1; i<=totalPages; i++) {
-          paginationHtml += `<button class="btn ${i === page ? 'btn-primary' : 'btn-outline'} btn-sm" onclick="renderPhotoGrid('${cat}', '${gridId}', ${i})">${i}</button>`;
-        }
-        paginationHtml += `<button class="btn btn-outline btn-sm" ${page === totalPages ? 'disabled style="opacity:0.5"' : ''} onclick="renderPhotoGrid('${cat}', '${gridId}', ${page + 1})"><i class="ri-arrow-right-s-line"></i></button>`;
-        paginationHtml += `</div>`;
-        html += paginationHtml;
+      if (hasMore[cat]) {
+        html += `<div style="grid-column:1/-1;text-align:center;margin-top:24px;">
+          <button class="btn btn-outline" onclick="loadMore('${cat}', '${gridId}', true)">Xem thêm <i class="ri-arrow-down-s-line" style="vertical-align:middle"></i></button>
+        </div>`;
       }
       
       grid.innerHTML = html;
@@ -459,10 +491,15 @@
 
     function photoCardHtml(s) {
       const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || ''));
+      const tierInfo = s.tier ? TIER_LABELS[s.tier] : null;
+      const tierPrice = s.tier ? getTierPrice(s.tier, s.category) : null;
+      const tierBadge = tierInfo ? `<span style="display:inline-block;padding:3px 10px;border-radius:100px;font-size:.68rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};letter-spacing:.06em;">${tierInfo.label}</span>` : '';
+      const priceBadge = tierPrice ? `<span style="font-size:.75rem;font-weight:700;color:white;opacity:.92;">${tierPrice}</span>` : '';
       return `<div class="photo-card" onclick="openDetail('${s.id}')">
         <img src="${imgSrc}" alt="${s.name}" loading="lazy" onerror="this.src='https://placehold.co/400x530?text=BêTráp'">
         <div class="photo-card-overlay">
           <div class="photo-card-name">${s.name}</div>
+          ${tierBadge || priceBadge ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">${tierBadge}${priceBadge}</div>` : ''}
           <button onclick="event.stopPropagation();openDetail('${s.id}')">Xem chi tiết</button>
         </div>
       </div>`;
@@ -476,12 +513,18 @@
         grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Chưa có dịch vụ nào</div>';
         return;
       }
-      grid.innerHTML = svcs.map(s => {
+      let html = svcs.map(s => {
         const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image||''));
+        const tierInfo = s.tier ? TIER_LABELS[s.tier] : null;
+        const tierPrice = s.tier ? getTierPrice(s.tier, s.category) : null;
         return `<div class="svc-card-h" onclick="openDetail('${s.id}')">
           <div class="svc-card-h-img"><img src="${imgSrc}" alt="${s.name}" onerror="this.src='https://placehold.co/180x140?text=BêTráp'"></div>
           <div class="svc-card-h-body">
-            <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+              <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
+              ${tierInfo ? `<span style="padding:2px 10px;border-radius:100px;font-size:.68rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};">${tierInfo.label}</span>` : ''}
+              ${tierPrice ? `<span style="font-size:.8rem;font-weight:700;color:var(--gold-dark);">${tierPrice}</span>` : ''}
+            </div>
             <div style="font-weight:700;font-size:1rem;color:var(--text-dark);">${s.name}</div>
             <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">${(s.description||'').slice(0,120)}${s.description && s.description.length>120?'...':''}</div>
             <div style="font-size:.8rem;color:var(--text-muted);"><i class="ri-map-pin-line"></i> ${s.location||'—'}</div>
@@ -492,6 +535,14 @@
           </div>
         </div>`;
       }).join('');
+      
+      if (hasMore[cat]) {
+        html += `<div style="text-align:center;margin-top:24px;">
+          <button class="btn btn-outline" onclick="loadMore('${cat}', '${gridId}', false)">Xem thêm <i class="ri-arrow-down-s-line" style="vertical-align:middle"></i></button>
+        </div>`;
+      }
+      
+      grid.innerHTML = html;
     }
 
     // ── Detail Lightbox ──
@@ -518,8 +569,18 @@
         gallery.style.display = 'none';
       }
 
+      // Tier + giá trong lightbox
+      const tierInfo = svc.tier ? TIER_LABELS[svc.tier] : null;
+      const tierPrice = svc.tier ? getTierPrice(svc.tier, svc.category) : null;
+      const tierHtml = tierInfo
+        ? `<span style="display:inline-block;padding:4px 14px;border-radius:100px;font-size:.78rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};margin-right:8px;">${tierInfo.label}</span>`
+        : '';
+      const priceHtml = tierPrice
+        ? `<span style="font-size:.85rem;font-weight:700;color:var(--gold-dark);"><i class="ri-price-tag-3-line"></i> ${tierPrice}</span>`
+        : '';
+
       document.getElementById('dm-name').textContent = svc.name;
-      document.getElementById('dm-cat').textContent = CAT_LABELS[svc.category] || svc.category;
+      document.getElementById('dm-cat').innerHTML = `${CAT_LABELS[svc.category] || svc.category}${tierHtml ? '&ensp;' + tierHtml : ''}${priceHtml ? '&ensp;' + priceHtml : ''}`;
       document.getElementById('dm-desc').innerHTML = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
       document.getElementById('detail-modal').classList.add('open');
     }

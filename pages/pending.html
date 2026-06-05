@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Chờ Duyệt — BêTráp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <style>
+    body{background:var(--grad-hero);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .pending-card{background:white;border-radius:var(--r-xl);padding:var(--sp-3xl);width:100%;max-width:560px;box-shadow:var(--shadow-lg);text-align:center}
+    .pending-icon{font-size:4rem;color:var(--gold);margin-bottom:var(--sp-md);animation:pulse 2s infinite}
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .pending-title{font-family:var(--font-h);font-size:2rem;font-weight:700;color:var(--text-dark);margin-bottom:var(--sp-md)}
+    .pending-desc{color:var(--text-muted);font-size:1.05rem;line-height:1.6;margin-bottom:var(--sp-xl)}
+    .contact-info{background:var(--cream);padding:var(--sp-lg);border-radius:var(--r-lg);margin-bottom:var(--sp-xl);text-align:left}
+  </style>
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body>
+  <div class="pending-card animate-scaleIn">
+    <div class="pending-icon"><i class="ri-time-line"></i></div>
+    <div class="pending-title">Tài Khoản Đang Chờ Duyệt</div>
+    <div class="pending-desc">
+      Cảm ơn bạn đã đăng ký trở thành Nhà Cung Cấp trên hệ thống BêTráp. Hồ sơ của bạn đang được ban quản trị xét duyệt để đảm bảo chất lượng dịch vụ.
+      <br><br>Quá trình này thường mất từ 24 - 48 giờ làm việc.
+    </div>
+    
+    <div class="contact-info">
+      <div style="font-weight:700;color:var(--text-dark);margin-bottom:var(--sp-sm)"><i class="ri-customer-service-2-line"></i> Hỗ trợ ngay:</div>
+      <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:4px"><i class="ri-phone-line"></i> Hotline: 1900 1234</div>
+      <div style="color:var(--text-muted);font-size:0.9rem"><i class="ri-mail-line"></i> Email: support@betrap.vn</div>
+    </div>
+    
+    <button class="btn btn-primary btn-block btn-lg" onclick="checkStatus()"><i class="ri-refresh-line"></i> Kiểm Tra Trạng Thái</button>
+    <button class="btn btn-ghost btn-block" onclick="API.auth.logout()" style="margin-top:var(--sp-md);color:var(--text-muted)">Đăng Xuất</button>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    const sess = API.auth.currentSession();
+    if (!sess) { window.location.href = 'login.html'; }
+    if (sess.role !== 'provider' || sess.verified) {
+      window.location.href = 'index.html';
+    }
+
+    async function checkStatus() {
+      // Re-fetch user session or profile to check verified status
+      try {
+        const btn = document.querySelector('.btn-primary');
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:2px"></span> Đang kiểm tra...';
+        btn.disabled = true;
+
+        // Fetch user info from database (need to ensure endpoint exists)
+        // Since we don't have a direct /api/auth/me endpoint, we can check by trying to access a provider-only endpoint
+        try {
+           const res = await API.auth.me();
+           if (res && res.session && res.session.verified) {
+             API.auth.updateSession(res.session); // Update localStorage
+             window.location.href = 'provider-dashboard.html';
+             return;
+           }
+        } catch(e) {
+            console.error(e);
+        }
+        
+        UI.toast('Tài khoản của bạn vẫn đang được duyệt. Vui lòng quay lại sau.', 'info');
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      } catch (err) {
+        UI.toast('Lỗi kiểm tra trạng thái.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

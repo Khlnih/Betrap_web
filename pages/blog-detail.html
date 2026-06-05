@@ -163,7 +163,9 @@
               tocHtml += `<li><a href="#${hid}">${c.text || c}</a></li>`;
             } 
             else if (b.Type === 'paragraph') {
-              html += `<p class="block block-paragraph">${c.text || c}</p>`;
+              let pText = c.text || c || '';
+              if (typeof pText === 'string') pText = pText.replace(/\n/g, '<br>');
+              html += `<p class="block block-paragraph">${pText}</p>`;
             } 
             else if (b.Type === 'image') {
               html += `<img src="${c.url}" class="block block-image" style="width:${c.width||'100%'};" alt="Image">`;

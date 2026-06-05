@@ -286,6 +286,27 @@
     let allTraps = [];
     let betrapServices = [];
 
+    const TIER_LABELS = {
+      'co-ban':       { label:'Cơ Bản',       color:'#7a6045', bg:'#fef3e2' },
+      'nang-cao':     { label:'Nâng Cao',     color:'#7a4a1e', bg:'#fbe8d4' },
+      'cao-cap':      { label:'Cao Cấp',      color:'#5a2d82', bg:'#f3e8ff' },
+      'tieu-chuan':   { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
+      'full-service': { label:'Full Service', color:'#1e7a4a', bg:'#e8f7ef' },
+      'standard':     { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
+    };
+    const TIER_PRICES = {
+      'co-ban':       { 'lam-trap':'6 – 7 triệu/gói', 'be-trap':'150.000₫/người' },
+      'nang-cao':     { 'lam-trap':'7 – 7.5 triệu/gói' },
+      'cao-cap':      { 'lam-trap':'Trên 10 triệu/gói', 'mc-su-kien':'1.2 – 1.5 triệu/show' },
+      'tieu-chuan':   { 'mc-su-kien':'800k – 1 triệu/show' },
+      'full-service': { 'be-trap':'250.000₫/người' },
+      'standard':     { 'media':'1.6 – 2 triệu/buổi' },
+    };
+    function getTierPrice(tier, cat) {
+      if (!tier) return null;
+      return (TIER_PRICES[tier] && (TIER_PRICES[tier][cat] || TIER_PRICES[tier]['*'])) || null;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
       const sess = API.auth.currentSession();
@@ -306,10 +327,19 @@
         }
         grid.innerHTML = allTraps.map(t => {
           const img = t.image && t.image.startsWith('http') ? t.image : (rootPath()+(t.image||''));
+          const tierInfo = t.tier ? TIER_LABELS[t.tier] : null;
+          const tierPrice = t.tier ? getTierPrice(t.tier, t.category) : null;
+          const tierBadge = tierInfo
+            ? `<span style="display:inline-block;padding:2px 10px;border-radius:100px;font-size:.68rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};">${tierInfo.label}</span>`
+            : '';
+          const priceStr = tierPrice
+            ? `<span style="font-size:.78rem;font-weight:700;color:var(--gold-dark);">${tierPrice}</span>`
+            : '';
           return `<div class="trap-card" id="tc-${t.id}" onclick="selectTrap('${t.id}')">
             <img src="${img}" alt="${t.name}" class="trap-card-img" onerror="this.src='https://placehold.co/400x300?text=Tráp'">
             <div class="trap-card-body">
               <div class="trap-card-name">${t.name}</div>
+              ${tierBadge || priceStr ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px;">${tierBadge}${priceStr}</div>` : ''}
               <div class="trap-card-loc"><i class="ri-map-pin-line"></i> ${t.location||'—'}</div>
               <div class="trap-card-sel">
                 <span style="font-size:.78rem;color:var(--gold);font-weight:600;">Chọn tráp này</span>

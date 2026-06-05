@@ -82,6 +82,63 @@
         </button>
         <button class="btn btn-ghost btn-sm" onclick="fillDemo('lan@betrap.vn','123456')" style="border:1px solid rgba(220,165,174,.3);color:var(--text-body);justify-content:flex-start;gap:var(--sp-sm)">
           <i class="ri-store-line"></i> Nhà cung cấp: lan@betrap.vn / 123456
+</head>
+<body>
+  <a href="../index.html" style="position:fixed;top:20px;left:20px;color:var(--gold-light);font-size:.875rem;display:flex;align-items:center;gap:6px;z-index:10">
+    <i class="ri-arrow-left-line"></i> Về trang chủ
+  </a>
+
+  <div class="auth-wrap animate-scaleIn">
+    <div class="auth-left">
+      <div>
+        <div class="navbar-brand" style="color:white;font-size:1.6rem;margin-bottom:var(--sp-xl)">
+          <img src="../assets/images/logo.jpg" alt="Trap Connect" style="height:64px; width:auto; object-fit:contain; border-radius:var(--r-sm)">
+        </div>
+        <h2>Chào mừng trở lại!</h2>
+        <p>Đăng nhập để đặt dịch vụ đám hỏi truyền thống nhanh chóng và tiện lợi.</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><i class="ri-shield-check-line"></i><span>Thanh toán an toàn, bảo mật</span></div>
+        <div class="auth-feature"><i class="ri-message-3-line"></i><span>Chat trực tiếp với nhà cung cấp</span></div>
+        <div class="auth-feature"><i class="ri-star-line"></i><span>Dịch vụ được xác thực uy tín</span></div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-title">Đăng Nhập</div>
+      <p class="auth-sub">Chưa có tài khoản? <a href="register.html" style="color:var(--gold-light);font-weight:600">Đăng ký ngay</a></p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-group">
+            <i class="ri-mail-line input-icon" style="color:var(--text-muted)"></i>
+            <input id="email" type="email" class="form-control" placeholder="email@example.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <div class="input-group">
+            <i class="ri-lock-line input-icon" style="color:var(--text-muted)"></i>
+            <input id="password" type="password" class="form-control" placeholder="Nhập mật khẩu" required>
+            <i class="ri-eye-off-line input-icon-right" id="toggle-pw" onclick="togglePw()"></i>
+          </div>
+        </div>
+        <div id="error-msg" class="form-error hidden"></div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg mt-md" id="submit-btn">
+          <i class="ri-login-circle-line"></i> Đăng Nhập
+        </button>
+      </form>
+
+      <div class="divider" style="border-color:rgba(220,165,174,.2);color:var(--text-muted)">Tài khoản demo</div>
+      <div style="display:flex;flex-direction:column;gap:var(--sp-sm)">
+        <button class="btn btn-ghost btn-sm" onclick="fillDemo('admin@betrap.vn','123456')" style="border:1px solid rgba(220,165,174,.3);color:var(--text-body);justify-content:flex-start;gap:var(--sp-sm);background:rgba(191,167,162,0.1)">
+          <i class="ri-shield-user-line" style="color:var(--red-dark)"></i> Quản trị viên: admin@betrap.vn / 123456
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="fillDemo('mai@gmail.com','123456')" style="border:1px solid rgba(220,165,174,.3);color:var(--text-body);justify-content:flex-start;gap:var(--sp-sm)">
+          <i class="ri-user-line"></i> Khách hàng: mai@gmail.com / 123456
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="fillDemo('lan@betrap.vn','123456')" style="border:1px solid rgba(220,165,174,.3);color:var(--text-body);justify-content:flex-start;gap:var(--sp-sm)">
+          <i class="ri-store-line"></i> Nhà cung cấp: lan@betrap.vn / 123456
         </button>
       </div>
     </div>
@@ -96,7 +153,10 @@
     const s = API.auth.currentSession();
     if (s) {
       if (s.role === 'admin') window.location.href = 'admin-dashboard.html';
-      else if (s.role === 'provider') window.location.href = 'provider-dashboard.html';
+      else if (s.role === 'provider') {
+        if (!s.verified) window.location.href = 'pending.html';
+        else window.location.href = 'provider-dashboard.html';
+      }
       else window.location.href = 'dashboard.html';
     }
 
@@ -115,7 +175,10 @@
         UI.toast('Đăng nhập thành công! 🎉', 'success');
         setTimeout(() => {
           if (session.role === 'admin') window.location.href = 'admin-dashboard.html';
-          else if (session.role === 'provider') window.location.href = 'provider-dashboard.html';
+          else if (session.role === 'provider') {
+            if (!session.verified) window.location.href = 'pending.html';
+            else window.location.href = 'provider-dashboard.html';
+          }
           else window.location.href = 'dashboard.html';
         }, 800);
       } catch(err) {

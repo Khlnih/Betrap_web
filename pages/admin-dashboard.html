@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { background-color: #F8F9FA; font-family: 'Plus Jakarta Sans', sans-serif; }
     .dash-layout { display: flex; min-height: 100vh; }
@@ -117,6 +118,9 @@
         <div class="menu-item" onclick="switchTab('blogs')" id="tab-blogs">
           <i class="ri-article-line"></i> Blog
         </div>
+        <div class="menu-item" onclick="switchTab('stats')" id="tab-stats">
+          <i class="ri-bar-chart-2-line"></i> Thống Kê
+        </div>
       </div>
       <div style="padding: 24px; border-top: 1px solid rgba(0,0,0,0.05)">
         <button class="btn btn-ghost btn-block" style="color:#64748B; border: 1px solid #E2E8F0; border-radius: 12px;" onclick="logout()">
@@ -154,6 +158,31 @@
           <div><div style="color:#64748B;font-size:0.85rem;font-weight:600">Quản Trị Viên</div><div style="font-size:1.8rem;font-weight:800;color:#1E293B" id="stat-admins">0</div></div>
         </div>
       </div>
+
+      <section id="view-stats" class="hidden">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon" style="width:40px;height:40px;font-size:1.2rem;background:#F1F5F9;color:#64748B"><i class="ri-file-list-3-line"></i></div>
+            <div><div style="color:#64748B;font-size:0.75rem">Tổng Đơn</div><div style="font-size:1.4rem;font-weight:700" id="ad-stat-total">0</div></div>
+          </div>
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon" style="width:40px;height:40px;font-size:1.2rem;background:rgba(59,130,246,0.1);color:#3B82F6"><i class="ri-time-line"></i></div>
+            <div><div style="color:#64748B;font-size:0.75rem">Chờ Xác Nhận</div><div style="font-size:1.4rem;font-weight:700" id="ad-stat-pending">0</div></div>
+          </div>
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon" style="width:40px;height:40px;font-size:1.2rem;background:rgba(34,197,94,0.1);color:#16A34A"><i class="ri-checkbox-circle-line"></i></div>
+            <div><div style="color:#64748B;font-size:0.75rem">Hoàn Thành</div><div style="font-size:1.4rem;font-weight:700" id="ad-stat-done">0</div></div>
+          </div>
+          <div class="stat-card" style="padding: 16px;">
+            <div class="stat-icon" style="width:40px;height:40px;font-size:1.2rem;background:rgba(239,68,68,0.1);color:#DC2626"><i class="ri-close-circle-line"></i></div>
+            <div><div style="color:#64748B;font-size:0.75rem">Đã Hủy</div><div style="font-size:1.4rem;font-weight:700" id="ad-stat-cancel">0</div></div>
+          </div>
+        </div>
+        <div class="table-card" style="padding: 24px;">
+          <h3 style="margin:0 0 16px 0;font-size:1.1rem;color:#1E293B">Biểu đồ doanh thu 6 tháng gần nhất</h3>
+          <canvas id="revenueChart" style="width:100%;max-height:400px;"></canvas>
+        </div>
+      </section>
 
       <section id="view-users">
         <div class="table-card">
@@ -285,6 +314,8 @@
     let allUsers = [];
     let allServices = [];
     let allBlogs = [];
+    let adminStats = null;
+    let revenueChartInst = null;
 
     async function loadData() {
       try {
@@ -292,6 +323,9 @@
         allServices = await API.admin.getServices();
         try {
             allBlogs = await API.blog.getAllAdmin();
+        } catch(e) {}
+        try {
+            adminStats = await API.stats.admin();
         } catch(e) {}
         updateStats();
         renderUsers();
@@ -307,6 +341,50 @@
       document.getElementById('stat-users').textContent = allUsers.length;
       document.getElementById('stat-providers').textContent = allUsers.filter(u => u.role === 'provider' || u.Role === 'provider').length;
       document.getElementById('stat-admins').textContent = allUsers.filter(u => u.role === 'admin' || u.Role === 'admin').length;
+      
+      if (adminStats && adminStats.transactions) {
+        const t = adminStats.transactions;
+        document.getElementById('ad-stat-total').textContent = t.Total || t.total || 0;
+        document.getElementById('ad-stat-pending').textContent = t.Pending || t.pending || 0;
+        document.getElementById('ad-stat-done').textContent = t.Done || t.done || 0;
+        document.getElementById('ad-stat-cancel').textContent = t.Cancelled || t.cancelled || 0;
+      }
+      
+      if (adminStats && adminStats.revenue) {
+        renderChart(adminStats.revenue);
+      }
+    }
+
+    function renderChart(revData) {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      if (revenueChartInst) revenueChartInst.destroy();
+      
+      const labels = revData.map(r => r.month);
+      const data = revData.map(r => r.amount);
+      
+      revenueChartInst = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Doanh thu (VNĐ)',
+            data: data,
+            borderColor: '#A62C38',
+            backgroundColor: 'rgba(166,44,56,0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: value => UI.formatCurrency(value) } }
+          }
+        }
+      });
     }
 
     function renderUsers() {
@@ -454,13 +532,15 @@
       document.getElementById('view-providers').classList.add('hidden');
       document.getElementById('view-services').classList.add('hidden');
       document.getElementById('view-blogs').classList.add('hidden');
+      document.getElementById('view-stats').classList.add('hidden');
       document.getElementById('view-' + tabId).classList.remove('hidden');
       
       const titles = {
         'users': 'Quản lý Người Dùng',
         'providers': 'Quản lý Nhà Cung Cấp',
         'services': 'Quản lý Dịch Vụ',
-        'blogs': 'Quản lý Blog'
+        'blogs': 'Quản lý Blog',
+        'stats': 'Thống Kê Hệ Thống'
       };
       document.getElementById('page-title').textContent = titles[tabId];
     }

@@ -274,10 +274,10 @@
           <label class="form-label">Danh mục *</label>
           <select id="so-category" class="form-control">
             <option value="">-- Chọn danh mục --</option>
-            <option value="be-trap">Đội Cưới Hỏi</option>
+            <option value="be-trap">Đội Cưới Hỏi (Bê Tráp)</option>
             <option value="ao-dai">Áo Dài </option>
             <option value="lam-trap">Tráp Ăn Hỏi</option>
-            <option value="media">Chụp ảnh / Quay phim</option>
+            <option value="media">Media</option>
             <option value="mc-su-kien">MC Sự Kiện</option>
           </select>
         </div>
@@ -668,9 +668,30 @@
               <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
             </div>
             ${r.comment ? `<div style="margin-top:var(--sp-sm);font-size:.875rem;color:var(--text-dark);line-height:1.6;background:var(--cream);border-radius:var(--r-sm);padding:var(--sp-sm) var(--sp-md)">"${r.comment}"</div>` : '<div style="margin-top:var(--sp-sm);font-size:.8rem;color:var(--text-muted);font-style:italic">Không có nhận xét</div>'}
+            ${r.providerReply ? 
+              `<div style="margin-top:8px; background:rgba(212,185,150,0.1); padding:12px; border-radius:8px; border-left:3px solid var(--gold);">
+                <div style="font-weight:700; font-size:0.8rem; color:var(--gold-dark); margin-bottom:4px;"><i class="ri-store-2-line"></i> Bạn đã trả lời (${UI.formatDate(r.repliedAt)}):</div>
+                <div style="font-size:0.85rem; color:var(--text-dark);">${r.providerReply}</div>
+              </div>` : 
+              `<div style="margin-top:12px;">
+                <button class="btn btn-outline btn-sm" onclick="promptReviewReply('${r.id}')"><i class="ri-reply-line"></i> Phản hồi khách hàng</button>
+              </div>`
+            }
           </div>`).join('');
       } catch(e) {
         el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Không tải được đánh giá</h3><p>${e.message}</p></div>`;
+      }
+    }
+
+    async function promptReviewReply(reviewId) {
+      const reply = prompt('Nhập nội dung phản hồi của bạn cho đánh giá này:\n(Phản hồi này sẽ được hiển thị công khai trên trang dịch vụ)');
+      if (!reply || !reply.trim()) return;
+      try {
+        await API.review.reply(reviewId, reply.trim());
+        UI.toast('Đã gửi phản hồi thành công!', 'success');
+        loadReviews();
+      } catch (err) {
+        UI.toast('Lỗi: ' + err.message, 'error');
       }
     }
 
@@ -932,6 +953,18 @@
       document.getElementById('so-location').value = editSvc ? (editSvc.location || '') : '';
       document.getElementById('so-tags').value     = editSvc && editSvc.tags ? editSvc.tags.join(', ') : '';
 
+      // Hiển thị Tier theo category
+      const editCat = editSvc ? editSvc.category : '';
+      updateTierUI(editCat, editSvc ? (editSvc.tier || '') : '');
+      if (editSvc && editSvc.tier) {
+        const tierOpts = TIER_OPTIONS[editCat] || [];
+        const found = tierOpts.find(o => o.value === editSvc.tier);
+        if (found) {
+          document.getElementById('so-price').value = found.price;
+          document.getElementById('so-unit').value  = found.unit;
+        }
+      }
+
       // Áo dài liên kết (chỉ với lam-trap)
       const aodaiGroup = document.getElementById('aodai-link-group');
       if (editSvc && editSvc.category === 'lam-trap') {
@@ -995,12 +1028,80 @@
       }, 'image/jpeg', 0.85);
     }
 
+    // ── Tier Config ────────────────────────────────────────────────────────────
+    const TIER_OPTIONS = {
+      'lam-trap': [
+        { value:'co-ban',    label:'Cơ Bản',    price:6500000,  unit:'gói',    hint:'Giá tham khảo: 6 – 7 triệu đồng / gói' },
+        { value:'nang-cao',  label:'Nâng Cao',  price:7250000,  unit:'gói',    hint:'Giá tham khảo: 7 – 7.5 triệu đồng / gói' },
+        { value:'cao-cap',   label:'Cao Cấp',   price:10000000, unit:'gói',    hint:'Giá tham khảo: Trên 10 triệu đồng / gói' },
+      ],
+      'be-trap': [
+        { value:'co-ban',        label:'Cơ Bản',        price:150000,   unit:'người',  hint:'Giá tham khảo: 150.000₫ / người' },
+        { value:'full-service',  label:'Full Service',  price:250000,   unit:'người',  hint:'Giá tham khảo: 250.000₫ / người' },
+      ],
+      'mc-su-kien': [
+        { value:'tieu-chuan',  label:'Tiêu Chuẩn',  price:900000,   unit:'show',   hint:'Giá tham khảo: 800.000 – 1 triệu đồng / show' },
+        { value:'cao-cap',     label:'Cao Cấp',     price:1350000,  unit:'show',   hint:'Giá tham khảo: 1.2 – 1.5 triệu đồng / show' },
+      ],
+      'media': [
+        { value:'standard',  label:'Tiêu Chuẩn',  price:1800000,  unit:'buổi',   hint:'Giá tham khảo: 1.6 – 2 triệu đồng / buổi' },
+      ],
+    };
+
     document.getElementById('so-category').addEventListener('change', function() {
       const isMC = this.value === 'mc-su-kien' || this.value === 'media';
       document.getElementById('gallery-group').style.display = isMC ? 'block' : 'none';
       const isTrap = this.value === 'lam-trap';
       document.getElementById('aodai-link-group').style.display = isTrap ? 'block' : 'none';
       if (isTrap) loadAodaiCheckboxList(document.getElementById('so-id').value, []);
+
+      // Hiển thị tier options theo category
+      updateTierUI(this.value);
+    });
+
+    function updateTierUI(category, currentTier) {
+      const tierGroup = document.getElementById('tier-group');
+      const tierSel   = document.getElementById('so-tier');
+      const hintBox   = document.getElementById('tier-price-hint');
+      const hintText  = document.getElementById('tier-hint-text');
+      const options   = TIER_OPTIONS[category];
+
+      if (!options) {
+        tierGroup.style.display = 'none';
+        hintBox.style.display = 'none';
+        return;
+      }
+
+      tierGroup.style.display = 'block';
+      tierSel.innerHTML = '<option value="">-- Chọn gói --</option>' +
+        options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+
+      if (currentTier) {
+        tierSel.value = currentTier;
+        const found = options.find(o => o.value === currentTier);
+        if (found) {
+          hintText.textContent = found.hint;
+          hintBox.style.display = 'block';
+        }
+      } else {
+        hintBox.style.display = 'none';
+      }
+    }
+
+    document.getElementById('so-tier').addEventListener('change', function() {
+      const category = document.getElementById('so-category').value;
+      const options  = TIER_OPTIONS[category] || [];
+      const found    = options.find(o => o.value === this.value);
+      const hintBox  = document.getElementById('tier-price-hint');
+      const hintText = document.getElementById('tier-hint-text');
+      if (found) {
+        document.getElementById('so-price').value = found.price;
+        document.getElementById('so-unit').value  = found.unit;
+        hintText.textContent = found.hint;
+        hintBox.style.display = 'block';
+      } else {
+        hintBox.style.display = 'none';
+      }
     });
 
     document.getElementById('so-gallery-files').addEventListener('change', function() {
@@ -1064,7 +1165,8 @@
           gallery = newUrls; // Tạm thời ghi đè ảnh cũ nếu upload mới
         }
 
-        const payload = { category, name, description, price, unit, image, location, tags, gallery };
+        const tier    = document.getElementById('so-tier')?.value || null;
+        const payload = { category, name, description, price, unit, tier, image, location, tags, gallery };
         
         if (id) {
           await API.svc.update(id, payload);

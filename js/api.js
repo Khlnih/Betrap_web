@@ -63,6 +63,8 @@ const API = (() => {
   const auth = {
     currentSession: getSession,
     currentUser:    getSession,
+    updateSession:  setSession,
+    me: async () => await get('/auth/me', true),
 
     login: async ({ email, password }) => {
       if (!email || !password) throw new Error('Vui lòng nhập email và mật khẩu.');
@@ -139,6 +141,8 @@ const API = (() => {
       if (filters.sort)     params.set('sort', filters.sort);
       if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
       if (filters.all)      params.set('all', '1');
+      if (filters.page)     params.set('page', filters.page);
+      if (filters.limit)    params.set('limit', filters.limit);
       const qs = params.toString();
       return await get('/services' + (qs ? '?' + qs : ''));
     },
@@ -287,6 +291,10 @@ const API = (() => {
       try { return await get('/reviews/provider/' + providerId, true); }
       catch { return []; }
     },
+
+    reply: async (id, reply) => {
+      return await put('/reviews/' + id + '/reply', { reply }, true);
+    },
   };
 
   // ── FAVORITES (Wishlist) ──────────────────────────────────────────────────
@@ -331,6 +339,9 @@ const API = (() => {
     getServices: async () => {
       return await get('/admin/services', true);
     },
+    verifyProvider: async (id) => {
+      return await put('/admin/providers/' + id + '/verify', null, true);
+    },
     toggleService: async (id) => {
       const token = localStorage.getItem('bt_token');
       const res = await fetch(BASE_URL + '/admin/services/' + id + '/toggle', {
@@ -350,10 +361,11 @@ const API = (() => {
   const blog = {
     getMonths: async (offset = 0) => get('/blogs/months?offset=' + offset),
     getByMonth: async (year, month) => get(`/blogs?year=${year}&month=${month}`),
-    getAll: async (limit, offset) => {
+    getAll: async (limit, offset, search) => {
       let q = [];
       if(limit) q.push(`limit=${limit}`);
       if(offset) q.push(`offset=${offset}`);
+      if(search) q.push(`search=${encodeURIComponent(search)}`);
       return get('/blogs' + (q.length ? '?' + q.join('&') : ''));
     },
     getAllAdmin: async () => get('/blogs?all=true', true),
@@ -385,7 +397,12 @@ const API = (() => {
 
     provider: async () => {
       try { return await get('/stats/provider', true); }
-      catch { return { orders: 0, pending: 0, done: 0, revenue: 0, services: 0, monthly: [] }; }
+      catch { return { total: 0, pending: 0, done: 0, revenue: 0, avgRating: 5 }; }
+    },
+
+    admin: async () => {
+      try { return await get('/stats/admin', true); }
+      catch { return null; }
     },
   };
 

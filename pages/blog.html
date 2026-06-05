@@ -148,6 +148,14 @@
     </div>
   </div>
 
+  <div class="container" style="margin-top:-24px; position:relative; z-index:10; text-align:center; padding-bottom: 24px;">
+    <div style="max-width:600px; margin:0 auto; background:white; padding:8px; border-radius:100px; box-shadow:var(--shadow-md); display:flex; align-items:center;">
+      <i class="ri-search-line" style="margin-left:16px; color:var(--text-muted);"></i>
+      <input type="text" id="blog-search" placeholder="Tìm kiếm bài viết..." style="border:none; padding:12px; width:100%; outline:none; border-radius:100px; font-size:1rem;" onkeypress="if(event.key==='Enter') doSearch()">
+      <button class="btn btn-primary" style="border-radius:100px; padding:10px 24px;" onclick="doSearch()">Tìm kiếm</button>
+    </div>
+  </div>
+
   <div class="container page-content">
     <div class="timeline" id="blog-timeline">
       <!-- Mẫu skeleton khi đang load -->
@@ -270,6 +278,47 @@
       loadBlogs(true).then(() => {
         btn.innerHTML = 'Xem thêm <i class="ri-arrow-down-line"></i>';
       });
+    }
+
+    async function doSearch() {
+      const val = document.getElementById('blog-search').value.trim();
+      const timelineEl = document.getElementById('blog-timeline');
+      const loadMoreEl = document.getElementById('load-more-container');
+      
+      if (!val) {
+        currentOffset = 0;
+        await loadBlogs(false);
+        return;
+      }
+      
+      timelineEl.innerHTML = '<div style="text-align:center; padding: 40px;"><div class="spinner"></div></div>';
+      loadMoreEl.style.display = 'none';
+      
+      try {
+        const blogs = await API.blog.getAll(null, null, val);
+        if (!blogs.length) {
+          timelineEl.innerHTML = '<div class="empty-state"><i class="ri-search-line empty-icon"></i><h3>Không tìm thấy bài viết nào</h3><p>Vui lòng thử từ khóa khác.</p></div>';
+          return;
+        }
+        
+        let html = '<div class="timeline-month"><div class="timeline-month-label">Kết quả tìm kiếm cho: "' + val + '"</div>';
+        html += blogs.map(b => `
+          <a href="blog-detail.html?id=${b.Slug || b.Id}" class="blog-card">
+            ${b.CoverImage ? `<img src="${b.CoverImage}" class="blog-card-img" alt="Cover">` : '<div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:#ddd"><i class="ri-image-line"></i></div>'}
+            <div class="blog-card-content">
+              <div class="blog-card-title">${b.Title}</div>
+              <div class="blog-card-meta">
+                <span><i class="ri-calendar-line"></i> ${UI.formatDate(b.PublishedAt)}</span>
+              </div>
+            </div>
+          </a>
+        `).join('');
+        html += '</div>';
+        
+        timelineEl.innerHTML = html;
+      } catch(e) {
+        timelineEl.innerHTML = '<div class="text-center text-error mt-lg">Lỗi tìm kiếm. Vui lòng thử lại sau.</div>';
+      }
     }
 
     // Hiệu ứng mưa canvas

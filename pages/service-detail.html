@@ -141,6 +141,12 @@
                   <div style="margin-left:auto;font-size:.75rem;color:var(--text-muted)">${UI.timeAgo(r.createdAt)}</div>
                 </div>
                 <p class="review-text">${r.comment}</p>
+                ${r.providerReply ? 
+                  `<div style="margin-top:12px; background:rgba(212,185,150,0.1); padding:12px; border-radius:8px; border-left:3px solid var(--gold);">
+                    <div style="font-weight:700; font-size:0.8rem; color:var(--gold-dark); margin-bottom:4px;"><i class="ri-store-2-line"></i> Phản hồi từ cửa hàng (${UI.formatDate(r.repliedAt)}):</div>
+                    <div style="font-size:0.85rem; color:var(--text-dark);">${r.providerReply}</div>
+                  </div>` : ''
+                }
               </div>`).join('')}</div>` : `<div class="empty-state"><div class="empty-icon">💬</div><h3>Chưa có đánh giá</h3></div>`}
           </div>
         </div>

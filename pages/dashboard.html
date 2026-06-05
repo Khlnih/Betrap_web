@@ -79,7 +79,16 @@
           <!-- Recent Orders -->
           <div class="orders-table">
             <div class="orders-table-header">
-              <h4>Đơn Hàng Gần Đây</h4>
+              <div style="display:flex;align-items:center;gap:var(--sp-md)">
+                <h4 style="margin:0">Đơn Hàng Gần Đây</h4>
+                <select id="dash-order-filter" class="form-control" style="width:auto;font-size:.8rem;padding:4px 12px;height:auto;border-radius:var(--r-full)" onchange="renderDashOrders()">
+                  <option value="">Tất cả</option>
+                  <option value="pending">Chờ xác nhận</option>
+                  <option value="confirmed">Đã xác nhận</option>
+                  <option value="done">Hoàn thành</option>
+                  <option value="cancelled">Đã huỷ</option>
+                </select>
+              </div>
               <a href="history.html" style="font-size:.875rem;color:var(--gold);font-weight:600">Xem tất cả →</a>
             </div>
             <div id="recent-orders"></div>
@@ -170,23 +179,29 @@
         <div class="stat-card animate-fadeInUp delay-200"><div class="stat-icon green"><i class="ri-checkbox-circle-line"></i></div><div><div class="stat-value">${s.done}</div><div class="stat-label">Đã hoàn thành</div></div></div>
         <div class="stat-card animate-fadeInUp delay-300"><div class="stat-icon red"><i class="ri-close-circle-line"></i></div><div><div class="stat-value">${s.cancelled||0}</div><div class="stat-label">Đã huỷ / Từ chối</div></div></div>`;
 
-      // Recent orders
-      const orders = await API.txn.getMyOrders();
-      const el = document.getElementById('recent-orders');
-      if (!orders.length) {
-        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>Chưa có đơn hàng nào</h3><p>Hãy tìm và đặt dịch vụ đám hỏi đầu tiên của bạn!</p><a href="services.html" class="btn btn-primary mt-md">Tìm Dịch Vụ</a></div>`;
-      } else {
-        el.innerHTML = orders.slice(0, 5).map(o => `
-          <div class="order-row">
-            <div>
-              <div style="font-weight:600;font-size:.9rem">${o.serviceName}</div>
-              <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
-              ${o.status === 'cancelled' && o.cancelReason ? `<div style="font-size:.75rem;color:var(--error);margin-top:2px"><i class="ri-information-line"></i> ${o.cancelReason}</div>` : ''}
-            </div>
-            <div>${UI.statusBadge(o.status)}</div>
-            <a href="checkout.html?id=${o.id}" class="btn btn-ghost btn-sm"><i class="ri-eye-line"></i></a>
-          </div>`).join('');
-      }
+      // Recent orders filtering
+      window.allOrders = await API.txn.getMyOrders();
+      window.renderDashOrders = function() {
+        const filter = document.getElementById('dash-order-filter') ? document.getElementById('dash-order-filter').value : '';
+        const list = filter ? window.allOrders.filter(o => o.status === filter) : window.allOrders;
+        const el = document.getElementById('recent-orders');
+        
+        if (!list.length) {
+          el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>Không có đơn hàng</h3><p>${filter ? 'Chưa có đơn hàng nào trong trạng thái này.' : 'Hãy tìm và đặt dịch vụ đám hỏi đầu tiên của bạn!'}</p>${!filter ? '<a href="services.html" class="btn btn-primary mt-md">Tìm Dịch Vụ</a>' : ''}</div>`;
+        } else {
+          el.innerHTML = list.slice(0, 5).map(o => `
+            <div class="order-row animate-fadeInUp">
+              <div>
+                <div style="font-weight:600;font-size:.9rem">${o.serviceName}</div>
+                <div class="order-id">${o.id} · ${UI.formatDate(o.createdAt)}</div>
+                ${o.status === 'cancelled' && o.cancelReason ? `<div style="font-size:.75rem;color:var(--error);margin-top:2px"><i class="ri-information-line"></i> ${o.cancelReason}</div>` : ''}
+              </div>
+              <div>${UI.statusBadge(o.status)}</div>
+              <a href="checkout.html?id=${o.id}" class="btn btn-ghost btn-sm"><i class="ri-eye-line"></i></a>
+            </div>`).join('');
+        }
+      };
+      renderDashOrders();
 
       // Load Profile Data
       document.getElementById('prof-name').value = sess.name || '';
