@@ -124,6 +124,19 @@ app.get('/api/setup-db', async (req, res) => {
     }
 });
 
+// ── Migration: Add Tier column ────────────────────────────────────────────────
+app.get('/api/migrate-tier', async (req, res) => {
+    try {
+        await pool.query('ALTER TABLE Services ADD COLUMN IF NOT EXISTS Tier VARCHAR(50) DEFAULT NULL');
+        res.send('✅ Migration done: Tier column added to Services table!');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('❌ Migration error: ' + err.message);
+    }
+});
+
+
+
 app.get('/api/setup-admin', async (req, res) => {
     try {
         const hash = await bcrypt.hash('123456', 10);
