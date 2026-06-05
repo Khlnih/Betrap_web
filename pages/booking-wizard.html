@@ -188,13 +188,25 @@
         <div class="ask-emoji">👥</div>
         <div class="ask-title">Bạn cần đội bê tráp không?</div>
         <div class="ask-desc">Đội bê tráp chuyên nghiệp, trang phục đồng bộ, đúng giờ và tận tâm trong suốt buổi lễ.</div>
-        <div class="ask-btns">
+        <div class="ask-btns" id="betrap-ask-btns">
           <button class="ask-btn-yes" onclick="chooseBetrap(true)">
             <i class="ri-check-line"></i> Có, tôi muốn
           </button>
           <button class="ask-btn-no" onclick="chooseBetrap(false)">
             Không, bỏ qua <i class="ri-arrow-right-line"></i>
           </button>
+        </div>
+        
+        <!-- Phần chọn gói bê tráp (hiển thị khi nhấn Có) -->
+        <div id="betrap-pkg-selection" style="display:none; text-align:left; margin-top:24px; border-top:1px solid #eee; padding-top:20px;">
+          <h4 style="font-family:var(--font-h);font-size:1.2rem;color:var(--text-dark);margin-bottom:12px;text-align:center;">Chọn gói Bê tráp</h4>
+          <div id="betrap-pkgs-list" style="display:flex;flex-direction:column;gap:10px;">
+            <!-- Render via JS -->
+          </div>
+          <div style="display:flex; gap:12px; margin-top:20px;">
+             <button class="btn btn-ghost" style="flex:1" onclick="cancelBetrap()">Hủy</button>
+             <button class="btn btn-primary" style="flex:2" onclick="confirmBetrapPkg()">Tiếp tục <i class="ri-arrow-right-line"></i></button>
+          </div>
         </div>
       </div>
     </div>
@@ -285,6 +297,8 @@
     let wantBetrap = false;
     let allTraps = [];
     let betrapServices = [];
+
+    let selectedBetrapPkg = null; // { name, price }
 
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
@@ -408,9 +422,54 @@
     }
 
     function chooseBetrap(want) {
-      wantBetrap = want;
-      document.getElementById('f-row-betrap').style.display = want ? 'block' : 'none';
-      goToStep(4);
+      if (!want) {
+        wantBetrap = false;
+        selectedBetrapPkg = null;
+        document.getElementById('f-row-betrap').style.display = 'none';
+        goToStep(4);
+      } else {
+        const sameProviderBetrap = betrapServices.find(s => s.providerId === selectedTrap.providerId);
+        const betrapSvc = sameProviderBetrap || betrapServices[0];
+
+        if (betrapSvc && betrapSvc.packages && betrapSvc.packages.length > 0) {
+          // Show packages
+          document.getElementById('betrap-ask-btns').style.display = 'none';
+          document.getElementById('betrap-pkg-selection').style.display = 'block';
+          const list = document.getElementById('betrap-pkgs-list');
+          list.innerHTML = betrapSvc.packages.map((p, idx) => `
+            <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid #e5e7eb;border-radius:12px;cursor:pointer;background:white;transition:border .2s;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="radio" name="betrap-pkg" value="${p.name}" data-price="${p.price}" ${idx===0?'checked':''} style="width:18px;height:18px;accent-color:var(--gold);">
+                <span style="font-weight:600;color:var(--text-dark);">${p.name}</span>
+              </div>
+              <strong style="color:var(--gold)">${UI.formatVND(p.price)}</strong>
+            </label>
+          `).join('');
+        } else {
+          // No packages, just go to next step
+          wantBetrap = true;
+          selectedBetrapPkg = null;
+          document.getElementById('f-row-betrap').style.display = 'block';
+          goToStep(4);
+        }
+      }
+    }
+
+    function cancelBetrap() {
+      document.getElementById('betrap-ask-btns').style.display = 'flex';
+      document.getElementById('betrap-pkg-selection').style.display = 'none';
+    }
+
+    function confirmBetrapPkg() {
+      const radio = document.querySelector('input[name="betrap-pkg"]:checked');
+      if (radio) {
+        selectedBetrapPkg = { name: radio.value, price: radio.dataset.price };
+        wantBetrap = true;
+        document.getElementById('f-row-betrap').style.display = 'block';
+        goToStep(4);
+      } else {
+        UI.toast('Vui lòng chọn một gói bê tráp', 'error');
+      }
     }
 
     // ── Navigation ──
@@ -459,7 +518,8 @@
       document.getElementById('summary-trap').innerHTML = `<i class="ri-checkbox-circle-line" style="color:var(--gold)"></i> <strong>Tráp:</strong> ${trapName}`;
       const adText = selectedAodais.length ? selectedAodais.map(a => a.name).join(', ') : 'Chưa chọn áo dài';
       document.getElementById('summary-aodai').innerHTML = `<i class="ri-shirt-line" style="color:var(--gold)"></i> <strong>Áo dài:</strong> ${adText}`;
-      document.getElementById('summary-betrap').innerHTML = `<i class="ri-group-line" style="color:var(--gold)"></i> <strong>Đội bê tráp:</strong> ${wantBetrap ? 'Có' : 'Không'}`;
+      const betrapText = wantBetrap ? (selectedBetrapPkg ? `Có (${selectedBetrapPkg.name})` : 'Có') : 'Không';
+      document.getElementById('summary-betrap').innerHTML = `<i class="ri-group-line" style="color:var(--gold)"></i> <strong>Đội bê tráp:</strong> ${betrapText}`;
     }
 
     async function submitBooking() {
@@ -504,10 +564,13 @@
         // Đơn 3: Bê tráp nếu có — ưu tiên dùng dịch vụ bê tráp cùng provider với tráp đã chọn
         if (wantBetrap && betrapServices.length > 0) {
           const betrapNote = fullNote + ` | Số người bê tráp: ${qtyBetrap}`;
-          // Tìm dịch vụ bê tráp cùng provider trước, nếu không có thì dùng dịch vụ bất kỳ
           const sameProviderBetrap = betrapServices.find(s => s.providerId === selectedTrap.providerId);
           const betrapSvc = sameProviderBetrap || betrapServices[0];
-          await API.txn.create({ serviceId: betrapSvc.id, date, time, address, note: betrapNote }).catch(() => {});
+          await API.txn.create({ 
+            serviceId: betrapSvc.id, 
+            packageName: selectedBetrapPkg ? selectedBetrapPkg.name : null,
+            date, time, address, note: betrapNote 
+          }).catch(() => {});
         }
 
         UI.toast('🎉 Đặt dịch vụ thành công!', 'success');
