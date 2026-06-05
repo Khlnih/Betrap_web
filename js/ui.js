@@ -293,7 +293,7 @@ const UI = (() => {
             </div>
           </div>
           <div class="footer-bottom">
-            <span>© 2024 BêTráp. Tất cả quyền được bảo lưu.</span>
+            <span>© 2026 BêTráp. Tất cả quyền được bảo lưu.</span>
             <span>Được làm với ❤️ cho đám hỏi Việt Nam</span>
           </div>
         </div>

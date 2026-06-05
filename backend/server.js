@@ -354,8 +354,13 @@ app.post('/api/auth/login', async (req, res) => {
         if (!result.recordset.length) return res.status(401).json({ error: 'Email không tồn tại.' });
         const user = result.recordset[0];
 
-        // Verify bcrypt password
-        const valid = await bcrypt.compare(password, user.PasswordHash);
+        // Verify bcrypt password (support legacy plain text)
+        let valid = false;
+        if (user.PasswordHash && user.PasswordHash.startsWith('$2')) {
+            valid = await bcrypt.compare(password, user.PasswordHash);
+        } else {
+            valid = (password === user.PasswordHash);
+        }
         if (!valid) return res.status(401).json({ error: 'Mật khẩu không đúng.' });
 
         let profile = {};
@@ -473,7 +478,12 @@ app.put('/api/auth/password', authMiddleware, async (req, res) => {
         const r = await sql.query`SELECT PasswordHash FROM Users WHERE Id=${req.user.userId}`;
         if (!r.recordset.length) return res.status(404).json({ error: 'User not found' });
         const user = r.recordset[0];
-        const valid = await bcrypt.compare(oldPassword, user.PasswordHash);
+        let valid = false;
+        if (user.PasswordHash && user.PasswordHash.startsWith('$2')) {
+            valid = await bcrypt.compare(oldPassword, user.PasswordHash);
+        } else {
+            valid = (oldPassword === user.PasswordHash);
+        }
         if (!valid) return res.status(401).json({ error: 'Mật khẩu hiện tại không đúng.' });
         const hash = await bcrypt.hash(newPassword, 10);
         await sql.query`UPDATE Users SET PasswordHash=${hash}, UpdatedAt=GETDATE() WHERE Id=${req.user.userId}`;
