@@ -489,7 +489,7 @@
         <img src="${imgSrc}" alt="${s.name}" loading="lazy" onerror="this.src='https://placehold.co/400x530?text=BêTráp'">
         <div class="photo-card-overlay">
           <div class="photo-card-name" style="margin-bottom:4px;">${s.name}</div>
-          <div style="font-size:0.95rem; font-weight:700; color:var(--gold); margin-bottom:12px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">${s.packages && s.packages.length > 0 ? 'Từ ' : ''}${UI.formatCurrency(s.price)}</div>
+          ${s.category !== 'be-trap' ? `<div style="font-size:0.95rem; font-weight:700; color:var(--gold); margin-bottom:12px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">${s.packages && s.packages.length > 0 ? 'Từ ' : ''}${UI.formatCurrency(s.price)}</div>` : ''}
           <button onclick="event.stopPropagation();openDetail('${s.id}')">Xem chi tiết</button>
         </div>
       </div>`;
