@@ -106,7 +106,18 @@ const sql = {
 };
 
 async function connectDB() {
-    try   { await pool.query('SELECT 1'); console.log('✅ Connected to Vercel Postgres'); }
+    try   { 
+        await pool.query('SELECT 1'); 
+        console.log('✅ Connected to Vercel Postgres'); 
+        // Auto-run lightweight migrations
+        try {
+            await pool.query('ALTER TABLE Services ADD COLUMN IF NOT EXISTS Tier VARCHAR(50) DEFAULT NULL');
+            await pool.query('ALTER TABLE Transactions ADD COLUMN IF NOT EXISTS CancelReason VARCHAR(500) DEFAULT NULL');
+            console.log('✅ Auto-migrations completed');
+        } catch(mErr) {
+            console.error('⚠️ Auto-migration skipped/failed:', mErr.message);
+        }
+    }
     catch (err) { console.error('❌ Database connection failed:', err.message); }
 }
 connectDB();
