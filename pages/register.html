@@ -45,6 +45,14 @@
 
     <!-- Step 1: Account info -->
     <div id="step-1">
+      <div class="form-group" style="margin-bottom:var(--sp-xl)">
+        <label class="form-label">Đăng ký với vai trò:</label>
+        <div class="role-row">
+          <button id="role-customer" class="btn btn-primary" onclick="setRole('customer')" style="flex:1">Khách hàng</button>
+          <button id="role-provider" class="btn btn-outline" onclick="setRole('provider')" style="flex:1">Nhà cung cấp</button>
+        </div>
+      </div>
+      
       <div class="form-group">
         <label class="form-label">Họ và tên</label>
         <div class="input-group">
@@ -103,6 +111,17 @@
   <script src="../js/ui.js"></script>
   <script>
     let selectedRole = 'customer';
+
+    function setRole(role) {
+      selectedRole = role;
+      if (role === 'customer') {
+        document.getElementById('role-customer').className = 'btn btn-primary';
+        document.getElementById('role-provider').className = 'btn btn-outline';
+      } else {
+        document.getElementById('role-provider').className = 'btn btn-primary';
+        document.getElementById('role-customer').className = 'btn btn-outline';
+      }
+    }
 
     function nextStep(n) {
       if (n === 2) {

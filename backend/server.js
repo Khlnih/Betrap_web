@@ -323,14 +323,14 @@ app.get('/api/provider/services', authMiddleware, providerOnly, async (req, res)
             WHERE s.ProviderId = ${req.user.userId}
             ORDER BY s.CreatedAt DESC`;
         const services = result.recordset.map(s => ({
-            id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
-            category: s.Category, name: s.Name, description: s.Description,
-            price: s.Price, unit: s.Unit, tier: s.Tier || null, image: s.Image, location: s.Location,
-            active: s.Active === 1 || s.Active === true,
-            rating: s.Rating, reviewCount: s.ReviewCount,
-            tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
-            gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
-            createdAt: s.CreatedAt
+            id: s.id, providerId: s.providerid, providerName: s.providername,
+            category: s.category, name: s.name, description: s.description,
+            price: s.price, unit: s.unit, tier: s.tier || null, image: s.image, location: s.location,
+            active: s.active === 1 || s.active === true,
+            rating: s.rating, reviewCount: s.reviewcount,
+            tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : [],
+            gallery: s.gallery ? (typeof s.gallery === 'string' ? JSON.parse(s.gallery) : s.gallery) : [],
+            createdAt: s.createdat
         }));
         res.json(services);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
