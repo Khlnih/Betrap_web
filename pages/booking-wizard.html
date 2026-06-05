@@ -286,27 +286,6 @@
     let allTraps = [];
     let betrapServices = [];
 
-    const TIER_LABELS = {
-      'co-ban':       { label:'Cơ Bản',       color:'#7a6045', bg:'#fef3e2' },
-      'nang-cao':     { label:'Nâng Cao',     color:'#7a4a1e', bg:'#fbe8d4' },
-      'cao-cap':      { label:'Cao Cấp',      color:'#5a2d82', bg:'#f3e8ff' },
-      'tieu-chuan':   { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
-      'full-service': { label:'Full Service', color:'#1e7a4a', bg:'#e8f7ef' },
-      'standard':     { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
-    };
-    const TIER_PRICES = {
-      'co-ban':       { 'lam-trap':'6 – 7 triệu/gói', 'be-trap':'150.000₫/người' },
-      'nang-cao':     { 'lam-trap':'7 – 7.5 triệu/gói' },
-      'cao-cap':      { 'lam-trap':'Trên 10 triệu/gói', 'mc-su-kien':'1.2 – 1.5 triệu/show' },
-      'tieu-chuan':   { 'mc-su-kien':'800k – 1 triệu/show' },
-      'full-service': { 'be-trap':'250.000₫/người' },
-      'standard':     { 'media':'1.6 – 2 triệu/buổi' },
-    };
-    function getTierPrice(tier, cat) {
-      if (!tier) return null;
-      return (TIER_PRICES[tier] && (TIER_PRICES[tier][cat] || TIER_PRICES[tier]['*'])) || null;
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
       const sess = API.auth.currentSession();
@@ -327,24 +306,31 @@
         }
         grid.innerHTML = allTraps.map(t => {
           const img = t.image && t.image.startsWith('http') ? t.image : (rootPath()+(t.image||''));
-          const tierInfo = t.tier ? TIER_LABELS[t.tier] : null;
-          const tierPrice = t.tier ? getTierPrice(t.tier, t.category) : null;
-          const tierBadge = tierInfo
-            ? `<span style="display:inline-block;padding:2px 10px;border-radius:100px;font-size:.68rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};">${tierInfo.label}</span>`
-            : '';
-          const priceStr = tierPrice
-            ? `<span style="font-size:.78rem;font-weight:700;color:var(--gold-dark);">${tierPrice}</span>`
-            : '';
+          let packagesHtml = '';
+          if (t.packages && t.packages.length > 0) {
+            packagesHtml = `<div class="trap-packages" style="margin-top:10px;display:none;" id="pkgs-${t.id}">
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:6px;">Chọn gói:</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                ${t.packages.map((p, idx) => `
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;">
+                    <input type="radio" name="pkg-${t.id}" value="${p.name}" onchange="selectPackage('${t.id}', '${p.name}', ${p.price})" ${idx===0?'checked':''} style="accent-color:var(--gold)">
+                    <span style="flex:1">${p.name}</span>
+                    <strong style="color:var(--gold)">${UI.formatVND(p.price)}</strong>
+                  </label>
+                `).join('')}
+              </div>
+            </div>`;
+          }
           return `<div class="trap-card" id="tc-${t.id}" onclick="selectTrap('${t.id}')">
             <img src="${img}" alt="${t.name}" class="trap-card-img" onerror="this.src='https://placehold.co/400x300?text=Tráp'">
             <div class="trap-card-body">
               <div class="trap-card-name">${t.name}</div>
-              ${tierBadge || priceStr ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px;">${tierBadge}${priceStr}</div>` : ''}
               <div class="trap-card-loc"><i class="ri-map-pin-line"></i> ${t.location||'—'}</div>
               <div class="trap-card-sel">
                 <span style="font-size:.78rem;color:var(--gold);font-weight:600;">Chọn tráp này</span>
                 <div class="trap-check" id="trapchk-${t.id}"></div>
               </div>
+              ${packagesHtml}
             </div>
           </div>`;
         }).join('');
@@ -355,9 +341,34 @@
 
     function selectTrap(id) {
       document.querySelectorAll('.trap-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.trap-packages').forEach(p => p.style.display = 'none');
+      
       document.getElementById('tc-'+id).classList.add('selected');
+      const pkgsDiv = document.getElementById('pkgs-'+id);
+      if (pkgsDiv) pkgsDiv.style.display = 'block';
+
       const t = allTraps.find(t => t.id === id);
       selectedTrap = { id: t.id, name: t.name, providerId: t.providerId };
+      
+      // Select first package by default if it has packages
+      if (t.packages && t.packages.length > 0) {
+         const firstPkg = t.packages[0];
+         const checkedRadio = document.querySelector(`input[name="pkg-${id}"]:checked`);
+         if (checkedRadio) {
+           selectPackage(id, checkedRadio.value, t.packages.find(p=>p.name===checkedRadio.value).price);
+         } else {
+           selectPackage(id, firstPkg.name, firstPkg.price);
+         }
+      } else {
+         selectedTrap.packageName = null;
+      }
+    }
+
+    function selectPackage(trapId, pkgName, pkgPrice) {
+       event.stopPropagation(); // Prevent card click
+       if (selectedTrap && selectedTrap.id === trapId) {
+          selectedTrap.packageName = pkgName;
+       }
     }
 
     async function loadAodais() {
@@ -444,7 +455,8 @@
     }
 
     function updateSummary() {
-      document.getElementById('summary-trap').innerHTML = `<i class="ri-checkbox-circle-line" style="color:var(--gold)"></i> <strong>Tráp:</strong> ${selectedTrap?.name || '—'}`;
+      const trapName = selectedTrap?.packageName ? `${selectedTrap.name} - ${selectedTrap.packageName}` : (selectedTrap?.name || '—');
+      document.getElementById('summary-trap').innerHTML = `<i class="ri-checkbox-circle-line" style="color:var(--gold)"></i> <strong>Tráp:</strong> ${trapName}`;
       const adText = selectedAodais.length ? selectedAodais.map(a => a.name).join(', ') : 'Chưa chọn áo dài';
       document.getElementById('summary-aodai').innerHTML = `<i class="ri-shirt-line" style="color:var(--gold)"></i> <strong>Áo dài:</strong> ${adText}`;
       document.getElementById('summary-betrap').innerHTML = `<i class="ri-group-line" style="color:var(--gold)"></i> <strong>Đội bê tráp:</strong> ${wantBetrap ? 'Có' : 'Không'}`;
@@ -482,7 +494,7 @@
 
       try {
         // Đơn 1: Tráp ăn hỏi
-        const trapTxn = await API.txn.create({ serviceId: selectedTrap.id, date, time, address, note: fullNote });
+        const trapTxn = await API.txn.create({ serviceId: selectedTrap.id, packageName: selectedTrap.packageName, date, time, address, note: fullNote });
 
         // Đơn 2: Áo dài (dùng áo dài đầu tiên đã chọn hoặc bất kỳ áo dài nào của provider đó)
         if (selectedAodais.length > 0) {

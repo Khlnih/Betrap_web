@@ -60,7 +60,6 @@ CREATE TABLE Services (
     Description TEXT,
     Price DECIMAL(18,0) NOT NULL,
     Unit VARCHAR(50),
-    Tier VARCHAR(50),  -- 'co-ban','nang-cao','cao-cap','tieu-chuan','full-service' (NULL = không phân tier)
     Image VARCHAR(500),
     Location VARCHAR(200),
     Gallery VARCHAR(5000),
@@ -68,12 +67,10 @@ CREATE TABLE Services (
     Rating FLOAT DEFAULT 0,
     ReviewCount INT DEFAULT 0,
     Tags VARCHAR(200), -- Lưu dạng JSON array hoặc chuỗi cách phẩy
+    Packages TEXT, -- Lưu các gói dịch vụ dạng JSON array
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Thêm cột Tier nếu DB đã tồn tại (chạy lần đầu sau khi deploy):
--- ALTER TABLE Services ADD COLUMN IF NOT EXISTS Tier VARCHAR(50) DEFAULT NULL;
 
 -- 3. Bảng Transactions
 CREATE TABLE Transactions (

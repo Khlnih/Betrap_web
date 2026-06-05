@@ -309,7 +309,8 @@
       <div class="detail-info">
         <div class="detail-cat" id="dm-cat"></div>
         <div class="detail-name" id="dm-name"></div>
-        <div class="detail-desc" id="dm-desc"></div>
+        <div class="detail-packages" id="dm-packages" style="display:none;margin-top:16px;background:var(--cream);padding:16px;border-radius:12px;border:1px solid rgba(184,148,90,.2);"></div>
+        <div class="detail-desc" id="dm-desc" style="margin-top:16px"></div>
       </div>
     </div>
   </div>
@@ -357,26 +358,6 @@
   <script src="../js/ui.js?v=1.2"></script>
   <script>
     const CAT_LABELS = { 'be-trap':'Đội Bê Tráp','lam-trap':'Tráp Ăn Hỏi','ao-dai':'Áo Dài','mc-su-kien':'MC Sự Kiện','media':'Media' };
-    const TIER_LABELS = {
-      'co-ban':       { label:'Cơ Bản',       color:'#7a6045', bg:'#fef3e2' },
-      'nang-cao':     { label:'Nâng Cao',     color:'#7a4a1e', bg:'#fbe8d4' },
-      'cao-cap':      { label:'Cao Cấp',      color:'#5a2d82', bg:'#f3e8ff' },
-      'tieu-chuan':   { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
-      'full-service': { label:'Full Service', color:'#1e7a4a', bg:'#e8f7ef' },
-      'standard':     { label:'Tiêu Chuẩn',   color:'#1e6fa8', bg:'#e8f4fb' },
-    };
-    const TIER_PRICES = {
-      'co-ban':       { 'lam-trap':'6 – 7 triệu/gói', 'be-trap':'150.000₫/người' },
-      'nang-cao':     { 'lam-trap':'7 – 7.5 triệu/gói' },
-      'cao-cap':      { 'lam-trap':'Trên 10 triệu/gói', 'mc-su-kien':'1.2 – 1.5 triệu/show' },
-      'tieu-chuan':   { 'mc-su-kien':'800k – 1 triệu/show' },
-      'full-service': { 'be-trap':'250.000₫/người' },
-      'standard':     { 'media':'1.6 – 2 triệu/buổi' },
-    };
-    function getTierPrice(tier, cat) {
-      if (!tier) return null;
-      return (TIER_PRICES[tier] && (TIER_PRICES[tier][cat] || TIER_PRICES[tier]['*'])) || null;
-    }
     let allSvcs = {};
     let currentBookCat = '';
     let currentBookSvcId = null;
@@ -491,15 +472,10 @@
 
     function photoCardHtml(s) {
       const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || ''));
-      const tierInfo = s.tier ? TIER_LABELS[s.tier] : null;
-      const tierPrice = s.tier ? getTierPrice(s.tier, s.category) : null;
-      const tierBadge = tierInfo ? `<span style="display:inline-block;padding:3px 10px;border-radius:100px;font-size:.68rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};letter-spacing:.06em;">${tierInfo.label}</span>` : '';
-      const priceBadge = tierPrice ? `<span style="font-size:.75rem;font-weight:700;color:white;opacity:.92;">${tierPrice}</span>` : '';
       return `<div class="photo-card" onclick="openDetail('${s.id}')">
         <img src="${imgSrc}" alt="${s.name}" loading="lazy" onerror="this.src='https://placehold.co/400x530?text=BêTráp'">
         <div class="photo-card-overlay">
           <div class="photo-card-name">${s.name}</div>
-          ${tierBadge || priceBadge ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">${tierBadge}${priceBadge}</div>` : ''}
           <button onclick="event.stopPropagation();openDetail('${s.id}')">Xem chi tiết</button>
         </div>
       </div>`;
@@ -515,16 +491,10 @@
       }
       let html = svcs.map(s => {
         const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image||''));
-        const tierInfo = s.tier ? TIER_LABELS[s.tier] : null;
-        const tierPrice = s.tier ? getTierPrice(s.tier, s.category) : null;
         return `<div class="svc-card-h" onclick="openDetail('${s.id}')">
           <div class="svc-card-h-img"><img src="${imgSrc}" alt="${s.name}" onerror="this.src='https://placehold.co/180x140?text=BêTráp'"></div>
           <div class="svc-card-h-body">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
-              <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
-              ${tierInfo ? `<span style="padding:2px 10px;border-radius:100px;font-size:.68rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};">${tierInfo.label}</span>` : ''}
-              ${tierPrice ? `<span style="font-size:.8rem;font-weight:700;color:var(--gold-dark);">${tierPrice}</span>` : ''}
-            </div>
+            <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
             <div style="font-weight:700;font-size:1rem;color:var(--text-dark);">${s.name}</div>
             <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">${(s.description||'').slice(0,120)}${s.description && s.description.length>120?'...':''}</div>
             <div style="font-size:.8rem;color:var(--text-muted);"><i class="ri-map-pin-line"></i> ${s.location||'—'}</div>
@@ -569,19 +539,27 @@
         gallery.style.display = 'none';
       }
 
-      // Tier + giá trong lightbox
-      const tierInfo = svc.tier ? TIER_LABELS[svc.tier] : null;
-      const tierPrice = svc.tier ? getTierPrice(svc.tier, svc.category) : null;
-      const tierHtml = tierInfo
-        ? `<span style="display:inline-block;padding:4px 14px;border-radius:100px;font-size:.78rem;font-weight:700;background:${tierInfo.bg};color:${tierInfo.color};margin-right:8px;">${tierInfo.label}</span>`
-        : '';
-      const priceHtml = tierPrice
-        ? `<span style="font-size:.85rem;font-weight:700;color:var(--gold-dark);"><i class="ri-price-tag-3-line"></i> ${tierPrice}</span>`
-        : '';
-
       document.getElementById('dm-name').textContent = svc.name;
-      document.getElementById('dm-cat').innerHTML = `${CAT_LABELS[svc.category] || svc.category}${tierHtml ? '&ensp;' + tierHtml : ''}${priceHtml ? '&ensp;' + priceHtml : ''}`;
+      document.getElementById('dm-cat').textContent = CAT_LABELS[svc.category] || svc.category;
       document.getElementById('dm-desc').innerHTML = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
+      
+      const pkgDiv = document.getElementById('dm-packages');
+      if (svc.packages && svc.packages.length > 0) {
+        let pkgHtml = `<div style="font-weight:700;color:var(--text-dark);margin-bottom:8px;font-size:0.9rem;">Các gói dịch vụ:</div>`;
+        pkgHtml += `<div style="display:flex;flex-direction:column;gap:8px;">`;
+        svc.packages.forEach(p => {
+          pkgHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.05);">
+            <span style="font-size:0.85rem;color:var(--text-dark);font-weight:600;">${p.name}</span>
+            <span style="font-size:0.9rem;color:var(--gold);font-weight:700;">${UI.formatVND(p.price)}</span>
+          </div>`;
+        });
+        pkgHtml += `</div>`;
+        pkgDiv.innerHTML = pkgHtml;
+        pkgDiv.style.display = 'block';
+      } else {
+        pkgDiv.style.display = 'none';
+      }
+
       document.getElementById('detail-modal').classList.add('open');
     }
     function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }

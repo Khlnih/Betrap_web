@@ -48,6 +48,11 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+// Tự động tạo cột Packages nếu chưa có khi khởi động server
+pool.query(`ALTER TABLE Services ADD COLUMN IF NOT EXISTS Packages TEXT`)
+    .then(() => console.log('Successfully checked/added Packages column to Services.'))
+    .catch(e => console.error('Error adding Packages column:', e.message));
+
 const sql = {
     connect: async () => {}, // Mock for existing code
     query: async function(strings, ...values) {
@@ -106,18 +111,7 @@ const sql = {
 };
 
 async function connectDB() {
-    try   { 
-        await pool.query('SELECT 1'); 
-        console.log('✅ Connected to Vercel Postgres'); 
-        // Auto-run lightweight migrations
-        try {
-            await pool.query('ALTER TABLE Services ADD COLUMN IF NOT EXISTS Tier VARCHAR(50) DEFAULT NULL');
-            await pool.query('ALTER TABLE Transactions ADD COLUMN IF NOT EXISTS CancelReason VARCHAR(500) DEFAULT NULL');
-            console.log('✅ Auto-migrations completed');
-        } catch(mErr) {
-            console.error('⚠️ Auto-migration skipped/failed:', mErr.message);
-        }
-    }
+    try   { await pool.query('SELECT 1'); console.log('✅ Connected to Vercel Postgres'); }
     catch (err) { console.error('❌ Database connection failed:', err.message); }
 }
 connectDB();
@@ -134,19 +128,6 @@ app.get('/api/setup-db', async (req, res) => {
         res.status(500).send('❌ Error setting up database: ' + err.message);
     }
 });
-
-// ── Migration: Add Tier column ────────────────────────────────────────────────
-app.get('/api/migrate-tier', async (req, res) => {
-    try {
-        await pool.query('ALTER TABLE Services ADD COLUMN IF NOT EXISTS Tier VARCHAR(50) DEFAULT NULL');
-        res.send('✅ Migration done: Tier column added to Services table!');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('❌ Migration error: ' + err.message);
-    }
-});
-
-
 
 app.get('/api/setup-admin', async (req, res) => {
     try {
@@ -228,9 +209,10 @@ app.get('/api/services', async (req, res) => {
         const services = result.recordset.map(s => ({
             id: s.id, providerId: s.providerid, providerName: s.providername,
             category: s.category, name: s.name, description: s.description,
-            price: s.price, unit: s.unit, tier: s.tier || null, image: s.image, location: s.location,
+            price: s.price, unit: s.unit, image: s.image, location: s.location,
             active: s.active, rating: s.rating, reviewCount: s.reviewcount,
             tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : [],
+            packages: s.packages ? (typeof s.packages === 'string' ? JSON.parse(s.packages) : s.packages) : null,
             gallery: s.gallery ? (typeof s.gallery === 'string' ? JSON.parse(s.gallery) : s.gallery) : [],
             createdAt: s.createdat
         }));
@@ -262,6 +244,7 @@ app.get('/api/services/:id', async (req, res) => {
             price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
             active: s.Active, rating: s.Rating, reviewCount: s.ReviewCount,
             tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
+            packages: s.Packages ? (typeof s.Packages === 'string' ? JSON.parse(s.Packages) : s.Packages) : null,
             gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
             createdAt: s.CreatedAt
         });
@@ -270,36 +253,36 @@ app.get('/api/services/:id', async (req, res) => {
 
 // POST create service (provider only)
 app.post('/api/services', authMiddleware, providerOnly, async (req, res) => {
-    const { category, name, description, price, unit, tier, image, location, tags, gallery } = req.body;
+    const { category, name, description, price, unit, image, location, tags, gallery, packages } = req.body;
     if (!category || !name || !price) return res.status(400).json({ error: 'Thiếu thông tin dịch vụ.' });
     try {
         const id = 'SVC_' + uid();
         const tagsStr = JSON.stringify(tags || []);
+        const packagesStr = packages && packages.length ? JSON.stringify(packages) : null;
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
-        const tierVal = tier || null;
         await sql.query`
-            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Tier, Image, Location, Tags, Gallery)
+            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Tags, Gallery, Packages)
             VALUES (${id}, ${req.user.userId}, ${category}, ${name}, ${description||null},
-                    ${parseFloat(price)}, ${unit||'buổi'}, ${tierVal}, ${image||null}, ${location||null}, ${tagsStr}, ${galleryStr})`;
+                    ${parseFloat(price)}, ${unit||'buổi'}, ${image||null}, ${location||null}, ${tagsStr}, ${galleryStr}, ${packagesStr})`;
         res.json({ id, message: 'Tạo dịch vụ thành công!' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
 // PUT update service
 app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
-    const { name, description, price, unit, tier, image, location, tags, gallery, active } = req.body;
+    const { name, description, price, unit, image, location, tags, gallery, active, packages } = req.body;
     try {
         const check = await sql.query`SELECT ProviderId FROM Services WHERE Id = ${req.params.id}`;
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
         if (check.recordset[0].ProviderId !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
         const tagsStr = tags ? JSON.stringify(tags) : null;
+        const packagesStr = packages && packages.length ? JSON.stringify(packages) : null;
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         const isActive = active !== undefined ? active : true;
-        const tierVal = tier || null;
         await sql.query`
             UPDATE Services SET Name=${name}, Description=${description||null},
-            Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Tier=${tierVal}, Image=${image||null},
-            Location=${location||null}, Tags=${tagsStr}, Gallery=${galleryStr},
+            Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Image=${image||null},
+            Location=${location||null}, Tags=${tagsStr}, Gallery=${galleryStr}, Packages=${packagesStr},
             Active=${isActive}, UpdatedAt=CURRENT_TIMESTAMP
             WHERE Id=${req.params.id}`;
         res.json({ success: true });
@@ -334,14 +317,15 @@ app.get('/api/provider/services', authMiddleware, providerOnly, async (req, res)
             WHERE s.ProviderId = ${req.user.userId}
             ORDER BY s.CreatedAt DESC`;
         const services = result.recordset.map(s => ({
-            id: s.id, providerId: s.providerid, providerName: s.providername,
-            category: s.category, name: s.name, description: s.description,
-            price: s.price, unit: s.unit, tier: s.tier || null, image: s.image, location: s.location,
-            active: s.active === 1 || s.active === true,
-            rating: s.rating, reviewCount: s.reviewcount,
-            tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : [],
-            gallery: s.gallery ? (typeof s.gallery === 'string' ? JSON.parse(s.gallery) : s.gallery) : [],
-            createdAt: s.createdat
+            id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
+            category: s.Category, name: s.Name, description: s.Description,
+            price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
+            active: s.Active === 1 || s.Active === true,
+            rating: s.Rating, reviewCount: s.ReviewCount,
+            tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
+            packages: s.Packages ? (typeof s.Packages === 'string' ? JSON.parse(s.Packages) : s.Packages) : null,
+            gallery: s.Gallery ? (typeof s.Gallery === 'string' ? JSON.parse(s.Gallery) : s.Gallery) : [],
+            createdAt: s.CreatedAt
         }));
         res.json(services);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -370,13 +354,8 @@ app.post('/api/auth/login', async (req, res) => {
         if (!result.recordset.length) return res.status(401).json({ error: 'Email không tồn tại.' });
         const user = result.recordset[0];
 
-        // Verify bcrypt password or legacy plain text
-        let valid = false;
-        if (user.PasswordHash && user.PasswordHash.startsWith('$2')) {
-            valid = await bcrypt.compare(password, user.PasswordHash);
-        } else {
-            valid = (password === user.PasswordHash);
-        }
+        // Verify bcrypt password
+        const valid = await bcrypt.compare(password, user.PasswordHash);
         if (!valid) return res.status(401).json({ error: 'Mật khẩu không đúng.' });
 
         let profile = {};
@@ -507,7 +486,7 @@ app.put('/api/auth/password', authMiddleware, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 app.post('/api/transactions', authMiddleware, async (req, res) => {
-    const { serviceId, date, time, address, note, paymentMethod } = req.body;
+    const { serviceId, packageName, date, time, address, note, paymentMethod } = req.body;
     const selectedDate = new Date(date + 'T00:00:00');
     const today = new Date(); today.setHours(0,0,0,0);
     if (selectedDate < today) return res.status(400).json({ error: 'Ngày tổ chức phải từ hôm nay trở đi.' });
@@ -524,10 +503,22 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
         if (dupCheck.recordset.length) {
             return res.status(400).json({ error: 'Bạn đã đặt dịch vụ này vào ngày này rồi. Vui lòng chọn ngày khác.' });
         }
+        let finalName = svc.Name;
+        let finalPrice = svc.Price;
+
+        if (packageName && svc.Packages) {
+            const pkgs = typeof svc.Packages === 'string' ? JSON.parse(svc.Packages) : svc.Packages;
+            const matchedPkg = pkgs.find(p => p.name === packageName);
+            if (matchedPkg) {
+                finalName = svc.Name + ' - ' + matchedPkg.name;
+                finalPrice = matchedPkg.price;
+            }
+        }
+
         const id = 'TXN_' + uid().toUpperCase();
         await sql.query`
             INSERT INTO Transactions (Id, CustomerId, ProviderId, ServiceId, ServiceName, Price, Date, Time, Address, Note, PaymentMethod)
-            VALUES (${id}, ${req.user.userId}, ${svc.ProviderId}, ${serviceId}, ${svc.Name}, ${svc.Price},
+            VALUES (${id}, ${req.user.userId}, ${svc.ProviderId}, ${serviceId}, ${finalName}, ${finalPrice},
                     ${date}, ${time}, ${address}, ${note||null}, ${paymentMethod||null})`;
         res.json({ id });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
