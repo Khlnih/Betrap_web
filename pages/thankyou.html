@@ -11,7 +11,7 @@
   <style>
     body { background: var(--cream); }
     .ty-wrapper {
-      min-height: 100vh;
+      min-height: calc(100vh - var(--nav-h));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -33,19 +33,40 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 6px;
-      background: linear-gradient(90deg, var(--gold), var(--rose));
+      background: linear-gradient(90deg, var(--gold), #f9d423, #ff4e50, var(--rose));
+      background-size: 200% 200%;
+      animation: gradientShift 3s ease infinite;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .ty-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
     }
     .ty-icon {
       font-size: 5rem;
       margin-bottom: var(--sp-lg);
-      animation: bounceIn .6s ease;
+      animation: popBounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      display: inline-block;
+    }
+    @keyframes popBounce {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      50%  { transform: scale(1.2) rotate(10deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
     .ty-title {
       font-family: var(--font-h);
-      font-size: 2rem;
+      font-size: 2.4rem;
       font-weight: 800;
       color: var(--text-dark);
       margin-bottom: var(--sp-sm);
+      background: linear-gradient(45deg, var(--text-dark), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .ty-sub {
       color: var(--text-muted);
@@ -100,6 +121,11 @@
       0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
   </style>
   <link rel="icon" type="image/png" href="../assets/favicon.png">
 </head>
@@ -111,11 +137,11 @@
 
   <div class="ty-wrapper">
     <div class="ty-card animate-fadeInUp" style="position:relative;z-index:1">
-      <div class="ty-icon">🎉</div>
+      <div class="ty-icon">🎊</div>
       <div class="ty-title">Cảm Ơn Bạn!</div>
       <p class="ty-sub" id="ty-message">
         Đơn hàng của bạn đã được hoàn thành thành công.<br>
-        Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ BêTráp!
+        Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của <strong>Trap Connect</strong>!
       </p>
 
       <div id="review-summary" style="display:none">
@@ -135,9 +161,9 @@
         </a>
       </div>
 
-      <div style="margin-top:var(--sp-xl);padding-top:var(--sp-lg);border-top:1px solid rgba(220,165,174,.1);font-size:.8rem;color:var(--text-muted)">
-        <i class="ri-heart-line" style="color:var(--rose)"></i>
-        BêTráp luôn đồng hành cùng những khoảnh khắc đặc biệt của bạn
+      <div style="margin-top:var(--sp-xl);padding-top:var(--sp-lg);border-top:1px solid rgba(220,165,174,.1);font-size:.85rem;color:var(--text-muted)">
+        <i class="ri-heart-pulse-fill" style="color:var(--rose); animation: pulse 1.5s infinite; display: inline-block;"></i>
+        <strong>Trap Connect</strong> luôn đồng hành cùng những khoảnh khắc đặc biệt của bạn
       </div>
     </div>
   </div>
@@ -159,7 +185,8 @@
       if (skipped) {
         document.getElementById('ty-message').innerHTML =
           'Đơn hàng của bạn đã được hoàn thành thành công.<br>' +
-          '<span style="color:var(--text-muted);font-size:.9rem">Bạn có thể đánh giá dịch vụ bất cứ lúc nào trong Lịch Sử Đơn Hàng.</span>';
+          'Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của <strong>Trap Connect</strong>!<br>' +
+          '<span style="color:var(--text-muted);font-size:.9rem;display:block;margin-top:8px;">Bạn có thể đánh giá dịch vụ bất cứ lúc nào trong Lịch Sử Đơn Hàng.</span>';
       } else if (rating > 0) {
         const summaryEl = document.getElementById('review-summary');
         summaryEl.style.display = 'block';
