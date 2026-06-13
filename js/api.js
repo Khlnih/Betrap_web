@@ -220,16 +220,10 @@ const API = (() => {
     },
 
     pay: async (txnId, method, amount = 1000000) => {
-      if (method === 'vnpay') {
-        const data = await post('/payment/create_payment_url', { txnId, amount, bankCode: '' }, true);
-        window.location.href = data.url;
-        return new Promise(() => {});
-      } else {
-        await new Promise(r => setTimeout(r, 800));
-        await put('/transaction/' + txnId + '/status',
-          { status: 'confirmed', paymentMethod: method, paymentStatus: 'paid' }, true);
-        return true;
-      }
+      await new Promise(r => setTimeout(r, 800));
+      await put('/transaction/' + txnId + '/status',
+        { status: 'confirmed', paymentMethod: method, paymentStatus: 'paid' }, true);
+      return true;
     },
   };
 

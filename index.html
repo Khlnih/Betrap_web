@@ -700,6 +700,13 @@
     </div>
   </section>
 
+  <!-- NÚT BẤM CẢM ƠN (Tạm thời) -->
+  <section class="section-v2" style="padding: 20px 0 60px; text-align: center;">
+    <button id="btn-thank-you" class="btn-pink" style="padding: 16px 40px; font-size: 1.1rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; position: relative; overflow: hidden; transform: scale(1); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <i class="ri-heart-3-fill"></i> Hoàn thành giới thiệu
+    </button>
+  </section>
+
   <div id="footer-container"></div>
   <div id="toast-container"></div>
 
@@ -841,6 +848,59 @@
       once: true,
       offset: 50
     });
+  </script>
+
+  <!-- Script Nút bấm Cảm ơn -->
+  <script>
+    document.getElementById('btn-thank-you').addEventListener('click', function(e) {
+      const btn = this;
+      
+      // Hiệu ứng nhún (bounce) của nút
+      btn.style.transform = 'scale(0.9)';
+      setTimeout(() => btn.style.transform = 'scale(1)', 150);
+
+      // Hiển thị Toast cảm ơn
+      if(window.UI && UI.toast) {
+        UI.toast('Cảm ơn bạn đã xem hết đoạn giới thiệu! Chúc bạn một ngày tuyệt vời ❤️', 'success');
+      } else {
+        alert('Cảm ơn bạn đã xem hết đoạn giới thiệu! Chúc bạn một ngày tuyệt vời ❤️');
+      }
+
+      // Tạo hiệu ứng Confetti (pháo giấy)
+      for(let i=0; i<40; i++) {
+        createConfetti(e.clientX, e.clientY);
+      }
+    });
+
+    function createConfetti(x, y) {
+      const confetti = document.createElement('div');
+      confetti.style.position = 'fixed';
+      confetti.style.left = x + 'px';
+      confetti.style.top = y + 'px';
+      confetti.style.width = (Math.random() * 8 + 6) + 'px';
+      confetti.style.height = (Math.random() * 8 + 6) + 'px';
+      confetti.style.backgroundColor = ['#FF6B9D', '#FF9472', '#F59E0B', '#6EE7B7', '#C4B5FD', '#C9A96E'][Math.floor(Math.random() * 6)];
+      confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      confetti.style.zIndex = '9999';
+      confetti.style.pointerEvents = 'none';
+      document.body.appendChild(confetti);
+
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = 60 + Math.random() * 120;
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity - 120;
+      
+      const animation = confetti.animate([
+        { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${tx}px, ${ty}px) rotate(${Math.random()*360}deg)`, opacity: 1, offset: 0.7 },
+        { transform: `translate(${tx}px, ${ty + 150}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+      ], {
+        duration: 1200 + Math.random() * 600,
+        easing: 'cubic-bezier(.37,0,.63,1)'
+      });
+      
+      animation.onfinish = () => confetti.remove();
+    }
   </script>
 </body>
 </html>

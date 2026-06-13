@@ -5,7 +5,7 @@ const cors    = require('cors');
 const { Pool } = require('pg');
 const bcrypt  = require('bcrypt');
 const jwt     = require('jsonwebtoken');
-const vnpay   = require('./vnpay');
+
 const multer  = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -614,39 +614,7 @@ function mapTxn(t) {
     };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// 4. PAYMENT (VNPay)
-// ═══════════════════════════════════════════════════════════════════════════
 
-app.post('/api/payment/create_payment_url', authMiddleware, async (req, res) => {
-    const { txnId, amount, bankCode } = req.body;
-    try {
-        const url = vnpay.createPaymentUrl(req, txnId, amount, bankCode||'', 'Thanh toan don hang ' + txnId);
-        res.json({ url });
-    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
-});
-
-app.get('/api/payment/vnpay_return', async (req, res) => {
-    const vnp_Params = req.query;
-    if (vnpay.verifyReturnUrl(vnp_Params)) {
-        const txnId = vnp_Params['vnp_TxnRef'];
-        if (vnp_Params['vnp_ResponseCode'] === '00') {
-            await sql.query`UPDATE Transactions SET Status='confirmed', PaymentMethod='vnpay', PaymentStatus='paid', UpdatedAt=GETDATE() WHERE Id=${txnId}`;
-        }
-        res.redirect(`${FRONTEND_URL}/pages/checkout.html?id=${txnId}&vnp_ResponseCode=${vnp_Params['vnp_ResponseCode']}`);
-    } else { res.send('Xác thực chữ ký thất bại'); }
-});
-
-app.get('/api/payment/vnpay_ipn', async (req, res) => {
-    const vnp_Params = req.query;
-    if (vnpay.verifyReturnUrl(vnp_Params)) {
-        const txnId = vnp_Params['vnp_TxnRef'];
-        if (vnp_Params['vnp_ResponseCode'] === '00') {
-            await sql.query`UPDATE Transactions SET Status='confirmed', PaymentMethod='vnpay', PaymentStatus='paid', UpdatedAt=GETDATE() WHERE Id=${txnId}`;
-        }
-        res.status(200).json({ RspCode: '00', Message: 'Confirm Success' });
-    } else { res.status(200).json({ RspCode: '97', Message: 'Fail checksum' }); }
-});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 5. REVIEWS

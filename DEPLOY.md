@@ -36,10 +36,6 @@ backend/.env
    DB_NAME=BeTrapDB
    JWT_SECRET=<chuỗi ngẫu nhiên dài 64 ký tự>
    FRONTEND_URL=https://betrap.netlify.app
-   VNP_TMNCODE=CGXZLS0Z
-   VNP_HASHSECRET=UIGOGDNOBIFJDWGUTXTHYJOPVYXYYIWE
-   VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-   VNP_RETURN_URL=https://betrap-api.onrender.com/api/payment/vnpay_return
    ```
 5. Sau khi deploy → ghi lại URL: `https://betrap-api.onrender.com`
 
@@ -164,7 +160,6 @@ ALTER TABLE Users ALTER COLUMN PasswordHash NVARCHAR(500) NOT NULL;
 
 - [ ] JWT_SECRET đã được đổi thành chuỗi ngẫu nhiên
 - [ ] FRONTEND_URL trỏ đúng domain
-- [ ] VNP_RETURN_URL trỏ đúng domain backend
 - [ ] API BASE_URL trong js/api.js trỏ đúng domain backend
 - [ ] SQL Server accessible từ backend server
 - [ ] Schema đã được cập nhật (bảng Favorites, cột PasswordHash 500)
@@ -179,5 +174,3 @@ ALTER TABLE Users ALTER COLUMN PasswordHash NVARCHAR(500) NOT NULL;
 2. Mở file `index.html` bằng VS Code Live Server (port 5500)
 3. Đăng nhập với: `lan@betrap.vn` / `123456`
 
-> **Lưu ý**: VNPay sandbox URL return đang trỏ về `http://127.0.0.1:5500`.
-> Khi deploy thật, đổi `VNP_RETURN_URL` trong `.env` thành URL production.
