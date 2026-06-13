@@ -519,28 +519,28 @@
       const total = totalPages[cat] || 1;
       
       if (current > 1) {
-        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage('${cat}', ${current - 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-left-s-line"></i></button>`;
+        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage(event, '${cat}', ${current - 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-left-s-line"></i></button>`;
       }
       
       for (let i = 1; i <= total; i++) {
         if (i === current) {
           html += `<button class="btn btn-primary" style="padding:8px 16px;min-width:auto;">${i}</button>`;
         } else {
-          html += `<button class="btn btn-outline" style="padding:8px 16px;min-width:auto;" onclick="goToPage('${cat}', ${i}, '${gridId}', ${isPhoto})">${i}</button>`;
+          html += `<button class="btn btn-outline" style="padding:8px 16px;min-width:auto;" onclick="goToPage(event, '${cat}', ${i}, '${gridId}', ${isPhoto})">${i}</button>`;
         }
       }
       
       if (current < total) {
-        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage('${cat}', ${current + 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-right-s-line"></i></button>`;
+        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage(event, '${cat}', ${current + 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-right-s-line"></i></button>`;
       }
       
       html += `</div>`;
       return html;
     }
     
-    async function goToPage(cat, pageNo, gridId, isPhoto) {
-      if (event && event.currentTarget) {
-        event.currentTarget.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
+    async function goToPage(ev, cat, pageNo, gridId, isPhoto) {
+      if (ev && ev.currentTarget) {
+        ev.currentTarget.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
       }
       await loadCategoryPage(cat, pageNo);
       if (isPhoto) renderPhotoGrid(cat, gridId);
