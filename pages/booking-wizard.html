@@ -276,6 +276,15 @@
       <div class="wiz-subtitle">Vui lòng kiểm tra lại chi phí dự kiến trước khi xác nhận đặt dịch vụ.</div>
       
       <div class="bill-card">
+        <div style="font-weight:700; margin-bottom:16px; font-size:1.05rem; color:var(--text-dark); border-bottom:1px solid #f3f4f6; padding-bottom:12px;">Thông tin tổ chức</div>
+        <div class="bill-row">
+          <div class="bill-label">Địa chỉ & Thời gian<span class="bill-sub" id="bill-address"></span><span class="bill-sub" id="bill-datetime"></span></div>
+        </div>
+        <div class="bill-row" id="bill-note-row" style="display:none;">
+          <div class="bill-label">Ghi chú<span class="bill-sub" id="bill-note"></span></div>
+        </div>
+
+        <div style="font-weight:700; margin-top:24px; margin-bottom:16px; font-size:1.05rem; color:var(--text-dark); border-bottom:1px solid #f3f4f6; padding-bottom:12px;">Chi tiết chi phí</div>
         <div class="bill-row" id="bill-trap"></div>
         <div class="bill-row" id="bill-aodai"></div>
         <div class="bill-row" id="bill-betrap" style="display:none;"></div>
@@ -283,6 +292,12 @@
           <div class="bill-total-lbl">Tổng cộng (Dự kiến)</div>
           <div class="bill-total-val" id="bill-total-sum">0 đ</div>
         </div>
+      </div>
+
+      <!-- Ảnh tham chiếu -->
+      <div id="bill-images" style="margin-bottom:24px; text-align:center;">
+        <div style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:12px;">Ảnh mẫu đã chọn (Nhấn giữ/chuột phải để lưu ảnh)</div>
+        <div id="bill-img-container" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;"></div>
       </div>
       
       <div style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-bottom:20px;">
@@ -379,7 +394,8 @@
       document.getElementById('tc-'+id).classList.add('selected');
 
       const t = allTraps.find(t => t.id === id);
-      selectedTrap = { id: t.id, name: t.name, price: t.price, providerId: t.providerId };
+      const img = t.image && t.image.startsWith('http') ? t.image : (rootPath()+(t.image||''));
+      selectedTrap = { id: t.id, name: t.name, price: t.price, providerId: t.providerId, image: img };
     }
 
     async function loadAodais() {
@@ -393,7 +409,7 @@
         }
         grid.innerHTML = linked.map(a => {
           const img = a.image && a.image.startsWith('http') ? a.image : (rootPath()+(a.image||''));
-          return `<div class="aodai-card" id="ac-${a.id}" onclick="toggleAodai('${a.id}','${a.name.replace(/'/g,"\\'")}', ${a.price})">
+          return `<div class="aodai-card" id="ac-${a.id}" onclick="toggleAodai('${a.id}','${a.name.replace(/'/g,"\\'")}', ${a.price || 0}, '${img}')">
             <img src="${img}" alt="${a.name}" class="aodai-card-img" onerror="this.src='https://placehold.co/300x400?text=Áo+Dài'">
             <div class="aodai-card-body">
               <div class="aodai-cb" id="adcb-${a.id}"></div>
@@ -409,14 +425,14 @@
       }
     }
 
-    function toggleAodai(id, name, price) {
+    function toggleAodai(id, name, price, image) {
       const idx = selectedAodais.findIndex(a => a.id === id);
       const card = document.getElementById('ac-'+id);
       if (idx >= 0) {
         selectedAodais.splice(idx, 1);
         card.classList.remove('selected');
       } else {
-        selectedAodais.push({ id, name, price });
+        selectedAodais.push({ id, name, price, image });
         card.classList.add('selected');
       }
     }
@@ -530,13 +546,27 @@
     }
 
     function renderBill() {
+      const address = document.getElementById('f-address').value.trim();
+      const date = document.getElementById('f-date').value;
+      const time = document.getElementById('f-time').value;
+      const note = document.getElementById('f-note').value.trim();
+
+      document.getElementById('bill-address').textContent = address;
+      document.getElementById('bill-datetime').textContent = `${time} - ${date}`;
+      if (note) {
+        document.getElementById('bill-note-row').style.display = 'flex';
+        document.getElementById('bill-note').textContent = note;
+      } else {
+        document.getElementById('bill-note-row').style.display = 'none';
+      }
+
       const qtyAodai = parseInt(document.getElementById('f-qty-aodai').value) || 0;
       const qtyBetrap = parseInt(document.getElementById('f-qty-betrap').value) || 0;
       
       let totalSum = 0;
 
       // Tráp
-      const trapPrice = selectedTrap.price || 0;
+      const trapPrice = parseInt(selectedTrap.price) || 0;
       totalSum += trapPrice;
       document.getElementById('bill-trap').innerHTML = `
         <div class="bill-label">Tráp Ăn Hỏi <span class="bill-sub">${selectedTrap.name}</span></div>
@@ -548,7 +578,7 @@
         let aodaiTotal = 0;
         let aodaiNames = [];
         selectedAodais.forEach(a => {
-          aodaiTotal += (a.price || 0) * qtyAodai;
+          aodaiTotal += (parseInt(a.price) || 0) * qtyAodai;
           aodaiNames.push(a.name);
         });
         totalSum += aodaiTotal;
@@ -563,7 +593,7 @@
 
       // Bê Tráp
       if (wantBetrap && selectedBetrapPkg) {
-        const betrapTotal = (selectedBetrapPkg.price || 0) * qtyBetrap;
+        const betrapTotal = (parseInt(selectedBetrapPkg.price) || 0) * qtyBetrap;
         totalSum += betrapTotal;
         document.getElementById('bill-betrap').innerHTML = `
           <div class="bill-label">Đội Bê Tráp x ${qtyBetrap} người <span class="bill-sub">${selectedBetrapPkg.name}</span></div>
@@ -575,6 +605,18 @@
       }
 
       document.getElementById('bill-total-sum').textContent = UI.formatCurrency(totalSum);
+
+      // Render images
+      let imgsHtml = '';
+      if (selectedTrap && selectedTrap.image) {
+         imgsHtml += `<img src="${selectedTrap.image}" style="width:140px;height:140px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.05);" alt="Tráp">`;
+      }
+      if (selectedAodais.length > 0) {
+         selectedAodais.forEach(a => {
+            if (a.image) imgsHtml += `<img src="${a.image}" style="width:140px;height:140px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.05);" alt="Áo dài">`;
+         });
+      }
+      document.getElementById('bill-img-container').innerHTML = imgsHtml;
     }
 
     async function submitBooking() {
