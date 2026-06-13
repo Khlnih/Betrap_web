@@ -374,10 +374,9 @@
     let currentBookCat = '';
     let currentBookSvcId = null;
     const PAGE_SIZE = 6;
-    let betrapPage = 0;
-
-    let currentPages = { 'be-trap': 1, 'lam-trap': 1, 'ao-dai': 1, 'mc-su-kien': 1, 'media': 1 };
-    let hasMore = {};
+    let currentPages = {};
+    let totalPages = {};
+    let allSvcs = {};
     let activeSubCat = { 'be-trap': '', 'lam-trap': '', 'ao-dai': '', 'mc-su-kien': '', 'media': '' };
 
     const SUBCAT_CONFIG = {
@@ -493,35 +492,68 @@
       currentPages[cat] = 1;
       const grid = document.getElementById(gridId);
       if(grid) grid.innerHTML = '<div style="text-align:center;padding:40px;"><span class="spinner" style="width:24px;height:24px;border-width:3px;"></span></div>';
-      await loadCategoryPage(cat, true);
+      await loadCategoryPage(cat, 1);
       if (isPhoto) renderPhotoGrid(cat, gridId);
       else renderCardList(cat, gridId);
     }
 
-    async function loadCategoryPage(cat, reset = false) {
-      const page = currentPages[cat] || 1;
-      const filters = { category: cat, page, limit: PAGE_SIZE };
+    async function loadCategoryPage(cat, pageNo = 1) {
+      const filters = { category: cat, page: pageNo, limit: PAGE_SIZE };
       if (activeSubCat[cat]) filters.subCategory = activeSubCat[cat];
 
       const res = await API.svc.getAll(filters);
       if (res && typeof res.total !== 'undefined') {
-        allSvcs[cat] = (page === 1 || reset) ? res.data : [...allSvcs[cat], ...res.data];
-        hasMore[cat] = (page * res.limit) < res.total;
+        allSvcs[cat] = res.data;
+        totalPages[cat] = Math.ceil(res.total / res.limit);
+        currentPages[cat] = pageNo;
       } else {
         allSvcs[cat] = res || [];
-        hasMore[cat] = false;
+        totalPages[cat] = 1;
+        currentPages[cat] = 1;
       }
     }
 
-    async function loadMore(cat, gridId, isPhoto) {
-      currentPages[cat]++;
+    function renderPaginationHtml(cat, gridId, isPhoto) {
+      let html = `<div style="grid-column:1/-1;text-align:center;margin-top:32px;display:flex;justify-content:center;gap:8px;">`;
+      const current = currentPages[cat] || 1;
+      const total = totalPages[cat] || 1;
+      
+      if (current > 1) {
+        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage('${cat}', ${current - 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-left-s-line"></i></button>`;
+      }
+      
+      for (let i = 1; i <= total; i++) {
+        if (i === current) {
+          html += `<button class="btn btn-primary" style="padding:8px 16px;min-width:auto;">${i}</button>`;
+        } else {
+          html += `<button class="btn btn-outline" style="padding:8px 16px;min-width:auto;" onclick="goToPage('${cat}', ${i}, '${gridId}', ${isPhoto})">${i}</button>`;
+        }
+      }
+      
+      if (current < total) {
+        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage('${cat}', ${current + 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-right-s-line"></i></button>`;
+      }
+      
+      html += `</div>`;
+      return html;
+    }
+    
+    async function goToPage(cat, pageNo, gridId, isPhoto) {
       if (event && event.currentTarget) {
         event.currentTarget.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
-        event.currentTarget.disabled = true;
       }
-      await loadCategoryPage(cat);
+      await loadCategoryPage(cat, pageNo);
       if (isPhoto) renderPhotoGrid(cat, gridId);
       else renderCardList(cat, gridId);
+      
+      const grid = document.getElementById(gridId);
+      if (grid) {
+        const offset = 100;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = grid.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+      }
     }
 
     // ── Render Photo Grid ──
@@ -535,10 +567,8 @@
       
       let html = svcs.map(s => photoCardHtml(s)).join('');
       
-      if (hasMore[cat]) {
-        html += `<div style="grid-column:1/-1;text-align:center;margin-top:24px;">
-          <button class="btn btn-outline" onclick="loadMore('${cat}', '${gridId}', true)">Xem thêm <i class="ri-arrow-down-s-line" style="vertical-align:middle"></i></button>
-        </div>`;
+      if (totalPages[cat] && totalPages[cat] > 1) {
+        html += renderPaginationHtml(cat, gridId, true);
       }
       
       grid.innerHTML = html;
@@ -593,10 +623,8 @@
         </div>`;
       }).join('');
       
-      if (hasMore[cat]) {
-        html += `<div style="text-align:center;margin-top:24px;">
-          <button class="btn btn-outline" onclick="loadMore('${cat}', '${gridId}', false)">Xem thêm <i class="ri-arrow-down-s-line" style="vertical-align:middle"></i></button>
-        </div>`;
+      if (totalPages[cat] && totalPages[cat] > 1) {
+        html += renderPaginationHtml(cat, gridId, false);
       }
       
       grid.innerHTML = html;
