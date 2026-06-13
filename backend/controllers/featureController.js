@@ -1,6 +1,12 @@
 const db = require('../config/db');
 const { uid } = require('../utils/helpers');
 
+const safeJSONParse = (data, defaultVal = []) => {
+    if (!data) return defaultVal;
+    if (typeof data !== 'string') return data;
+    try { return JSON.parse(data); } catch { return defaultVal; }
+};
+
 exports.getFavorites = async (req, res) => {
     try {
         const result = await db.query(`
@@ -14,7 +20,7 @@ exports.getFavorites = async (req, res) => {
             category: s.category, name: s.name, description: s.description,
             price: s.price, unit: s.unit, image: s.image, location: s.location,
             rating: s.rating, reviewCount: s.reviewcount,
-            tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : []
+            tags: safeJSONParse(s.tags, [])
         })));
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
