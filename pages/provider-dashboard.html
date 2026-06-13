@@ -282,20 +282,21 @@
           </select>
         </div>
         <div class="form-group">
+          <label class="form-label">Danh mục phụ *</label>
+          <select id="so-subcategory" class="form-control">
+            <option value="">-- Chọn danh mục phụ --</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">Mô tả</label>
           <textarea id="so-desc" class="form-control" rows="6" placeholder="Mô tả chi tiết dịch vụ... (Bạn có thể viết dài bao nhiêu tùy thích)"></textarea>
         </div>
-        <div class="form-group" id="so-packages-group" style="display:none;">
-          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>Các Gói Dịch Vụ <small style="color:var(--text-muted);font-weight:normal">(chọn các gói bạn cung cấp và điền giá của bạn)</small></span>
-          </label>
-          <div id="packages-container" style="display:flex;flex-direction:column;gap:12px;background:var(--cream);padding:16px;border-radius:8px;border:1px solid rgba(220,165,174,.2);">
-            <!-- Dynamically populated via JS -->
+        <div class="form-group">
+          <label class="form-label">Giá chuẩn (VNĐ) *</label>
+          <div style="display:flex;gap:8px;">
+            <input id="so-price" class="form-control" type="number" min="0" value="100000" style="flex:2">
+            <input id="so-unit" class="form-control" type="text" value="buổi" style="flex:1" placeholder="Đơn vị (vd: buổi, gói)">
           </div>
-        </div>
-        <div id="so-price-group" style="display:none;">
-          <input id="so-price" class="form-control" type="number" min="0" value="100000">
-          <input id="so-unit" class="form-control" type="text" value="gói">
         </div>
         <div class="form-group">
           <label class="form-label">Ảnh đại diện dịch vụ</label>
@@ -907,61 +908,43 @@
       }
     }
 
-    const PACKAGE_CONFIG = {
+    const SUBCAT_CONFIG = {
+      'be-trap': [],
       'lam-trap': [
-        { name: 'Cơ bản', defaultPrice: 6500000, desc: '6 - 7 triệu' },
-        { name: 'Nâng cao', defaultPrice: 7500000, desc: '7 - 7.5 triệu' },
-        { name: 'Cao cấp', defaultPrice: 10000000, desc: '> 10 triệu' }
+        { id: 'tieu-chuan', name: 'Tiêu chuẩn' },
+        { id: 'nang-cao', name: 'Nâng cao' },
+        { id: 'cao-cap', name: 'Cao cấp' }
+      ],
+      'ao-dai': [
+        { id: 'cho-doi-trap', name: 'Cho đội Tráp' },
+        { id: 'cho-dau', name: 'Cho Dâu' },
+        { id: 'cho-me-dau', name: 'Cho Mẹ dâu' },
+        { id: 'ca-nhan', name: 'Cá nhân' }
       ],
       'media': [
-        { name: 'Tiêu chuẩn', defaultPrice: 1800000, desc: '1.6 - 2 triệu/buổi' }
+        { id: 'chup-anh', name: 'Chụp ảnh' },
+        { id: 'anh-video', name: 'Ảnh + video' },
+        { id: 'chup-ca-nhan', name: 'Chụp cá nhân' }
       ],
       'mc-su-kien': [
-        { name: 'Tiêu chuẩn', defaultPrice: 900000, desc: '800k - 1 triệu/show' },
-        { name: 'Cao cấp', defaultPrice: 1350000, desc: '1.2 - 1.5 triệu/show' }
-      ],
-      'be-trap': [
-        { name: 'Cơ bản', defaultPrice: 150000, desc: '150k/người' },
-        { name: 'Bê tráp full', defaultPrice: 250000, desc: '250k/người' }
+        { id: 'dam-hoi', name: 'Đám hỏi' },
+        { id: 'dam-cuoi', name: 'Đám cưới' },
+        { id: 'cuoi-hoi', name: 'Cưới + hỏi' },
+        { id: 'su-kien', name: 'Sự kiện' }
       ]
     };
 
-    let currentEditPackages = null;
-
-    function renderPackages(category) {
-      const pkgContainer = document.getElementById('packages-container');
-      const pkgGroup = document.getElementById('so-packages-group');
-      const priceGroup = document.getElementById('so-price-group');
+    function renderSubCategories(category, selectedSubCat = '') {
+      const subCatSelect = document.getElementById('so-subcategory');
+      const conf = SUBCAT_CONFIG[category] || [];
       
-      const conf = PACKAGE_CONFIG[category];
-      if (!conf) {
-        pkgGroup.style.display = 'none';
-        priceGroup.style.display = 'block';
-        return;
-      }
-      
-      pkgGroup.style.display = 'block';
-      priceGroup.style.display = 'none';
-      
-      pkgContainer.innerHTML = conf.map((p, i) => {
-        let isChecked = false;
-        let price = p.defaultPrice;
-        if (currentEditPackages && currentEditPackages.length > 0) {
-           const existing = currentEditPackages.find(ep => ep.name === p.name);
-           if (existing) {
-             isChecked = true;
-             price = existing.price;
-           }
-        }
-        
-        return `
-          <div style="display:flex;align-items:center;gap:12px;">
-            <input type="checkbox" id="pkg-chk-${i}" class="pkg-checkbox" data-name="${p.name}" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
-            <label for="pkg-chk-${i}" style="flex:1;cursor:pointer;font-weight:600;margin:0;">${p.name} <span style="font-weight:normal;color:var(--text-muted);font-size:0.85rem">(${p.desc})</span></label>
-            <input type="number" id="pkg-price-${i}" class="form-control" style="width:150px;padding:8px" value="${price}" placeholder="Giá của bạn">
-          </div>
-        `;
-      }).join('');
+      let html = '<option value="">-- Chọn danh mục phụ --</option>';
+      conf.forEach(c => {
+        html += `<option value="${c.id}" ${selectedSubCat === c.id ? 'selected' : ''}>${c.name}</option>`;
+      });
+      subCatSelect.innerHTML = html;
+      subCatSelect.parentElement.style.display = conf.length > 0 ? 'block' : 'none';
+      if(conf.length === 0) subCatSelect.value = '';
     }
 
     // ── Service Modal ─────────────────────────────────────────────────────────
@@ -978,10 +961,10 @@
       document.getElementById('so-name').value     = editSvc ? editSvc.name : '';
       document.getElementById('so-category').value = editSvc ? editSvc.category : '';
       document.getElementById('so-desc').value     = editSvc ? (editSvc.description || '') : '';
-      document.getElementById('so-price').value    = editSvc ? (editSvc.price || 1) : 1;
+      document.getElementById('so-price').value    = editSvc ? (editSvc.price || 100000) : 100000;
+      document.getElementById('so-unit').value     = editSvc ? (editSvc.unit || 'buổi') : 'buổi';
       
-      currentEditPackages = editSvc && editSvc.packages ? editSvc.packages : null;
-      renderPackages(editSvc ? editSvc.category : '');
+      renderSubCategories(editSvc ? editSvc.category : '', editSvc ? editSvc.subCategory : '');
       
       const imgPreview = document.getElementById('so-image-preview');
       const imgFile    = document.getElementById('so-image-file');
@@ -1090,7 +1073,7 @@
       const isTrap = this.value === 'lam-trap';
       document.getElementById('aodai-link-group').style.display = isTrap ? 'block' : 'none';
       if (isTrap) loadAodaiCheckboxList(document.getElementById('so-id').value, []);
-      renderPackages(this.value);
+      renderSubCategories(this.value, '');
     });
 
     document.getElementById('so-gallery-files').addEventListener('change', function() {
@@ -1125,17 +1108,10 @@
       const tagsRaw  = document.getElementById('so-tags').value;
       const tags     = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
 
+      const subCategory = document.getElementById('so-subcategory').value;
+      
+      // Khách hàng chọn Option A nên không dùng khái niệm Packages (gói) lồng bên trong dịch vụ nữa
       let packages = null;
-      if (PACKAGE_CONFIG[category]) {
-        const selected = [];
-        document.querySelectorAll('.pkg-checkbox').forEach((chk, i) => {
-          if (chk.checked) {
-            selected.push({ name: chk.dataset.name, price: parseInt(document.getElementById(`pkg-price-${i}`).value) || 0 });
-          }
-        });
-        packages = selected.length > 0 ? selected : null;
-        if (packages) price = packages[0].price;
-      }
 
       if (!name)     { UI.toast('Vui lòng nhập tên dịch vụ.', 'error'); return; }
       if (!category) { UI.toast('Vui lòng chọn danh mục.', 'error'); return; }
@@ -1166,7 +1142,7 @@
           gallery = newUrls; // Tạm thời ghi đè ảnh cũ nếu upload mới
         }
 
-        const payload = { category, name, description, price, unit, image, location, tags, gallery, packages };
+        const payload = { category, subCategory, name, description, price, unit, image, location, tags, gallery, packages };
         
         if (id) {
           await API.svc.update(id, payload);

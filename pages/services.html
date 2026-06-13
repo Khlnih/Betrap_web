@@ -149,6 +149,13 @@
     .svc-card-h:hover .svc-card-h-img img { transform:scale(1.05); }
     .svc-card-h-body { flex:1; padding:20px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; }
     .svc-cards-vert { display:flex; flex-direction:column; gap:16px; }
+    
+    /* Chips */
+    .subcat-chips { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .subcat-chip { padding:8px 16px; border-radius:20px; background:var(--cream); color:var(--text-dark); border:1px solid rgba(220,165,174,.4); font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s; }
+    .subcat-chip:hover { background:white; border-color:var(--gold); }
+    .subcat-chip.active { background:var(--gold); color:white; border-color:var(--gold); }
+
     @media(max-width:600px) { .svc-card-h { flex-direction:column; } .svc-card-h-img { width:100%; height:180px; } }
   </style>
 </head>
@@ -255,6 +262,7 @@
         <div class="svc-section-title">Đội Bê Tráp Cưới Hỏi</div>
         <button onclick="openBookSimple('be-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
       </div>
+      <div class="subcat-chips" id="chips-be-trap"></div>
       <div class="photo-grid" id="grid-betrap"></div>
     </div>
 
@@ -264,6 +272,7 @@
         <div class="svc-section-title">Tráp Ăn Hỏi</div>
         <button onclick="openBookSimple('lam-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
       </div>
+      <div class="subcat-chips" id="chips-lam-trap"></div>
       <div class="photo-grid" id="grid-trap"></div>
     </div>
 
@@ -273,6 +282,7 @@
         <div class="svc-section-title">Thuê Áo Dài</div>
         <button onclick="openBookSimple('ao-dai')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
       </div>
+      <div class="subcat-chips" id="chips-ao-dai"></div>
       <div class="photo-grid" id="grid-aodai"></div>
     </div>
 
@@ -281,6 +291,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div class="svc-section-title">MC Sự Kiện</div>
       </div>
+      <div class="subcat-chips" id="chips-mc-su-kien"></div>
       <div class="svc-cards-vert" id="grid-mc"></div>
     </div>
 
@@ -289,6 +300,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div class="svc-section-title">Media</div>
       </div>
+      <div class="subcat-chips" id="chips-media"></div>
       <div class="svc-cards-vert" id="grid-media"></div>
     </div>
 
@@ -366,6 +378,33 @@
 
     let currentPages = { 'be-trap': 1, 'lam-trap': 1, 'ao-dai': 1, 'mc-su-kien': 1, 'media': 1 };
     let hasMore = {};
+    let activeSubCat = { 'be-trap': '', 'lam-trap': '', 'ao-dai': '', 'mc-su-kien': '', 'media': '' };
+
+    const SUBCAT_CONFIG = {
+      'be-trap': [],
+      'lam-trap': [
+        { id: 'tieu-chuan', name: 'Tiêu chuẩn' },
+        { id: 'nang-cao', name: 'Nâng cao' },
+        { id: 'cao-cap', name: 'Cao cấp' }
+      ],
+      'ao-dai': [
+        { id: 'cho-doi-trap', name: 'Cho đội Tráp' },
+        { id: 'cho-dau', name: 'Cho Dâu' },
+        { id: 'cho-me-dau', name: 'Cho Mẹ dâu' },
+        { id: 'ca-nhan', name: 'Cá nhân' }
+      ],
+      'media': [
+        { id: 'chup-anh', name: 'Chụp ảnh' },
+        { id: 'anh-video', name: 'Ảnh + video' },
+        { id: 'chup-ca-nhan', name: 'Chụp cá nhân' }
+      ],
+      'mc-su-kien': [
+        { id: 'dam-hoi', name: 'Đám hỏi' },
+        { id: 'dam-cuoi', name: 'Đám cưới' },
+        { id: 'cuoi-hoi', name: 'Cưới + hỏi' },
+        { id: 'su-kien', name: 'Sự kiện' }
+      ]
+    };
 
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
@@ -399,6 +438,9 @@
       renderPhotoGrid('be-trap', 'grid-betrap');
       renderPhotoGrid('lam-trap', 'grid-trap');
       renderPhotoGrid('ao-dai', 'grid-aodai');
+      renderChips('be-trap', 'grid-betrap', true);
+      renderChips('lam-trap', 'grid-trap', true);
+      renderChips('ao-dai', 'grid-aodai', true);
       setTimeout(() => document.getElementById('panel-cuoi-hoi').scrollIntoView({ behavior:'smooth', block:'start' }), 50);
     }
 
@@ -407,9 +449,11 @@
       if (type === 'mc') {
         document.getElementById('sec-mc').style.display = 'block';
         renderCardList('mc-su-kien', 'grid-mc');
+        renderChips('mc-su-kien', 'grid-mc', false);
       } else if (type === 'media') {
         document.getElementById('sec-media').style.display = 'block';
         renderCardList('media', 'grid-media');
+        renderChips('media', 'grid-media', false);
       }
       setTimeout(() => (document.getElementById('sec-'+type) || document.getElementById('sec-mc')).scrollIntoView({ behavior:'smooth' }), 50);
     }
@@ -427,11 +471,41 @@
       window.location.href = 'booking-wizard.html';
     }
 
-    async function loadCategoryPage(cat) {
+    function renderChips(cat, gridId, isPhoto) {
+      const container = document.getElementById('chips-' + cat);
+      if (!container) return;
+      const conf = SUBCAT_CONFIG[cat] || [];
+      if (conf.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+      container.style.display = 'flex';
+      let html = `<button class="subcat-chip ${activeSubCat[cat] === '' ? 'active' : ''}" onclick="filterSubCat('${cat}', '', '${gridId}', ${isPhoto})">Tất cả</button>`;
+      conf.forEach(c => {
+        html += `<button class="subcat-chip ${activeSubCat[cat] === c.id ? 'active' : ''}" onclick="filterSubCat('${cat}', '${c.id}', '${gridId}', ${isPhoto})">${c.name}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    async function filterSubCat(cat, subCatId, gridId, isPhoto) {
+      activeSubCat[cat] = subCatId;
+      renderChips(cat, gridId, isPhoto);
+      currentPages[cat] = 1;
+      const grid = document.getElementById(gridId);
+      if(grid) grid.innerHTML = '<div style="text-align:center;padding:40px;"><span class="spinner" style="width:24px;height:24px;border-width:3px;"></span></div>';
+      await loadCategoryPage(cat, true);
+      if (isPhoto) renderPhotoGrid(cat, gridId);
+      else renderCardList(cat, gridId);
+    }
+
+    async function loadCategoryPage(cat, reset = false) {
       const page = currentPages[cat] || 1;
-      const res = await API.svc.getAll({ category: cat, page, limit: PAGE_SIZE });
+      const filters = { category: cat, page, limit: PAGE_SIZE };
+      if (activeSubCat[cat]) filters.subCategory = activeSubCat[cat];
+
+      const res = await API.svc.getAll(filters);
       if (res && typeof res.total !== 'undefined') {
-        allSvcs[cat] = page === 1 ? res.data : [...allSvcs[cat], ...res.data];
+        allSvcs[cat] = (page === 1 || reset) ? res.data : [...allSvcs[cat], ...res.data];
         hasMore[cat] = (page * res.limit) < res.total;
       } else {
         allSvcs[cat] = res || [];
@@ -473,9 +547,8 @@
     function photoCardHtml(s) {
       const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || ''));
       const nameLower = s.name ? s.name.toLowerCase() : '';
-      const pkgs = s.packages || [];
-      const hasCaoCap = nameLower.includes('cao cấp') || nameLower.includes('vip') || pkgs.some(p => p.name.toLowerCase().includes('cao cấp') || p.name.toLowerCase().includes('vip'));
-      const hasNangCao = nameLower.includes('nâng cao') || pkgs.some(p => p.name.toLowerCase().includes('nâng cao'));
+      const hasCaoCap = nameLower.includes('cao cấp') || nameLower.includes('vip') || s.subCategory === 'cao-cap';
+      const hasNangCao = nameLower.includes('nâng cao') || s.subCategory === 'nang-cao';
       
       let badgeHtml = '';
       if (hasCaoCap) {
@@ -489,7 +562,7 @@
         <img src="${imgSrc}" alt="${s.name}" loading="lazy" onerror="this.src='https://placehold.co/400x530?text=BêTráp'">
         <div class="photo-card-overlay">
           <div class="photo-card-name" style="margin-bottom:4px;">${s.name}</div>
-          ${s.category !== 'be-trap' ? `<div style="font-size:0.95rem; font-weight:700; color:var(--gold); margin-bottom:12px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">${s.packages && s.packages.length > 0 ? 'Từ ' : ''}${UI.formatCurrency(s.price)}</div>` : ''}
+          ${s.category !== 'be-trap' ? `<div style="font-size:0.95rem; font-weight:700; color:var(--gold); margin-bottom:12px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">${UI.formatCurrency(s.price)} / ${s.unit || 'buổi'}</div>` : ''}
           <button onclick="event.stopPropagation();openDetail('${s.id}')">Xem chi tiết</button>
         </div>
       </div>`;
@@ -558,16 +631,10 @@
       document.getElementById('dm-desc').innerHTML = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
       
       const pkgDiv = document.getElementById('dm-packages');
-      if (svc.packages && svc.packages.length > 0) {
-        let pkgHtml = `<div style="display:flex;flex-direction:column;gap:8px;">`;
-        svc.packages.forEach(p => {
-          pkgHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.05);">
-            <span style="font-size:0.85rem;color:var(--text-dark);font-weight:600;">${p.name}</span>
-            <span style="font-size:0.9rem;color:var(--gold);font-weight:700;">${UI.formatCurrency(p.price)}</span>
-          </div>`;
-        });
-        pkgHtml += `</div>`;
-        pkgDiv.innerHTML = pkgHtml;
+      if (svc.price) {
+        pkgDiv.innerHTML = `<div style="font-size:1.2rem;color:var(--gold);font-weight:700;margin-top:16px;">
+          ${UI.formatCurrency(svc.price)} / ${svc.unit || 'buổi'}
+        </div>`;
         pkgDiv.style.display = 'block';
       } else {
         pkgDiv.style.display = 'none';

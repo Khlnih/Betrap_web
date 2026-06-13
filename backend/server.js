@@ -53,6 +53,11 @@ pool.query(`ALTER TABLE Services ADD COLUMN IF NOT EXISTS Packages TEXT`)
     .then(() => console.log('Successfully checked/added Packages column to Services.'))
     .catch(e => console.error('Error adding Packages column:', e.message));
 
+// Tự động tạo cột SubCategory
+pool.query(`ALTER TABLE Services ADD COLUMN IF NOT EXISTS SubCategory VARCHAR(100)`)
+    .then(() => console.log('Successfully checked/added SubCategory column to Services.'))
+    .catch(e => console.error('Error adding SubCategory column:', e.message));
+
 const sql = {
     connect: async () => {}, // Mock for existing code
     query: async function(strings, ...values) {
@@ -174,12 +179,13 @@ const uid = () => Math.random().toString(36).substr(2, 9);
 // GET all services (with filters)
 app.get('/api/services', async (req, res) => {
     try {
-        const { category, location, search, sort, maxPrice, all, page, limit } = req.query;
+        const { category, subCategory, location, search, sort, maxPrice, all, page, limit } = req.query;
         // Build parameterized query to prevent SQL injection
         const params = [];
         let conditions = '1=1';
         if (!all) conditions += ` AND s.Active = true AND u.Verified = true`;
         if (category) { params.push(category); conditions += ` AND s.Category = $${params.length}`; }
+        if (subCategory) { params.push(subCategory); conditions += ` AND s.SubCategory = $${params.length}`; }
         if (location) { params.push(`%${location.replace(/[%_]/g, '')}%`); conditions += ` AND s.Location ILIKE $${params.length}`; }
         if (search)   { params.push(`%${search.replace(/[%_]/g, '')}%`); conditions += ` AND (s.Name ILIKE $${params.length} OR s.Description ILIKE $${params.length})`; }
         if (maxPrice) { params.push(parseInt(maxPrice) || 0); conditions += ` AND s.Price <= $${params.length}`; }
@@ -208,7 +214,7 @@ app.get('/api/services', async (req, res) => {
         result.recordset = result.rows;
         const services = result.recordset.map(s => ({
             id: s.id, providerId: s.providerid, providerName: s.providername,
-            category: s.category, name: s.name, description: s.description,
+            category: s.category, subCategory: s.subcategory, name: s.name, description: s.description,
             price: s.price, unit: s.unit, image: s.image, location: s.location,
             active: s.active, rating: s.rating, reviewCount: s.reviewcount,
             tags: s.tags ? (typeof s.tags === 'string' ? JSON.parse(s.tags) : s.tags) : [],
@@ -240,7 +246,7 @@ app.get('/api/services/:id', async (req, res) => {
         res.json({
             id: s.Id, providerId: s.ProviderId, providerName: s.ProviderName,
             providerPhone: s.ProviderPhone, providerBio: s.Bio,
-            category: s.Category, name: s.Name, description: s.Description,
+            category: s.Category, subCategory: s.SubCategory, name: s.Name, description: s.Description,
             price: s.Price, unit: s.Unit, image: s.Image, location: s.Location,
             active: s.Active, rating: s.Rating, reviewCount: s.ReviewCount,
             tags: s.Tags ? (typeof s.Tags === 'string' ? JSON.parse(s.Tags) : s.Tags) : [],
@@ -253,7 +259,7 @@ app.get('/api/services/:id', async (req, res) => {
 
 // POST create service (provider only)
 app.post('/api/services', authMiddleware, providerOnly, async (req, res) => {
-    const { category, name, description, price, unit, image, location, tags, gallery, packages } = req.body;
+    const { category, subCategory, name, description, price, unit, image, location, tags, gallery, packages } = req.body;
     if (!category || !name || !price) return res.status(400).json({ error: 'Thiếu thông tin dịch vụ.' });
     try {
         const id = 'SVC_' + uid();
@@ -261,8 +267,8 @@ app.post('/api/services', authMiddleware, providerOnly, async (req, res) => {
         const packagesStr = packages && packages.length ? JSON.stringify(packages) : null;
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         await sql.query`
-            INSERT INTO Services (Id, ProviderId, Category, Name, Description, Price, Unit, Image, Location, Tags, Gallery, Packages)
-            VALUES (${id}, ${req.user.userId}, ${category}, ${name}, ${description||null},
+            INSERT INTO Services (Id, ProviderId, Category, SubCategory, Name, Description, Price, Unit, Image, Location, Tags, Gallery, Packages)
+            VALUES (${id}, ${req.user.userId}, ${category}, ${subCategory||null}, ${name}, ${description||null},
                     ${parseFloat(price)}, ${unit||'buổi'}, ${image||null}, ${location||null}, ${tagsStr}, ${galleryStr}, ${packagesStr})`;
         res.json({ id, message: 'Tạo dịch vụ thành công!' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -270,7 +276,7 @@ app.post('/api/services', authMiddleware, providerOnly, async (req, res) => {
 
 // PUT update service
 app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
-    const { name, description, price, unit, image, location, tags, gallery, active, packages } = req.body;
+    const { name, subCategory, description, price, unit, image, location, tags, gallery, active, packages } = req.body;
     try {
         const check = await sql.query`SELECT ProviderId FROM Services WHERE Id = ${req.params.id}`;
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
@@ -280,7 +286,7 @@ app.put('/api/services/:id', authMiddleware, providerOnly, async (req, res) => {
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         const isActive = active !== undefined ? active : true;
         await sql.query`
-            UPDATE Services SET Name=${name}, Description=${description||null},
+            UPDATE Services SET Name=${name}, SubCategory=${subCategory||null}, Description=${description||null},
             Price=${parseFloat(price)}, Unit=${unit||'buổi'}, Image=${image||null},
             Location=${location||null}, Tags=${tagsStr}, Gallery=${galleryStr}, Packages=${packagesStr},
             Active=${isActive}, UpdatedAt=CURRENT_TIMESTAMP

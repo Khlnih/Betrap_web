@@ -136,6 +136,7 @@ const API = (() => {
     getAll: async (filters = {}) => {
       const params = new URLSearchParams();
       if (filters.category) params.set('category', filters.category);
+      if (filters.subCategory) params.set('subCategory', filters.subCategory);
       if (filters.location) params.set('location', filters.location);
       if (filters.search)   params.set('search', filters.search);
       if (filters.sort)     params.set('sort', filters.sort);
