@@ -47,7 +47,46 @@ const initDB = async () => {
     try {
         await pool.query(`ALTER TABLE Services ADD COLUMN IF NOT EXISTS Packages TEXT`);
         await pool.query(`ALTER TABLE Services ADD COLUMN IF NOT EXISTS SubCategory VARCHAR(100)`);
-        console.log('✅ Database columns initialized.');
+        await pool.query(`ALTER TABLE Services ADD COLUMN IF NOT EXISTS Gallery VARCHAR(5000)`);
+        await pool.query(`ALTER TABLE Reviews ADD COLUMN IF NOT EXISTS ProviderReply TEXT`);
+        await pool.query(`ALTER TABLE Reviews ADD COLUMN IF NOT EXISTS RepliedAt TIMESTAMP`);
+        
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS BlogPosts (
+                Id          VARCHAR(50) PRIMARY KEY,
+                AuthorId    VARCHAR(50) REFERENCES Users(Id),
+                Title       VARCHAR(300) NOT NULL,
+                Slug        VARCHAR(300) UNIQUE,
+                CoverImage  VARCHAR(500),
+                Published   BOOLEAN DEFAULT false,
+                PublishedAt TIMESTAMP,
+                CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UpdatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS BlogBlocks (
+                Id        VARCHAR(50) PRIMARY KEY,
+                PostId    VARCHAR(50) NOT NULL REFERENCES BlogPosts(Id) ON DELETE CASCADE,
+                Type      VARCHAR(50) NOT NULL,
+                Content   TEXT,
+                Position  INT NOT NULL DEFAULT 0,
+                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS TrapAodaiLinks (
+                Id        VARCHAR(50) PRIMARY KEY,
+                TrapId    VARCHAR(50) NOT NULL REFERENCES Services(Id) ON DELETE CASCADE,
+                AodaiId   VARCHAR(50) NOT NULL REFERENCES Services(Id) ON DELETE CASCADE,
+                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(TrapId, AodaiId)
+            )
+        `);
+        
+        console.log('✅ Database columns and tables initialized.');
     } catch (e) {
         console.error('❌ Error initializing database columns:', e.message);
     }

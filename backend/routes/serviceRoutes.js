@@ -15,4 +15,7 @@ router.put('/:id', authMiddleware, providerOnly, serviceController.update);
 router.patch('/:id/toggle', authMiddleware, providerOnly, serviceController.toggleActive);
 router.delete('/:id', authMiddleware, providerOnly, serviceController.delete);
 
+router.get('/:id/aodai', serviceController.getAodaiLinks);
+router.put('/:id/aodai-links', authMiddleware, providerOnly, serviceController.updateAodaiLinks);
+
 module.exports = { router, providerOnly };

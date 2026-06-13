@@ -21,6 +21,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const featureRoutes = require('./routes/featureRoutes');
+const blogRoutes = require('./routes/blogRoutes');
 
 const { authMiddleware } = require('./middlewares/authMiddleware');
 
@@ -96,6 +97,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/transaction', transactionRoutes); 
 
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/blogs', blogRoutes);
 app.use('/api', messageRoutes);
 
 // Alias for old frontend routes calling /api/admin, /api/stats, /api/favorites, /api/consultations

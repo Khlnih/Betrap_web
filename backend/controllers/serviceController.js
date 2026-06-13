@@ -168,3 +168,42 @@ exports.delete = async (req, res) => {
         res.json({ success: true });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
+
+exports.getAodaiLinks = async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT s.Id, s.Name, s.Image, s.Description, s.Location, s.ProviderId
+            FROM TrapAodaiLinks t
+            JOIN Services s ON s.Id = t.AodaiId
+            WHERE t.TrapId = $1 AND s.Active = true
+            ORDER BY s.Name`, [req.params.id]
+        );
+        const items = result.recordset.map(s => ({
+            id: s.id,
+            name: s.name,
+            image: s.image,
+            description: s.description,
+            location: s.location,
+            providerId: s.providerid
+        }));
+        res.json(items);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
+exports.updateAodaiLinks = async (req, res) => {
+    const { aodaiIds } = req.body;
+    if (!Array.isArray(aodaiIds)) return res.status(400).json({ error: 'aodaiIds must be an array' });
+    try {
+        const check = await db.query('SELECT ProviderId FROM Services WHERE Id = $1', [req.params.id]);
+        if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
+        const row = check.recordset[0];
+        if (row.providerid !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
+        
+        await db.query('DELETE FROM TrapAodaiLinks WHERE TrapId = $1', [req.params.id]);
+        for (const aodaiId of aodaiIds) {
+            const linkId = 'LNK_' + uid();
+            await db.query('INSERT INTO TrapAodaiLinks (Id, TrapId, AodaiId) VALUES ($1, $2, $3)', [linkId, req.params.id, aodaiId]);
+        }
+        res.json({ success: true, linked: aodaiIds.length });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
