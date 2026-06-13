@@ -96,8 +96,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/transaction', transactionRoutes); 
 
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/conversations', messageRoutes); // because messageRoutes handles /conversations
+app.use('/api', messageRoutes);
 
 // Alias for old frontend routes calling /api/admin, /api/stats, /api/favorites, /api/consultations
 app.use('/api', adminRoutes);
