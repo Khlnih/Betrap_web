@@ -67,7 +67,7 @@ CREATE TABLE Services (
     Rating FLOAT DEFAULT 0,
     ReviewCount INT DEFAULT 0,
     Tags VARCHAR(200), -- Lưu dạng JSON array hoặc chuỗi cách phẩy
-    Packages TEXT, -- Lưu các gói dịch vụ dạng JSON array
+    SubCategory VARCHAR(100), -- Phân loại danh mục phụ
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

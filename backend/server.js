@@ -502,7 +502,7 @@ app.put('/api/auth/password', authMiddleware, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 app.post('/api/transactions', authMiddleware, async (req, res) => {
-    const { serviceId, packageName, date, time, address, note, paymentMethod } = req.body;
+    const { serviceId, date, time, address, note, paymentMethod } = req.body;
     const selectedDate = new Date(date + 'T00:00:00');
     const today = new Date(); today.setHours(0,0,0,0);
     if (selectedDate < today) return res.status(400).json({ error: 'Ngày tổ chức phải từ hôm nay trở đi.' });
@@ -521,15 +521,6 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
         }
         let finalName = svc.Name;
         let finalPrice = svc.Price;
-
-        if (packageName && svc.Packages) {
-            const pkgs = typeof svc.Packages === 'string' ? JSON.parse(svc.Packages) : svc.Packages;
-            const matchedPkg = pkgs.find(p => p.name === packageName);
-            if (matchedPkg) {
-                finalName = svc.Name + ' - ' + matchedPkg.name;
-                finalPrice = matchedPkg.price;
-            }
-        }
 
         const id = 'TXN_' + uid().toUpperCase();
         await sql.query`
