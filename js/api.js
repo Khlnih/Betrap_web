@@ -208,7 +208,8 @@ const API = (() => {
     getMyOrders: async () => {
       const s = auth.currentSession();
       if (!s) return [];
-      return await get('/transactions/' + s.userId, true);
+      try { return await get('/transactions/' + s.userId, true); }
+      catch { return []; }
     },
 
     getById: async (id) => {
