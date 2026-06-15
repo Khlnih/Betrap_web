@@ -1,4 +1,6 @@
 const db = require('../config/db');
+const bcrypt = require('bcrypt');
+const { uid } = require('../utils/helpers');
 
 exports.verifyProvider = async (req, res) => {
     try {
@@ -104,5 +106,63 @@ exports.getAdminStats = async (req, res) => {
             },
             revenue: revenue.recordset.map(r => ({ month: r.month, amount: parseFloat(r.total_revenue) || 0 }))
         });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
+// ── QUẢN LÝ NGƯỜI DÙNG ──
+exports.getUsers = async (req, res) => {
+    try {
+        const result = await db.query(`SELECT Id, Email, Name, Role, Phone, Verified, CreatedAt FROM Users ORDER BY CreatedAt DESC`);
+        res.json(result.recordset);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
+exports.createProvider = async (req, res) => {
+    const { name, email, password, phone } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'Vui lòng điền đủ thông tin.' });
+    try {
+        const check = await db.query('SELECT Id FROM Users WHERE Email = $1', [email.toLowerCase()]);
+        if (check.recordset.length) return res.status(400).json({ error: 'Email đã tồn tại.' });
+        
+        const id = 'U_' + uid();
+        const avatar = name.trim().split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+        const hash = await bcrypt.hash(password, 10);
+        
+        await db.query(
+            'INSERT INTO Users (Id, Email, PasswordHash, Name, Role, Phone, Avatar, Verified) VALUES ($1, $2, $3, $4, $5, $6, $7, true)',
+            [id, email.toLowerCase(), hash, name, 'provider', phone || null, avatar]
+        );
+        await db.query('INSERT INTO ProviderProfiles (UserId) VALUES ($1)', [id]);
+        
+        res.json({ success: true, id });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
+exports.toggleUser = async (req, res) => {
+    try {
+        const result = await db.query('UPDATE Users SET Verified = NOT Verified, UpdatedAt=CURRENT_TIMESTAMP WHERE Id = $1 RETURNING Verified', [req.params.id]);
+        if (!result.recordset.length) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true, verified: result.recordset[0].verified });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
+// ── QUẢN LÝ DỊCH VỤ ──
+exports.getServices = async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT s.*, u.Name AS ProviderName, u.Verified AS ProviderVerified
+            FROM Services s
+            LEFT JOIN Users u ON s.ProviderId = u.Id
+            ORDER BY s.CreatedAt DESC
+        `);
+        res.json(result.recordset);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
+exports.toggleService = async (req, res) => {
+    try {
+        const result = await db.query('UPDATE Services SET Active = NOT Active, UpdatedAt=CURRENT_TIMESTAMP WHERE Id = $1 RETURNING Active', [req.params.id]);
+        if (!result.recordset.length) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true, active: result.recordset[0].active });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };

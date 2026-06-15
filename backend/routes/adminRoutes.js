@@ -5,6 +5,11 @@ const { authMiddleware, adminOnly } = require('../middlewares/authMiddleware');
 const { providerOnly } = require('./serviceRoutes');
 
 // Admin Routes
+router.get('/admin/users', authMiddleware, adminOnly, adminController.getUsers);
+router.post('/admin/providers', authMiddleware, adminOnly, adminController.createProvider);
+router.patch('/admin/users/:id/toggle', authMiddleware, adminOnly, adminController.toggleUser);
+router.get('/admin/services', authMiddleware, adminOnly, adminController.getServices);
+router.patch('/admin/services/:id/toggle', authMiddleware, adminOnly, adminController.toggleService);
 router.put('/admin/providers/:id/verify', authMiddleware, adminOnly, adminController.verifyProvider);
 
 // Stats Routes
