@@ -44,7 +44,7 @@ exports.getMonths = async (req, res) => {
             FROM BlogPosts WHERE Published=true AND PublishedAt IS NOT NULL
             ORDER BY year DESC, month DESC
             LIMIT 5 OFFSET $1`, [parseInt(offset)]);
-        res.json(result.recordset.map(r => ({ year: r.year, month: r.month })));
+        res.json(result.recordset.map(r => ({ year: parseInt(r.year), month: parseInt(r.month) })));
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
 
