@@ -657,7 +657,10 @@
     }
 
     function saveDraft() {
+      const sess = API.auth.currentSession();
+      const currentUserId = sess ? sess.userId : 'guest';
       const draft = {
+        userId: currentUserId,
         trapId: selectedTrap?.id,
         aodaiIds: selectedAodais.map(a => a.id),
         wantBetrap,
@@ -679,6 +682,14 @@
       try {
         const draft = JSON.parse(draftStr);
         if (!draft.trapId) return;
+
+        const sess = API.auth.currentSession();
+        const currentUserId = sess ? sess.userId : 'guest';
+        
+        // Nếu bản nháp của user khác (không phải guest), thì bỏ qua không hỏi
+        if (draft.userId && draft.userId !== 'guest' && draft.userId !== currentUserId) {
+          return;
+        }
 
         UI.modal({
           title: 'Bạn có một bản nháp!',
