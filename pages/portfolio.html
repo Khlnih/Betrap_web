@@ -110,18 +110,18 @@
       ];
 
       const el = document.getElementById('portfolio-list');
-      el.innerHTML = portfolioData.map(p => \`
+      el.innerHTML = portfolioData.map(p => `
         <div class="portfolio-item">
           <div style="overflow:hidden">
-            <img src="\${p.image}" class="portfolio-img" alt="\${p.title}">
+            <img src="${p.image}" class="portfolio-img" alt="${p.title}">
           </div>
           <div class="portfolio-content">
-            <div class="portfolio-title">\${p.title}</div>
-            <div class="portfolio-meta"><i class="ri-map-pin-line"></i> \${p.location} • \${p.date}</div>
-            <div class="portfolio-tag">\${p.category}</div>
+            <div class="portfolio-title">${p.title}</div>
+            <div class="portfolio-meta"><i class="ri-map-pin-line"></i> ${p.location} • ${p.date}</div>
+            <div class="portfolio-tag">${p.category}</div>
           </div>
         </div>
-      \`).join('');
+      `).join('');
     }
   </script>
 </body>
