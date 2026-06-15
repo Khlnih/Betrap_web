@@ -24,13 +24,13 @@ exports.getAll = async (req, res) => {
         
         const result = await db.query(query, params);
         const mapped = result.recordset.map(p => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            coverImage: p.coverimage,
-            published: p.published,
-            publishedAt: p.publishedat,
-            createdAt: p.createdat
+            Id: p.id,
+            Title: p.title,
+            Slug: p.slug,
+            CoverImage: p.coverimage,
+            Published: p.published,
+            PublishedAt: p.publishedat,
+            CreatedAt: p.createdat
         }));
         res.json(mapped);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
@@ -61,20 +61,20 @@ exports.getById = async (req, res) => {
         if (!postRes.recordset.length) return res.status(404).json({ error: 'Blog not found' });
         const p = postRes.recordset[0];
         const mappedPost = {
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            coverImage: p.coverimage,
-            published: p.published,
-            publishedAt: p.publishedat,
-            createdAt: p.createdat
+            Id: p.id,
+            Title: p.title,
+            Slug: p.slug,
+            CoverImage: p.coverimage,
+            Published: p.published,
+            PublishedAt: p.publishedat,
+            CreatedAt: p.createdat
         };
         const blocksRes = await db.query('SELECT * FROM BlogBlocks WHERE PostId=$1 ORDER BY Position ASC', [p.id]);
         mappedPost.blocks = blocksRes.recordset.map(b => ({
-            id: b.id,
-            type: b.type,
-            content: b.content,
-            position: b.position
+            Id: b.id,
+            Type: b.type,
+            Content: b.content,
+            Position: b.position
         }));
         res.json(mappedPost);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
