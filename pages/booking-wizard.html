@@ -146,7 +146,8 @@
   <div id="nav-container"></div>
 
   <!-- Progress Header -->
-  <div class="wiz-header">
+  <div class="wiz-header" style="position:relative;">
+    <button id="btn-manage-drafts" onclick="showDraftsModal()" style="display:none; position:absolute; right:20px; top:50%; transform:translateY(-50%); background:#fff8f0; color:var(--gold-dark); border:1px solid var(--gold); border-radius:100px; padding:6px 12px; font-size:0.8rem; font-weight:700; cursor:pointer; z-index:10;"><i class="ri-folder-open-line"></i> Bản nháp</button>
     <div class="wiz-progress">
       <div class="wiz-step active" id="ws-1">
         <div class="wiz-step-circle" id="wsc-1">1</div>
@@ -656,10 +657,33 @@
       }
     }
 
+    function getDrafts() {
+      const sess = API.auth.currentSession();
+      const currentUserId = sess ? sess.userId : 'guest';
+      const draftStr = localStorage.getItem('betrap_wizard_drafts');
+      let drafts = [];
+      if (draftStr) {
+        try { drafts = JSON.parse(draftStr); } catch(e) {}
+      }
+      return drafts.filter(d => !d.userId || d.userId === 'guest' || d.userId === currentUserId);
+    }
+
     function saveDraft() {
+      const drafts = getDrafts();
+      if (drafts.length >= 5) {
+        UI.modal({ title: 'Đã đạt giới hạn bản nháp', body: 'Bạn chỉ có thể lưu tối đa 5 bản nháp. Vui lòng mở Quản lý bản nháp để xoá bớt trước khi lưu mới.', confirmText: 'Đã hiểu' });
+        return;
+      }
+
+      const name = prompt('Vui lòng nhập tên cho bản nháp này (để dễ nhớ lúc khôi phục):', 'Nháp ngày ' + new Date().toLocaleDateString('vi-VN'));
+      if (name === null) return;
+
       const sess = API.auth.currentSession();
       const currentUserId = sess ? sess.userId : 'guest';
       const draft = {
+        id: Date.now().toString(),
+        name: name || 'Bản nháp không tên',
+        dateSaved: new Date().toISOString(),
         userId: currentUserId,
         trapId: selectedTrap?.id,
         aodaiIds: selectedAodais.map(a => a.id),
@@ -672,68 +696,128 @@
         color: document.getElementById('f-color').value,
         note: document.getElementById('f-note').value
       };
-      localStorage.setItem('betrap_wizard_draft', JSON.stringify(draft));
-      UI.toast('Đã lưu bản nháp thành công! Bạn có thể đóng trang và tiếp tục sau.', 'success');
+      
+      const draftStr = localStorage.getItem('betrap_wizard_drafts');
+      let allDrafts = [];
+      if (draftStr) { try { allDrafts = JSON.parse(draftStr); } catch(e) {} }
+      allDrafts.push(draft);
+      localStorage.setItem('betrap_wizard_drafts', JSON.stringify(allDrafts));
+      
+      UI.toast('Đã lưu bản nháp thành công!', 'success');
+      checkDraft();
     }
 
     async function checkDraft() {
-      const draftStr = localStorage.getItem('betrap_wizard_draft');
-      if (!draftStr) return;
-      try {
-        const draft = JSON.parse(draftStr);
-        if (!draft.trapId) return;
-
-        const sess = API.auth.currentSession();
-        const currentUserId = sess ? sess.userId : 'guest';
-        
-        // Nếu bản nháp của user khác (không phải guest), thì bỏ qua không hỏi
-        if (draft.userId && draft.userId !== 'guest' && draft.userId !== currentUserId) {
-          return;
-        }
-
-        UI.modal({
-          title: 'Bạn có một bản nháp!',
-          body: 'Chúng tôi tìm thấy một bản nháp đặt dịch vụ đang làm dở của bạn. Bạn có muốn tiếp tục khôi phục bản nháp này không?',
-          confirmText: 'Khôi phục',
-          cancelText: 'Bỏ qua (Xóa nháp)',
-          onConfirm: async () => {
-            try {
-              selectTrap(draft.trapId);
-              await loadAodais();
-              if (draft.aodaiIds && draft.aodaiIds.length) {
-                draft.aodaiIds.forEach(aId => {
-                  const card = document.getElementById('ac-'+aId);
-                  if(card) card.click();
-                });
-              }
-              document.getElementById('f-date').value = draft.date || '';
-              document.getElementById('f-time').value = draft.time || '06:00';
-              document.getElementById('f-address').value = draft.address || '';
-              document.getElementById('f-qty-aodai').value = draft.qtyAodai || '';
-              document.getElementById('f-qty-betrap').value = draft.qtyBetrap || '';
-              document.getElementById('f-color').value = draft.color || '';
-              document.getElementById('f-note').value = draft.note || '';
-              
-              if (draft.wantBetrap) chooseBetrap(true);
-
-              if (validateStep4()) {
-                renderBill();
-                goToStep(5);
-                UI.toast('Đã khôi phục bản nháp thành công', 'success');
-              } else {
-                goToStep(4);
-              }
-            } catch(err) {
-              UI.toast('Không thể khôi phục đầy đủ bản nháp do dữ liệu cũ', 'warning');
-            }
-            return true;
-          },
-          onCancel: () => {
-            localStorage.removeItem('betrap_wizard_draft');
-            return true;
+      // Migrate old format
+      const oldDraftStr = localStorage.getItem('betrap_wizard_draft');
+      if (oldDraftStr) {
+        try {
+          const old = JSON.parse(oldDraftStr);
+          if (old.trapId) {
+            old.id = Date.now().toString();
+            old.name = 'Bản nháp cũ';
+            old.dateSaved = new Date().toISOString();
+            const draftStr = localStorage.getItem('betrap_wizard_drafts');
+            let d = draftStr ? JSON.parse(draftStr) : [];
+            d.push(old);
+            localStorage.setItem('betrap_wizard_drafts', JSON.stringify(d));
           }
-        });
-      } catch(e) {}
+        } catch(e) {}
+        localStorage.removeItem('betrap_wizard_draft');
+      }
+
+      const drafts = getDrafts();
+      const btn = document.getElementById('btn-manage-drafts');
+      if (drafts.length > 0) {
+        btn.style.display = 'block';
+        btn.innerHTML = `<i class="ri-folder-open-line"></i> Bản nháp (${drafts.length})`;
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    function showDraftsModal() {
+      const drafts = getDrafts();
+      if (!drafts.length) {
+        UI.toast('Bạn chưa có bản nháp nào.', 'info');
+        return;
+      }
+      
+      let html = '<div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;">';
+      drafts.forEach(d => {
+        const dateStr = new Date(d.dateSaved).toLocaleString('vi-VN');
+        html += `
+          <div style="border:1px solid #e5e7eb; border-radius:12px; padding:16px; background:#fff;">
+            <div style="font-weight:700; color:var(--text-dark); margin-bottom:4px;">${d.name}</div>
+            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;"><i class="ri-time-line"></i> ${dateStr}</div>
+            <div style="display:flex; gap:8px;">
+              <button onclick="restoreDraft('${d.id}')" style="flex:1; padding:8px; border-radius:8px; background:var(--gold); color:white; border:none; font-weight:600; cursor:pointer;">Khôi phục</button>
+              <button onclick="deleteDraft('${d.id}')" style="padding:8px 12px; border-radius:8px; background:#FEE2E2; color:#DC2626; border:none; font-weight:600; cursor:pointer;"><i class="ri-delete-bin-line"></i> Xóa</button>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      UI.modal({
+        title: 'Quản lý Bản Nháp',
+        body: html,
+        confirmText: 'Đóng',
+        onConfirm: () => { return true; }
+      });
+    }
+
+    async function restoreDraft(id) {
+      const drafts = getDrafts();
+      const draft = drafts.find(d => d.id === id);
+      if (!draft) return;
+      
+      try {
+        if (!document.getElementById('tc-'+draft.trapId)) {
+            // Might need to render traps first if not rendered
+            await loadData();
+        }
+        selectTrap(draft.trapId);
+        await loadAodais();
+        if (draft.aodaiIds && draft.aodaiIds.length) {
+          draft.aodaiIds.forEach(aId => {
+            const card = document.getElementById('ac-'+aId);
+            if(card) card.click();
+          });
+        }
+        document.getElementById('f-date').value = draft.date || '';
+        document.getElementById('f-time').value = draft.time || '06:00';
+        document.getElementById('f-address').value = draft.address || '';
+        document.getElementById('f-qty-aodai').value = draft.qtyAodai || '';
+        document.getElementById('f-qty-betrap').value = draft.qtyBetrap || '';
+        document.getElementById('f-color').value = draft.color || '';
+        document.getElementById('f-note').value = draft.note || '';
+        
+        if (draft.wantBetrap) chooseBetrap(true);
+
+        if (validateStep4()) {
+          renderBill();
+          goToStep(5);
+        } else {
+          goToStep(4);
+        }
+        document.querySelector('.modal-overlay')?.remove();
+        UI.toast('Đã khôi phục bản nháp: ' + draft.name, 'success');
+      } catch(err) {
+        UI.toast('Không thể khôi phục đầy đủ bản nháp', 'warning');
+      }
+    }
+
+    function deleteDraft(id) {
+      if(!confirm('Bạn có chắc muốn xóa bản nháp này?')) return;
+      const draftStr = localStorage.getItem('betrap_wizard_drafts');
+      if (!draftStr) return;
+      let allDrafts = JSON.parse(draftStr);
+      allDrafts = allDrafts.filter(d => d.id !== id);
+      localStorage.setItem('betrap_wizard_drafts', JSON.stringify(allDrafts));
+      document.querySelector('.modal-overlay')?.remove();
+      UI.toast('Đã xóa bản nháp!', 'success');
+      checkDraft();
     }
 
     async function submitBooking() {
