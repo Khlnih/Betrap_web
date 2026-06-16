@@ -12,101 +12,375 @@
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <style>
-    /* ── Hero ── */
-    .svc-hero { width:100%; margin:0 auto; }
-    .svc-hero img { width:100%; max-height:600px; object-fit:cover; object-position:top center; display:block; }
+    body { background: #faf7f4; }
 
-    /* ── 3 Big Category Cards ── */
-    .cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; margin:60px 0; }
-    @media(max-width:900px) { .cat-grid { grid-template-columns:1fr; gap:20px; } }
-    .cat-card {
-      border-radius:20px; overflow:hidden; position:relative; cursor:pointer;
-      aspect-ratio:4/3; box-shadow:0 8px 32px rgba(0,0,0,.18);
-      transition:transform .35s ease, box-shadow .35s ease;
-    }
-    .cat-card:hover { transform:translateY(-8px); box-shadow:0 20px 48px rgba(0,0,0,.28); }
-    .cat-card img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
-    .cat-card:hover img { transform:scale(1.06); }
-    .cat-card-overlay {
+    /* ══ HERO BANNER ══════════════════════════════════════════════════════════ */
+    .svc-hero { width:100%; position:relative; overflow:hidden; max-height:380px; }
+    .svc-hero img { width:100%; max-height:380px; object-fit:cover; object-position:top center; display:block; }
+    .svc-hero-overlay {
       position:absolute; inset:0;
-      background:linear-gradient(to top, rgba(20,10,5,.85) 0%, rgba(20,10,5,.2) 55%, transparent 100%);
-      display:flex; flex-direction:column; justify-content:flex-end; padding:28px;
+      background: linear-gradient(to bottom, rgba(20,10,5,.15) 0%, rgba(20,10,5,.55) 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+      padding: 40px 20px;
     }
-    .cat-card-tag { font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
-    .cat-card-title { font-family:var(--font-h); color:white; font-size:1.6rem; line-height:1.2; margin-bottom:8px; }
-    .cat-card-desc { color:rgba(255,255,255,.7); font-size:.85rem; line-height:1.5; margin-bottom:16px; }
-    .cat-card-btn {
-      display:inline-flex; align-items:center; gap:6px;
-      background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
-      border:1px solid rgba(255,255,255,.3); color:white;
-      padding:9px 20px; border-radius:100px; font-size:.85rem; font-weight:600;
-      transition:background .2s;
+    .svc-hero-title {
+      font-family: var(--font-h); font-size: clamp(2rem, 5vw, 3rem);
+      color: white; text-align:center; text-shadow: 0 2px 20px rgba(0,0,0,.5);
+      margin-bottom: 8px;
     }
-    .cat-card:hover .cat-card-btn { background:var(--gold); border-color:var(--gold); }
+    .svc-hero-sub { color: rgba(255,255,255,.8); font-size:.95rem; text-align:center; }
 
-    /* ── Sub Panel (Cưới Hỏi 4 lựa chọn) ── */
-    .sub-panel {
-      display:none; background:#fff8f5; border-radius:20px;
-      padding:40px; margin-bottom:48px;
-      border:1px solid rgba(220,165,174,.2);
-      box-shadow:0 4px 24px rgba(180,120,90,.08);
-      animation:fadeInUp .4s ease;
+    /* ══ LAYOUT 2 CỘT ═════════════════════════════════════════════════════════ */
+    .svc-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 36px 20px 80px;
     }
-    .sub-panel.active { display:block; }
-    .sub-panel-title { font-family:var(--font-h); font-size:1.5rem; color:var(--text-dark); margin-bottom:6px; }
-    .sub-panel-desc  { font-size:.9rem; color:var(--text-muted); margin-bottom:28px; }
-    .sub-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-    @media(max-width:900px) { .sub-grid { grid-template-columns:repeat(2,1fr); } }
-    @media(max-width:560px) { .sub-grid { grid-template-columns:1fr; } }
-    .sub-card {
-      background:white; border-radius:14px; overflow:hidden;
-      box-shadow:0 2px 12px rgba(0,0,0,.06); border:1.5px solid transparent;
-      cursor:pointer; transition:all .25s ease;
-    }
-    .sub-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:0 8px 24px rgba(184,148,90,.2); }
-    .sub-card.featured { border-color:var(--gold); background:linear-gradient(135deg,#fff8f0,#fff); }
-    .sub-card-img { width:100%; aspect-ratio:4/3; object-fit:cover; }
-    .sub-card-body { padding:14px; }
-    .sub-card-badge { font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }
-    .sub-card-title { font-weight:700; font-size:.92rem; color:var(--text-dark); margin-bottom:4px; line-height:1.3; }
-    .sub-card-desc  { font-size:.78rem; color:var(--text-muted); line-height:1.5; margin-bottom:12px; }
-    .sub-card-btn { display:block; width:100%; padding:9px; border-radius:8px; font-size:.82rem; font-weight:700; text-align:center; transition:all .2s; }
-    .sub-card-btn-primary { background:var(--gold); color:white; }
-    .sub-card-btn-outline { border:1.5px solid var(--gold); color:var(--gold); background:white; }
-    .sub-card-btn:hover { opacity:.85; }
 
-    /* ── Photo Grid (dịch vụ lẻ) ── */
-    .svc-panel { margin-bottom:60px; }
-    .svc-section-title { font-family:var(--font-h); font-size:1.35rem; color:var(--text-dark); margin-bottom:16px; }
-    .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    /* ══ SIDEBAR ══════════════════════════════════════════════════════════════ */
+    .svc-sidebar {
+      width: 264px;
+      flex-shrink: 0;
+      position: sticky;
+      top: calc(var(--nav-h, 72px) + 20px);
+      max-height: calc(100vh - var(--nav-h, 72px) - 40px);
+      overflow-y: auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(74,66,56,.08);
+      border: 1px solid rgba(212,185,150,.18);
+      padding: 16px 0 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-light) transparent;
+    }
+    .svc-sidebar::-webkit-scrollbar { width:4px; }
+    .svc-sidebar::-webkit-scrollbar-thumb { background:var(--gold-light); border-radius:4px; }
+
+    /* Sidebar header logo line */
+    .sidebar-header {
+      padding: 4px 20px 14px;
+      border-bottom: 1px solid rgba(212,185,150,.2);
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-header-icon { font-size:1.1rem; color:var(--gold); }
+    .sidebar-header-text { font-weight:700; font-size:.85rem; color:var(--text-dark); letter-spacing:.04em; }
+
+    /* ── Group (Cưới Hỏi, MC, Media) ────────────────────────────── */
+    .sb-group { margin-bottom: 4px; }
+
+    .sb-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .2s;
+      border-radius: 0;
+    }
+    .sb-group-header:hover { background: rgba(212,185,150,.1); }
+    .sb-group-header.open { background: rgba(212,185,150,.08); }
+
+    .sb-group-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items:center; justify-content:center;
+      font-size: .95rem; flex-shrink: 0;
+      transition: all .25s;
+    }
+    .sb-group-icon.cuoi  { background: linear-gradient(135deg,#ffe8e8,#ffd0d0); color:#C9616A; }
+    .sb-group-icon.mc    { background: linear-gradient(135deg,#e8eeff,#d0d8ff); color:#4A6BE8; }
+    .sb-group-icon.media { background: linear-gradient(135deg,#e8ffe8,#c8f0c8); color:#3A9E4A; }
+
+    .sb-group-label {
+      flex: 1;
+      font-weight: 700;
+      font-size: .88rem;
+      color: var(--text-dark);
+    }
+    .sb-group-arrow {
+      font-size: .8rem;
+      color: var(--text-muted);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .sb-group-header.open .sb-group-arrow { transform: rotate(180deg); }
+    .sb-group-count {
+      font-size: .68rem; font-weight: 700;
+      background: var(--gold-light);
+      color: var(--gold-dark);
+      border-radius: 20px;
+      padding: 2px 7px;
+      line-height: 1.4;
+    }
+
+    /* ── Accordion Body ─────────────────────────────────────────── */
+    .sb-group-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .38s cubic-bezier(.4,0,.2,1);
+    }
+    .sb-group-body.open { max-height: 600px; }
+
+    /* ── Sub Item (Bê Tráp trực tiếp / Tráp / Áo Dài header) ─── */
+    .sb-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px 9px 62px;
+      cursor: pointer;
+      position: relative;
+      transition: all .2s;
+      border-radius: 0;
+      font-size: .84rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .sb-item::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 3px; border-radius: 3px;
+      background: transparent;
+      transition: background .2s;
+    }
+    .sb-item:hover { background: rgba(212,185,150,.1); color: var(--text-dark); }
+    .sb-item.active {
+      background: linear-gradient(90deg, rgba(212,185,150,.18) 0%, rgba(212,185,150,.05) 100%);
+      color: var(--gold-dark);
+      font-weight: 700;
+    }
+    .sb-item.active::before { background: var(--gold); }
+
+    .sb-item-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0; opacity:.5;
+      transition: opacity .2s, transform .2s;
+    }
+    .sb-item.active .sb-item-dot { opacity:1; transform: scale(1.3); }
+
+    /* ── Sub-sub items (Tráp: Tất cả, Tiêu chuẩn...) ─────────── */
+    .sb-sub-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px 9px 62px;
+      cursor: pointer;
+      font-size: .84rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      transition: all .2s;
+      position: relative;
+    }
+    .sb-sub-header::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 3px; border-radius: 3px;
+      background: transparent;
+      transition: background .2s;
+    }
+    .sb-sub-header:hover { background: rgba(212,185,150,.1); }
+    .sb-sub-header.active-parent { color: var(--gold-dark); }
+    .sb-sub-header.active-parent::before { background: rgba(212,185,150,.4); }
+
+    .sb-sub-arrow {
+      margin-left: auto;
+      font-size: .7rem; color: var(--text-muted);
+      transition: transform .3s;
+    }
+    .sb-sub-header.open .sb-sub-arrow { transform: rotate(180deg); }
+
+    .sb-sub-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s cubic-bezier(.4,0,.2,1);
+    }
+    .sb-sub-body.open { max-height: 300px; }
+
+    .sb-leaf {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 20px 8px 78px;
+      cursor: pointer;
+      font-size: .81rem;
+      color: var(--text-muted);
+      transition: all .2s;
+      position: relative;
+    }
+    .sb-leaf::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 3px; border-radius: 3px;
+      background: transparent;
+      transition: background .2s;
+    }
+    .sb-leaf:hover { background: rgba(212,185,150,.08); color: var(--text-dark); }
+    .sb-leaf.active {
+      background: linear-gradient(90deg, rgba(212,185,150,.15) 0%, rgba(212,185,150,.04) 100%);
+      color: var(--gold-dark);
+      font-weight: 700;
+    }
+    .sb-leaf.active::before { background: var(--gold); }
+
+    .sb-leaf-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: currentColor; flex-shrink:0; opacity:.4;
+      transition: all .2s;
+    }
+    .sb-leaf.active .sb-leaf-dot { opacity:1; background: var(--gold); }
+
+    /* ── Separator ───────────────────────────────────────────────── */
+    .sb-sep { height:1px; background: rgba(212,185,150,.15); margin: 6px 16px; }
+
+    /* ── Mobile toggle ───────────────────────────────────────────── */
+    .svc-mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 24px; left: 24px;
+      z-index: 900;
+      width: 52px; height: 52px;
+      background: var(--gold);
+      color: white;
+      border: none; border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(212,185,150,.5);
+      align-items: center; justify-content:center;
+      transition: all .2s;
+    }
+    .svc-mobile-toggle:hover { transform: scale(1.08); }
+
+    .svc-mobile-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 950;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .svc-mobile-overlay.show { opacity: 1; }
+
+    /* ══ CONTENT AREA ══════════════════════════════════════════════════════════ */
+    .svc-content { flex: 1; min-width: 0; }
+
+    /* Content panel animation */
+    .content-fade-in {
+      animation: contentFadeIn .38s cubic-bezier(.4,0,.2,1) both;
+    }
+    @keyframes contentFadeIn {
+      from { opacity:0; transform: translateY(12px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* ── Breadcrumb ──────────────────────────────────────────────── */
+    .svc-breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .8rem; color: var(--text-muted);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .svc-breadcrumb span { transition: color .2s; }
+    .svc-breadcrumb .sep { color: rgba(117,109,99,.4); }
+    .svc-breadcrumb .current { color: var(--gold-dark); font-weight:700; }
+
+    /* ── Section title ───────────────────────────────────────────── */
+    .svc-title-row {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 6px; gap: 12px; flex-wrap: wrap;
+    }
+    .svc-title {
+      font-family: var(--font-h);
+      font-size: clamp(1.4rem,3vw,2rem);
+      color: var(--text-dark);
+      line-height: 1.2;
+    }
+    .svc-subtitle { color: var(--text-muted); font-size:.88rem; margin-bottom:24px; }
+
+    /* ── Empty state ─────────────────────────────────────────────── */
+    .svc-empty {
+      text-align: center; padding: 80px 20px;
+      background: white; border-radius: 20px;
+      border: 1.5px dashed rgba(212,185,150,.4);
+    }
+    .svc-empty i { font-size:3rem; color:var(--gold-light); display:block; margin-bottom:12px; }
+    .svc-empty p { color:var(--text-muted); font-size:.9rem; }
+
+    /* ── Combo teaser banner ─────────────────────────────────────── */
+    .combo-banner {
+      background: linear-gradient(135deg, #fff5e8 0%, #ffecd4 50%, #ffe0b8 100%);
+      border: 1.5px solid rgba(212,185,150,.45);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+      transition: all .25s;
+      box-shadow: 0 4px 16px rgba(212,185,150,.15);
+    }
+    .combo-banner:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(212,185,150,.25); }
+    .combo-banner-icon { font-size:2rem; flex-shrink:0; }
+    .combo-banner-text h4 { font-weight:800; color:var(--dark); font-size:1rem; margin-bottom:2px; }
+    .combo-banner-text p { font-size:.82rem; color:var(--text-muted); }
+    .combo-banner-btn {
+      margin-left:auto; flex-shrink:0;
+      background:var(--gold); color:white;
+      border:none; border-radius:100px;
+      padding:9px 18px; font-size:.82rem; font-weight:700;
+      cursor:pointer; white-space:nowrap;
+      transition: all .2s;
+    }
+    .combo-banner-btn:hover { background:var(--gold-dark); }
+
+    /* ── Photo Grid ──────────────────────────────────────────────── */
+    .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
     @media(max-width:800px) { .photo-grid { grid-template-columns:repeat(2,1fr); } }
     @media(max-width:500px) { .photo-grid { grid-template-columns:1fr; } }
     .photo-card {
-      border-radius:14px; overflow:hidden; cursor:pointer;
+      border-radius:16px; overflow:hidden; cursor:pointer;
       position:relative; aspect-ratio:3/4;
-      box-shadow:0 4px 16px rgba(0,0,0,.1);
-      transition:transform .3s ease, box-shadow .3s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      transition: transform .3s ease, box-shadow .3s ease;
     }
-    .photo-card:hover { transform:translateY(-5px); box-shadow:0 12px 32px rgba(0,0,0,.18); }
+    .photo-card:hover { transform:translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,.18); }
     .photo-card img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
-    .photo-card:hover img { transform:scale(1.05); }
+    .photo-card:hover img { transform:scale(1.06); }
     .photo-card-overlay {
       position:absolute; inset:0;
-      background:linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 55%);
+      background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 55%);
       display:flex; flex-direction:column; justify-content:flex-end; padding:16px;
       opacity:0; transition:opacity .3s;
     }
     .photo-card:hover .photo-card-overlay { opacity:1; }
-    .photo-card-name { color:white; font-weight:700; font-size:.92rem; margin-bottom:8px; }
+    .photo-card-name { color:white; font-weight:700; font-size:.92rem; margin-bottom:4px; }
+    .photo-card-price { font-size:.88rem; font-weight:700; color:var(--gold); margin-bottom:10px; }
     .photo-card-overlay button {
       background:rgba(255,255,255,.92); color:#5a3020;
       border:none; border-radius:100px;
       padding:8px 20px; font-size:.82rem; font-weight:700; cursor:pointer;
     }
-    /* Load more */
-    .load-more-wrap { text-align:center; margin:24px 0 0; }
 
-    /* ── Detail Lightbox ── */
+    /* ── Card list (MC / Media) ──────────────────────────────────── */
+    .svc-card-h {
+      background:white; border-radius:16px; overflow:hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      display:flex; gap:0;
+      transition: box-shadow .25s, transform .25s;
+      cursor:pointer; margin-bottom:16px;
+      border: 1px solid rgba(212,185,150,.1);
+    }
+    .svc-card-h:hover { box-shadow: 0 10px 32px rgba(0,0,0,.12); transform:translateY(-2px); }
+    .svc-card-h-img { width:180px; flex-shrink:0; overflow:hidden; }
+    .svc-card-h-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+    .svc-card-h:hover .svc-card-h-img img { transform:scale(1.06); }
+    .svc-card-h-body { flex:1; padding:20px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; }
+    @media(max-width:600px) { .svc-card-h { flex-direction:column; } .svc-card-h-img { width:100%; height:180px; } }
+
+    /* ── Pagination ──────────────────────────────────────────────── */
+    .paging-row { display:flex; justify-content:center; gap:8px; margin-top:32px; flex-wrap:wrap; }
+
+    /* ── Detail Lightbox ─────────────────────────────────────────── */
     #detail-modal {
       position:fixed; inset:0; z-index:9999;
       background:rgba(0,0,0,.92);
@@ -141,170 +415,261 @@
       .detail-info { padding:24px; }
     }
 
-    /* MC/Media dạng card thường */
-    .svc-card-h { background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.06); display:flex; gap:0; transition:box-shadow .25s; cursor:pointer; }
-    .svc-card-h:hover { box-shadow:0 6px 24px rgba(0,0,0,.12); }
-    .svc-card-h-img { width:180px; flex-shrink:0; overflow:hidden; }
-    .svc-card-h-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-    .svc-card-h:hover .svc-card-h-img img { transform:scale(1.05); }
-    .svc-card-h-body { flex:1; padding:20px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; }
-    .svc-cards-vert { display:flex; flex-direction:column; gap:16px; }
-    
-    /* Chips */
-    .subcat-chips { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-    .subcat-chip { padding:8px 16px; border-radius:20px; background:var(--cream); color:var(--text-dark); border:1px solid rgba(220,165,174,.4); font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s; }
-    .subcat-chip:hover { background:white; border-color:var(--gold); }
-    .subcat-chip.active { background:var(--gold); color:white; border-color:var(--gold); }
+    /* ── Book Simple Modal ───────────────────────────────────────── */
+    #book-simple-modal {
+      position:fixed; inset:0; z-index:10000;
+      background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      opacity:0; pointer-events:none; transition:opacity .3s;
+    }
 
-    @media(max-width:600px) { .svc-card-h { flex-direction:column; } .svc-card-h-img { width:100%; height:180px; } }
+    /* ══ RESPONSIVE ═══════════════════════════════════════════════════════════ */
+    @media(max-width:860px) {
+      .svc-layout { padding: 24px 16px 80px; gap:0; }
+      .svc-sidebar {
+        position: fixed;
+        top: 0; left: -290px;
+        height: 100vh; max-height:100vh;
+        z-index: 960;
+        border-radius: 0 20px 20px 0;
+        transition: left .35s cubic-bezier(.4,0,.2,1);
+        padding-top: calc(var(--nav-h, 72px) + 16px);
+      }
+      .svc-sidebar.mobile-open { left: 0; }
+      .svc-mobile-toggle { display:flex; }
+      .svc-mobile-overlay { display:block; pointer-events:none; }
+      .svc-mobile-overlay.show { pointer-events:all; }
+    }
   </style>
 </head>
 <body>
   <div id="nav-container"></div>
 
-  <!-- Hero -->
-  <div class="svc-hero" data-aos="fade-down">
-    <img src="../assets/images/services-banner.png" alt="Trap Connect Services">
+  <!-- Hero Banner -->
+  <div class="svc-hero">
+    <img src="../assets/images/services-banner.png" alt="Dịch Vụ BêTráp">
+    <div class="svc-hero-overlay">
+      <h1 class="svc-hero-title">Khám Phá Dịch Vụ</h1>
+      <p class="svc-hero-sub">Tất cả những gì bạn cần cho ngày ăn hỏi trọn vẹn</p>
+    </div>
   </div>
 
-  <div class="container page-content">
+  <!-- Mobile overlay -->
+  <div class="svc-mobile-overlay" id="mobile-overlay" onclick="closeMobileSidebar()"></div>
+  <!-- Mobile toggle button -->
+  <button class="svc-mobile-toggle" id="mobile-toggle" onclick="toggleMobileSidebar()">
+    <i class="ri-menu-2-line"></i>
+  </button>
 
-    <!-- 3 Card Danh Mục Lớn -->
-    <div class="cat-grid" id="main-cat-grid">
-      <!-- Cưới Hỏi -->
-      <div class="cat-card" onclick="openCuoiHoi()" data-aos="fade-up" data-aos-delay="0">
-        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&auto=format&fit=crop" alt="Cưới Hỏi">
-        <div class="cat-card-overlay">
-          <div class="cat-card-tag">Trọn gói</div>
-          <div class="cat-card-title">Cưới Hỏi</div>
-          <div class="cat-card-desc">Bê tráp, tráp ăn hỏi, áo dài và combo trọn vẹn cho ngày lễ</div>
-          <span class="cat-card-btn"><i class="ri-arrow-right-line"></i> Khám phá</span>
-        </div>
-      </div>
-      <!-- MC Sự Kiện -->
-      <div class="cat-card" onclick="openSection('mc')" data-aos="fade-up" data-aos-delay="100">
-        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop" alt="MC Sự Kiện">
-        <div class="cat-card-overlay">
-          <div class="cat-card-tag">Chuyên nghiệp</div>
-          <div class="cat-card-title">MC Sự Kiện</div>
-          <div class="cat-card-desc">MC lịch lãm, giọng truyền cảm cho lễ ăn hỏi và tiệc cưới</div>
-          <span class="cat-card-btn"><i class="ri-arrow-right-line"></i> Xem MC</span>
-        </div>
-      </div>
-      <!-- Media -->
-      <div class="cat-card" onclick="openSection('media')" data-aos="fade-up" data-aos-delay="200">
-        <img src="https://images.unsplash.com/photo-1556103255-4443dbae8e5a?w=800&auto=format&fit=crop" alt="Media">
-        <div class="cat-card-overlay">
-          <div class="cat-card-tag">Kỷ niệm</div>
-          <div class="cat-card-title">Media</div>
-          <div class="cat-card-desc">Ghi lại từng khoảnh khắc đẹp nhất trong ngày trọng đại</div>
-          <span class="cat-card-btn"><i class="ri-arrow-right-line"></i> Xem Media</span>
-        </div>
-      </div>
-    </div>
+  <!-- 2-column layout -->
+  <div class="svc-layout">
 
-    <!-- ── Sub Panel: Cưới Hỏi ── -->
-    <div id="panel-cuoi-hoi" class="sub-panel">
-      <button onclick="closeAllPanels()" style="float:right;background:none;border:none;font-size:1.3rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
-      <div class="sub-panel-title">Dịch Vụ Cưới Hỏi</div>
-      <div class="sub-panel-desc">Chọn dịch vụ phù hợp hoặc đặt combo tráp + áo dài cùng nhau</div>
-      <div class="sub-grid">
-        <!-- Bê Tráp -->
-        <div class="sub-card" onclick="scrollToSection('sec-betrap')">
-          <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?w=600&auto=format&fit=crop" alt="Bê Tráp" class="sub-card-img">
-          <div class="sub-card-body">
-            <div class="sub-card-badge">Đội hình</div>
-            <div class="sub-card-title">Thuê Đội Bê Tráp</div>
-            <div class="sub-card-desc">Đội cưới hỏi chuyên nghiệp, trang phục chỉn chu, đúng giờ</div>
-            <span class="sub-card-btn sub-card-btn-outline">Xem dịch vụ</span>
-          </div>
+    <!-- ════ SIDEBAR ════ -->
+    <div class="svc-sidebar" id="svc-sidebar">
+      <div class="sidebar-header">
+        <i class="ri-layout-grid-line sidebar-header-icon"></i>
+        <span class="sidebar-header-text">Danh mục dịch vụ</span>
+      </div>
+
+      <!-- ── Cưới Hỏi ── -->
+      <div class="sb-group" id="grp-cuoi">
+        <div class="sb-group-header" onclick="toggleGroup('cuoi')" id="grp-cuoi-hdr">
+          <div class="sb-group-icon cuoi"><i class="ri-heart-line"></i></div>
+          <span class="sb-group-label">Cưới Hỏi</span>
+          <span class="sb-group-count" id="cnt-cuoi">—</span>
+          <i class="ri-arrow-down-s-line sb-group-arrow" id="arr-cuoi"></i>
         </div>
-        <!-- Tráp Ăn Hỏi -->
-        <div class="sub-card" onclick="scrollToSection('sec-trap')">
-          <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&auto=format&fit=crop" alt="Tráp" class="sub-card-img">
-          <div class="sub-card-body">
-            <div class="sub-card-badge">Lễ vật</div>
-            <div class="sub-card-title">Tráp Ăn Hỏi</div>
-            <div class="sub-card-desc">Tráp truyền thống và hiện đại, được trang trí tỉ mỉ công phu</div>
-            <span class="sub-card-btn sub-card-btn-outline">Xem tráp</span>
+        <div class="sb-group-body" id="body-cuoi">
+          <!-- Thuê Đội Bê Tráp (trực tiếp, không sub) -->
+          <div class="sb-item" id="si-betrap" onclick="selectItem('betrap','be-trap','')">
+            <span class="sb-item-dot"></span>
+            <i class="ri-group-line" style="font-size:.85rem; opacity:.7;"></i>
+            Thuê Đội Bê Tráp
           </div>
-        </div>
-        <!-- Áo Dài -->
-        <div class="sub-card" onclick="scrollToSection('sec-aodai')">
-          <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&auto=format&fit=crop" alt="Áo Dài" class="sub-card-img" style="filter:hue-rotate(280deg) saturate(.8)">
-          <div class="sub-card-body">
-            <div class="sub-card-badge">Trang phục</div>
-            <div class="sub-card-title">Thuê Áo Dài</div>
-            <div class="sub-card-desc">Nhiều mẫu mã đa dạng, từ truyền thống đến hiện đại</div>
-            <span class="sub-card-btn sub-card-btn-outline">Xem áo dài</span>
+          <div class="sb-sep"></div>
+          <!-- Tráp Ăn Hỏi (có sub) -->
+          <div class="sb-sub-header" onclick="toggleSub('trap')" id="sub-hdr-trap">
+            <span class="sb-item-dot" style="width:6px;height:6px;"></span>
+            <i class="ri-gift-line" style="font-size:.85rem; opacity:.7;"></i>
+            Tráp Ăn Hỏi
+            <i class="ri-arrow-down-s-line sb-sub-arrow" id="sub-arr-trap"></i>
           </div>
-        </div>
-        <!-- Combo -->
-        <div class="sub-card featured" onclick="goCombo()">
-          <div style="width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#f9e8d0,#f0c8a0,#e8a87c);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;">
-            <div style="font-size:2.5rem;"><i class="ri-sparkling-line" style="color:white"></i></div>
-            <div style="font-size:.75rem;font-weight:700;color:#8B5E3C;letter-spacing:.1em;text-transform:uppercase;">Gợi ý nổi bật</div>
+          <div class="sb-sub-body" id="sub-body-trap">
+            <div class="sb-leaf active" id="sl-trap-all"      onclick="selectItem('trap','lam-trap','')">
+              <span class="sb-leaf-dot"></span> Tất cả
+            </div>
+            <div class="sb-leaf" id="sl-trap-tieu-chuan"    onclick="selectItem('trap','lam-trap','tieu-chuan')">
+              <span class="sb-leaf-dot"></span> Tiêu chuẩn
+            </div>
+            <div class="sb-leaf" id="sl-trap-nang-cao"       onclick="selectItem('trap','lam-trap','nang-cao')">
+              <span class="sb-leaf-dot"></span> Nâng cao
+            </div>
+            <div class="sb-leaf" id="sl-trap-cao-cap"         onclick="selectItem('trap','lam-trap','cao-cap')">
+              <span class="sb-leaf-dot"></span> Cao cấp
+            </div>
           </div>
-          <div class="sub-card-body">
-            <div class="sub-card-badge" style="color:#C9872E;">Combo tiết kiệm</div>
-            <div class="sub-card-title">Combo Tráp + Áo Dài</div>
-            <div class="sub-card-desc">Chọn tráp trước, hệ thống gợi ý áo dài phù hợp từ cùng nhà cung cấp</div>
-            <span class="sub-card-btn sub-card-btn-primary">Đặt Combo →</span>
+          <div class="sb-sep"></div>
+          <!-- Thuê Áo Dài (có sub) -->
+          <div class="sb-sub-header" onclick="toggleSub('aodai')" id="sub-hdr-aodai">
+            <span class="sb-item-dot" style="width:6px;height:6px;"></span>
+            <i class="ri-shirt-line" style="font-size:.85rem; opacity:.7;"></i>
+            Thuê Áo Dài
+            <i class="ri-arrow-down-s-line sb-sub-arrow" id="sub-arr-aodai"></i>
+          </div>
+          <div class="sb-sub-body" id="sub-body-aodai">
+            <div class="sb-leaf" id="sl-aodai-all"           onclick="selectItem('aodai','ao-dai','')">
+              <span class="sb-leaf-dot"></span> Tất cả
+            </div>
+            <div class="sb-leaf" id="sl-aodai-cho-doi-trap"  onclick="selectItem('aodai','ao-dai','cho-doi-trap')">
+              <span class="sb-leaf-dot"></span> Cho đội Tráp
+            </div>
+            <div class="sb-leaf" id="sl-aodai-cho-dau"       onclick="selectItem('aodai','ao-dai','cho-dau')">
+              <span class="sb-leaf-dot"></span> Cho Dâu
+            </div>
+            <div class="sb-leaf" id="sl-aodai-cho-me-dau"    onclick="selectItem('aodai','ao-dai','cho-me-dau')">
+              <span class="sb-leaf-dot"></span> Cho Mẹ dâu
+            </div>
+            <div class="sb-leaf" id="sl-aodai-ca-nhan"       onclick="selectItem('aodai','ao-dai','ca-nhan')">
+              <span class="sb-leaf-dot"></span> Cá nhân
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ── Sections ảnh dịch vụ lẻ ── -->
-    <!-- Bê Tráp -->
-    <div class="svc-panel" id="sec-betrap" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="svc-section-title">Đội Bê Tráp Cưới Hỏi</div>
-        <button onclick="openBookSimple('be-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+      <div class="sb-sep"></div>
+
+      <!-- ── MC Sự Kiện ── -->
+      <div class="sb-group" id="grp-mc">
+        <div class="sb-group-header" onclick="toggleGroup('mc')" id="grp-mc-hdr">
+          <div class="sb-group-icon mc"><i class="ri-mic-line"></i></div>
+          <span class="sb-group-label">MC Sự Kiện</span>
+          <span class="sb-group-count" id="cnt-mc">—</span>
+          <i class="ri-arrow-down-s-line sb-group-arrow" id="arr-mc"></i>
+        </div>
+        <div class="sb-group-body" id="body-mc">
+          <div class="sb-leaf" id="sl-mc-all"      onclick="selectItem('mc','mc-su-kien','')">
+            <span class="sb-leaf-dot"></span> Tất cả
+          </div>
+          <div class="sb-leaf" id="sl-mc-dam-hoi"  onclick="selectItem('mc','mc-su-kien','dam-hoi')">
+            <span class="sb-leaf-dot"></span> Đám hỏi
+          </div>
+          <div class="sb-leaf" id="sl-mc-dam-cuoi" onclick="selectItem('mc','mc-su-kien','dam-cuoi')">
+            <span class="sb-leaf-dot"></span> Đám cưới
+          </div>
+          <div class="sb-leaf" id="sl-mc-cuoi-hoi" onclick="selectItem('mc','mc-su-kien','cuoi-hoi')">
+            <span class="sb-leaf-dot"></span> Cưới + hỏi
+          </div>
+          <div class="sb-leaf" id="sl-mc-su-kien"  onclick="selectItem('mc','mc-su-kien','su-kien')">
+            <span class="sb-leaf-dot"></span> Sự kiện
+          </div>
+        </div>
       </div>
-      <div class="subcat-chips" id="chips-be-trap"></div>
-      <div class="photo-grid" id="grid-betrap"></div>
-    </div>
 
-    <!-- Tráp -->
-    <div class="svc-panel" id="sec-trap" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="svc-section-title">Tráp Ăn Hỏi</div>
-        <button onclick="openBookSimple('lam-trap')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+      <div class="sb-sep"></div>
+
+      <!-- ── Media ── -->
+      <div class="sb-group" id="grp-media">
+        <div class="sb-group-header" onclick="toggleGroup('media')" id="grp-media-hdr">
+          <div class="sb-group-icon media"><i class="ri-camera-line"></i></div>
+          <span class="sb-group-label">Media</span>
+          <span class="sb-group-count" id="cnt-media">—</span>
+          <i class="ri-arrow-down-s-line sb-group-arrow" id="arr-media"></i>
+        </div>
+        <div class="sb-group-body" id="body-media">
+          <div class="sb-leaf" id="sl-media-all"        onclick="selectItem('media','media','')">
+            <span class="sb-leaf-dot"></span> Tất cả
+          </div>
+          <div class="sb-leaf" id="sl-media-chup-anh"   onclick="selectItem('media','media','chup-anh')">
+            <span class="sb-leaf-dot"></span> Chụp ảnh
+          </div>
+          <div class="sb-leaf" id="sl-media-anh-video"  onclick="selectItem('media','media','anh-video')">
+            <span class="sb-leaf-dot"></span> Ảnh + video
+          </div>
+          <div class="sb-leaf" id="sl-media-chup-ca-nhan" onclick="selectItem('media','media','chup-ca-nhan')">
+            <span class="sb-leaf-dot"></span> Chụp cá nhân
+          </div>
+        </div>
       </div>
-      <div class="subcat-chips" id="chips-lam-trap"></div>
-      <div class="photo-grid" id="grid-trap"></div>
-    </div>
 
-    <!-- Áo Dài -->
-    <div class="svc-panel" id="sec-aodai" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="svc-section-title">Thuê Áo Dài</div>
-        <button onclick="openBookSimple('ao-dai')" class="btn btn-primary btn-sm"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
+    </div><!-- /sidebar -->
+
+    <!-- ════ CONTENT ════ -->
+    <div class="svc-content" id="svc-content">
+
+      <!-- Welcome state (before selecting) -->
+      <div id="content-welcome">
+        <div style="margin-bottom:28px;">
+          <div class="svc-title">Khám Phá Dịch Vụ</div>
+          <div class="svc-subtitle">Chọn danh mục từ thanh bên để xem các dịch vụ phù hợp</div>
+        </div>
+
+        <!-- Quick-select cards -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-bottom:36px;">
+          <div onclick="selectItem('betrap','be-trap','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2rem;margin-bottom:8px;">👥</div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Đội Bê Tráp</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Chuyên nghiệp, đúng giờ</div>
+          </div>
+          <div onclick="selectItem('trap','lam-trap','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2rem;margin-bottom:8px;">🎁</div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Tráp Ăn Hỏi</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Truyền thống & hiện đại</div>
+          </div>
+          <div onclick="selectItem('aodai','ao-dai','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2rem;margin-bottom:8px;">👘</div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Thuê Áo Dài</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Đa dạng mẫu mã</div>
+          </div>
+          <div onclick="selectItem('mc','mc-su-kien','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2rem;margin-bottom:8px;">🎤</div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">MC Sự Kiện</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Giọng truyền cảm</div>
+          </div>
+          <div onclick="selectItem('media','media','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2rem;margin-bottom:8px;">📸</div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Media</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Ảnh & video chuyên nghiệp</div>
+          </div>
+          <div onclick="window.location.href='booking-wizard.html'" style="background:linear-gradient(135deg,#fff5e8,#ffe0b8);border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(212,185,150,.2);border:1.5px solid rgba(212,185,150,.4);transition:all .25s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:2rem;margin-bottom:8px;">✨</div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--dark);margin-bottom:4px;">Đặt Combo</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">Tráp + Áo Dài tiết kiệm</div>
+          </div>
+        </div>
       </div>
-      <div class="subcat-chips" id="chips-ao-dai"></div>
-      <div class="photo-grid" id="grid-aodai"></div>
-    </div>
 
-    <!-- MC -->
-    <div class="svc-panel" id="sec-mc" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="svc-section-title">MC Sự Kiện</div>
+      <!-- Service display panel -->
+      <div id="content-panel" style="display:none;">
+        <!-- Breadcrumb -->
+        <div class="svc-breadcrumb" id="breadcrumb"></div>
+
+        <!-- Combo banner (only for Cưới Hỏi sections) -->
+        <div class="combo-banner" id="combo-banner" onclick="window.location.href='booking-wizard.html'" style="display:none;">
+          <div class="combo-banner-icon">✨</div>
+          <div class="combo-banner-text">
+            <h4>Gợi ý: Đặt Combo Tráp + Áo Dài</h4>
+            <p>Chọn tráp trước, hệ thống tự gợi ý áo dài phù hợp từ cùng nhà cung cấp — tiết kiệm hơn đặt lẻ!</p>
+          </div>
+          <button class="combo-banner-btn">Đặt Combo →</button>
+        </div>
+
+        <!-- Title row -->
+        <div class="svc-title-row">
+          <div>
+            <div class="svc-title" id="panel-title">—</div>
+            <div class="svc-subtitle" id="panel-subtitle"></div>
+          </div>
+          <button id="panel-book-btn" class="btn btn-primary btn-sm" style="display:none;" onclick="openBookSimple(currentCat)">
+            <i class="ri-calendar-check-line"></i> Đặt ngay
+          </button>
+        </div>
+
+        <!-- Grid -->
+        <div id="panel-grid"></div>
       </div>
-      <div class="subcat-chips" id="chips-mc-su-kien"></div>
-      <div class="svc-cards-vert" id="grid-mc"></div>
-    </div>
+    </div><!-- /content -->
 
-    <!-- Media -->
-    <div class="svc-panel" id="sec-media" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="svc-section-title">Media</div>
-      </div>
-      <div class="subcat-chips" id="chips-media"></div>
-      <div class="svc-cards-vert" id="grid-media"></div>
-    </div>
-
-  </div><!-- /container -->
+  </div><!-- /layout -->
 
   <div id="footer-container"></div>
   <div id="toast-container"></div>
@@ -323,12 +688,17 @@
         <div class="detail-name" id="dm-name"></div>
         <div class="detail-packages" id="dm-packages" style="display:none;margin-top:16px;background:var(--cream);padding:16px;border-radius:12px;border:1px solid rgba(184,148,90,.2);"></div>
         <div class="detail-desc" id="dm-desc" style="margin-top:16px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          <button class="btn btn-primary btn-sm" id="dm-book-btn" style="display:none;" onclick="">
+            <i class="ri-calendar-check-line"></i> Đặt ngay
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Book Simple Modal -->
-  <div id="book-simple-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;">
+  <div id="book-simple-modal">
     <div style="background:#fff;border-radius:20px;padding:32px;width:100%;max-width:440px;position:relative;transform:translateY(20px);transition:transform .3s;" id="book-simple-inner">
       <button onclick="closeBookSimple()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;"><i class="ri-close-line"></i></button>
       <h3 id="bs-title" style="font-family:var(--font-h);font-size:1.5rem;margin-bottom:6px;color:var(--text-dark);"></h3>
@@ -341,24 +711,24 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
             <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Ngày diễn ra *</label>
-            <input type="date" id="bs-date" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
+            <input type="date" id="bs-date" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
           </div>
           <div>
             <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Giờ chuẩn bị *</label>
-            <input type="time" id="bs-time" class="form-control" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
+            <input type="time" id="bs-time" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
           </div>
         </div>
         <div>
           <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Địa chỉ tổ chức *</label>
-          <input type="text" id="bs-address" class="form-control" placeholder="Số nhà, tên đường..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
+          <input type="text" id="bs-address" placeholder="Số nhà, tên đường..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
         </div>
         <div id="bs-row-qty">
           <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Số lượng</label>
-          <input type="text" id="bs-qty" class="form-control" placeholder="VD: 7 người, 7 bộ..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
+          <input type="text" id="bs-qty" placeholder="VD: 7 người, 7 bộ..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;">
         </div>
         <div>
           <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.85rem;">Ghi chú thêm</label>
-          <textarea id="bs-note" class="form-control" rows="2" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;resize:none;"></textarea>
+          <textarea id="bs-note" rows="2" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;resize:none;"></textarea>
         </div>
       </div>
       <button id="bs-submit" class="btn btn-primary btn-block" style="padding:13px;font-size:1rem;">Đăng ký</button>
@@ -369,267 +739,330 @@
   <script src="../js/api.js?v=1.2"></script>
   <script src="../js/ui.js?v=1.2"></script>
   <script>
-    const CAT_LABELS = { 'be-trap':'Đội Bê Tráp','lam-trap':'Tráp Ăn Hỏi','ao-dai':'Áo Dài','mc-su-kien':'MC Sự Kiện','media':'Media' };
-    let allSvcs = {};
-    let currentBookCat = '';
-    let currentBookSvcId = null;
-    const PAGE_SIZE = 6;
-    let currentPages = {};
-    let totalPages = {};
-    let activeSubCat = { 'be-trap': '', 'lam-trap': '', 'ao-dai': '', 'mc-su-kien': '', 'media': '' };
-
-    const SUBCAT_CONFIG = {
-      'be-trap': [],
-      'lam-trap': [
-        { id: 'tieu-chuan', name: 'Tiêu chuẩn' },
-        { id: 'nang-cao', name: 'Nâng cao' },
-        { id: 'cao-cap', name: 'Cao cấp' }
-      ],
-      'ao-dai': [
-        { id: 'cho-doi-trap', name: 'Cho đội Tráp' },
-        { id: 'cho-dau', name: 'Cho Dâu' },
-        { id: 'cho-me-dau', name: 'Cho Mẹ dâu' },
-        { id: 'ca-nhan', name: 'Cá nhân' }
-      ],
-      'media': [
-        { id: 'chup-anh', name: 'Chụp ảnh' },
-        { id: 'anh-video', name: 'Ảnh + video' },
-        { id: 'chup-ca-nhan', name: 'Chụp cá nhân' }
-      ],
-      'mc-su-kien': [
-        { id: 'dam-hoi', name: 'Đám hỏi' },
-        { id: 'dam-cuoi', name: 'Đám cưới' },
-        { id: 'cuoi-hoi', name: 'Cưới + hỏi' },
-        { id: 'su-kien', name: 'Sự kiện' }
-      ]
+    /* ═══════════════════════════════════════════════════════════════════════════
+       CONFIG & STATE
+    ═══════════════════════════════════════════════════════════════════════════ */
+    const CAT_LABELS = {
+      'be-trap':    'Đội Bê Tráp',
+      'lam-trap':   'Tráp Ăn Hỏi',
+      'ao-dai':     'Thuê Áo Dài',
+      'mc-su-kien': 'MC Sự Kiện',
+      'media':      'Media'
     };
 
+    const IS_PHOTO_CAT = { 'be-trap': true, 'lam-trap': true, 'ao-dai': true, 'mc-su-kien': false, 'media': false };
+
+    // State
+    let allSvcs  = {};
+    let currentSection = '';   // 'betrap' | 'trap' | 'aodai' | 'mc' | 'media'
+    let currentCat     = '';   // 'be-trap' | 'lam-trap' | ...
+    let currentSubCat  = '';
+    let currentPage    = 1;
+    let totalPages     = {};
+    let currentBookCat = '';
+    let currentBookSvcId = null;
+    const PAGE_SIZE = 9;
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', async () => {
       UI.initPage();
-      const nav = document.getElementById('navbar');
-      if (nav) nav.classList.remove('solid'); // Make navbar transparent for the hero banner
       UI.renderFooter('footer-container');
 
-      // Preload page 1 cho tất cả dịch vụ
-      const categories = ['be-trap','lam-trap','ao-dai','mc-su-kien','media'];
-      categories.forEach(c => allSvcs[c] = []);
-      await Promise.all(categories.map(cat => loadCategoryPage(cat)));
+      // Preload counts
+      await preloadAllCounts();
 
-      // Check URL param
+      // URL param
       const p = new URLSearchParams(location.search);
       const cat = p.get('cat');
-      if (cat === 'cuoi-hoi' || cat === 'be-trap' || cat === 'lam-trap' || cat === 'ao-dai') {
-        openCuoiHoi();
-        if (cat === 'be-trap') setTimeout(() => scrollToSection('sec-betrap'), 200);
-        if (cat === 'lam-trap') setTimeout(() => scrollToSection('sec-trap'), 200);
-        if (cat === 'ao-dai') setTimeout(() => scrollToSection('sec-aodai'), 200);
-      }
-      else if (cat === 'mc-su-kien') openSection('mc');
-      else if (cat === 'media') openSection('media');
+      if (cat === 'be-trap')      selectItem('betrap', 'be-trap', '');
+      else if (cat === 'lam-trap' || cat === 'cuoi-hoi') selectItem('trap', 'lam-trap', '');
+      else if (cat === 'ao-dai')  selectItem('aodai', 'ao-dai', '');
+      else if (cat === 'mc-su-kien') selectItem('mc', 'mc-su-kien', '');
+      else if (cat === 'media')   selectItem('media', 'media', '');
+      else openDefaultGroups();
     });
 
-    function openCuoiHoi() {
-      closeAllPanels();
-      document.getElementById('panel-cuoi-hoi').classList.add('active');
-      // Hiển thị tất cả 3 sections
-      ['sec-betrap','sec-trap','sec-aodai'].forEach(id => document.getElementById(id).style.display = 'block');
-      renderPhotoGrid('be-trap', 'grid-betrap');
-      renderPhotoGrid('lam-trap', 'grid-trap');
-      renderPhotoGrid('ao-dai', 'grid-aodai');
-      renderChips('be-trap', 'grid-betrap', true);
-      renderChips('lam-trap', 'grid-trap', true);
-      renderChips('ao-dai', 'grid-aodai', true);
-      setTimeout(() => document.getElementById('panel-cuoi-hoi').scrollIntoView({ behavior:'smooth', block:'start' }), 50);
+    function openDefaultGroups() {
+      // Open Cưới Hỏi group by default
+      openGroup('cuoi');
+      openSub('trap');
     }
 
-    function openSection(type) {
-      closeAllPanels();
-      if (type === 'mc') {
-        document.getElementById('sec-mc').style.display = 'block';
-        renderCardList('mc-su-kien', 'grid-mc');
-        renderChips('mc-su-kien', 'grid-mc', false);
-      } else if (type === 'media') {
-        document.getElementById('sec-media').style.display = 'block';
-        renderCardList('media', 'grid-media');
-        renderChips('media', 'grid-media', false);
+    async function preloadAllCounts() {
+      const cats = ['be-trap','lam-trap','ao-dai','mc-su-kien','media'];
+      cats.forEach(c => allSvcs[c] = []);
+      const counts = { cuoi: 0, mc: 0, media: 0 };
+      await Promise.all(cats.map(async cat => {
+        const res = await API.svc.getAll({ category: cat, page: 1, limit: PAGE_SIZE });
+        if (res && typeof res.total !== 'undefined') {
+          allSvcs[cat] = res.data;
+          totalPages[cat] = Math.ceil(res.total / res.limit);
+          const n = res.total;
+          if (['be-trap','lam-trap','ao-dai'].includes(cat)) counts.cuoi += n;
+          else if (cat === 'mc-su-kien') counts.mc = n;
+          else counts.media = n;
+        } else {
+          allSvcs[cat] = res || [];
+          totalPages[cat] = 1;
+        }
+      }));
+      document.getElementById('cnt-cuoi').textContent  = counts.cuoi  || '—';
+      document.getElementById('cnt-mc').textContent    = counts.mc    || '—';
+      document.getElementById('cnt-media').textContent = counts.media || '—';
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SIDEBAR ACCORDION
+    ═══════════════════════════════════════════════════════════════════════════ */
+    function toggleGroup(grp) {
+      const body = document.getElementById('body-' + grp);
+      const hdr  = document.getElementById('grp-' + grp + '-hdr');
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      hdr.classList.toggle('open', !isOpen);
+    }
+    function openGroup(grp) {
+      document.getElementById('body-' + grp).classList.add('open');
+      document.getElementById('grp-' + grp + '-hdr').classList.add('open');
+    }
+
+    function toggleSub(sub) {
+      const body = document.getElementById('sub-body-' + sub);
+      const hdr  = document.getElementById('sub-hdr-' + sub);
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      hdr.classList.toggle('open', !isOpen);
+    }
+    function openSub(sub) {
+      document.getElementById('sub-body-' + sub).classList.add('open');
+      document.getElementById('sub-hdr-' + sub).classList.add('open');
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SELECT ITEM & LOAD
+    ═══════════════════════════════════════════════════════════════════════════ */
+    async function selectItem(section, cat, subCat) {
+      currentSection = section;
+      currentCat     = cat;
+      currentSubCat  = subCat;
+      currentPage    = 1;
+
+      // Update active state in sidebar
+      updateSidebarActive(section, subCat);
+
+      // Open parent accordion
+      if (['betrap','trap','aodai'].includes(section)) openGroup('cuoi');
+      if (section === 'mc')    openGroup('mc');
+      if (section === 'media') openGroup('media');
+      if (section === 'trap')  openSub('trap');
+      if (section === 'aodai') openSub('aodai');
+
+      // Close mobile sidebar
+      closeMobileSidebar();
+
+      // Show content panel
+      document.getElementById('content-welcome').style.display = 'none';
+      const panel = document.getElementById('content-panel');
+      panel.style.display = 'block';
+
+      // Combo banner
+      const comboBanner = document.getElementById('combo-banner');
+      comboBanner.style.display = ['betrap','trap','aodai'].includes(section) ? 'flex' : 'none';
+
+      // Panel title / subtitle
+      const titles = {
+        'betrap': ['Đội Bê Tráp Cưới Hỏi', 'Đội ngũ chuyên nghiệp, trang phục chỉn chu, đúng giờ'],
+        'trap':   ['Tráp Ăn Hỏi', subCat ? `Danh mục: ${subCatLabel(subCat)}` : 'Truyền thống và hiện đại, được trang trí tỉ mỉ'],
+        'aodai':  ['Thuê Áo Dài', subCat ? `Danh mục: ${subCatLabel(subCat)}` : 'Đa dạng mẫu mã từ truyền thống đến hiện đại'],
+        'mc':     ['MC Sự Kiện', subCat ? `Chuyên: ${subCatLabel(subCat)}` : 'MC lịch lãm, giọng truyền cảm cho lễ ăn hỏi'],
+        'media':  ['Media', subCat ? `Loại: ${subCatLabel(subCat)}` : 'Ghi lại từng khoảnh khắc đẹp trong ngày trọng đại']
+      };
+      const [t, s] = titles[section] || ['Dịch vụ', ''];
+      document.getElementById('panel-title').textContent    = t;
+      document.getElementById('panel-subtitle').textContent = s;
+
+      // Breadcrumb
+      renderBreadcrumb(section, subCat);
+
+      // Book btn
+      const bookBtn = document.getElementById('panel-book-btn');
+      bookBtn.style.display = (section === 'betrap' || section === 'mc' || section === 'media') ? 'inline-flex' : 'none';
+
+      // Load & render
+      const grid = document.getElementById('panel-grid');
+      grid.innerHTML = `<div style="text-align:center;padding:60px;"><span class="spinner" style="width:36px;height:36px;border-width:3px;display:inline-block;"></span></div>`;
+
+      await loadPage(cat, subCat, 1);
+      renderGrid();
+
+      // Animate
+      panel.classList.remove('content-fade-in');
+      void panel.offsetWidth; // reflow
+      panel.classList.add('content-fade-in');
+
+      // Scroll content into view on mobile
+      if (window.innerWidth <= 860) {
+        setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       }
-      setTimeout(() => (document.getElementById('sec-'+type) || document.getElementById('sec-mc')).scrollIntoView({ behavior:'smooth' }), 50);
     }
 
-    function scrollToSection(secId) {
-      document.getElementById(secId).scrollIntoView({ behavior:'smooth', block:'start' });
+    function subCatLabel(id) {
+      const map = {
+        'tieu-chuan':'Tiêu chuẩn','nang-cao':'Nâng cao','cao-cap':'Cao cấp',
+        'cho-doi-trap':'Cho đội Tráp','cho-dau':'Cho Dâu','cho-me-dau':'Cho Mẹ dâu','ca-nhan':'Cá nhân',
+        'chup-anh':'Chụp ảnh','anh-video':'Ảnh + video','chup-ca-nhan':'Chụp cá nhân',
+        'dam-hoi':'Đám hỏi','dam-cuoi':'Đám cưới','cuoi-hoi':'Cưới + hỏi','su-kien':'Sự kiện'
+      };
+      return map[id] || id;
     }
 
-    function closeAllPanels() {
-      document.getElementById('panel-cuoi-hoi').classList.remove('active');
-      ['sec-betrap','sec-trap','sec-aodai','sec-mc','sec-media'].forEach(id => document.getElementById(id).style.display = 'none');
-    }
-
-    function goCombo() {
-      window.location.href = 'booking-wizard.html';
-    }
-
-    function renderChips(cat, gridId, isPhoto) {
-      const container = document.getElementById('chips-' + cat);
-      if (!container) return;
-      const conf = SUBCAT_CONFIG[cat] || [];
-      if (conf.length === 0) {
-        container.style.display = 'none';
-        return;
+    function renderBreadcrumb(section, subCat) {
+      const groupLabels = {
+        'betrap':'Cưới Hỏi','trap':'Cưới Hỏi','aodai':'Cưới Hỏi','mc':'MC Sự Kiện','media':'Media'
+      };
+      const sectionLabels = {
+        'betrap':'Đội Bê Tráp','trap':'Tráp Ăn Hỏi','aodai':'Thuê Áo Dài','mc':'MC Sự Kiện','media':'Media'
+      };
+      let html = `<span>Dịch vụ</span><span class="sep">›</span><span>${groupLabels[section]}</span>`;
+      if (sectionLabels[section] !== groupLabels[section]) {
+        html += `<span class="sep">›</span><span>${sectionLabels[section]}</span>`;
       }
-      container.style.display = 'flex';
-      let html = `<button class="subcat-chip ${activeSubCat[cat] === '' ? 'active' : ''}" onclick="filterSubCat('${cat}', '', '${gridId}', ${isPhoto})">Tất cả</button>`;
-      conf.forEach(c => {
-        html += `<button class="subcat-chip ${activeSubCat[cat] === c.id ? 'active' : ''}" onclick="filterSubCat('${cat}', '${c.id}', '${gridId}', ${isPhoto})">${c.name}</button>`;
+      if (subCat) {
+        html += `<span class="sep">›</span><span class="current">${subCatLabel(subCat)}</span>`;
+      } else {
+        html += `<span class="sep">›</span><span class="current">Tất cả</span>`;
+      }
+      document.getElementById('breadcrumb').innerHTML = html;
+    }
+
+    function updateSidebarActive(section, subCat) {
+      // Remove all active
+      document.querySelectorAll('.sb-item, .sb-leaf, .sb-sub-header').forEach(el => {
+        el.classList.remove('active','active-parent');
       });
-      container.innerHTML = html;
+      // Set active
+      if (section === 'betrap') {
+        document.getElementById('si-betrap').classList.add('active');
+      } else if (section === 'trap') {
+        document.getElementById('sub-hdr-trap').classList.add('active-parent');
+        const leafId = subCat ? `sl-trap-${subCat}` : 'sl-trap-all';
+        const leaf = document.getElementById(leafId);
+        if (leaf) leaf.classList.add('active');
+      } else if (section === 'aodai') {
+        document.getElementById('sub-hdr-aodai').classList.add('active-parent');
+        const leafId = subCat ? `sl-aodai-${subCat}` : 'sl-aodai-all';
+        const leaf = document.getElementById(leafId);
+        if (leaf) leaf.classList.add('active');
+      } else if (section === 'mc') {
+        const leafId = subCat ? `sl-mc-${subCat}` : 'sl-mc-all';
+        const leaf = document.getElementById(leafId);
+        if (leaf) leaf.classList.add('active');
+      } else if (section === 'media') {
+        const leafId = subCat ? `sl-media-${subCat}` : 'sl-media-all';
+        const leaf = document.getElementById(leafId);
+        if (leaf) leaf.classList.add('active');
+      }
     }
 
-    async function filterSubCat(cat, subCatId, gridId, isPhoto) {
-      activeSubCat[cat] = subCatId;
-      renderChips(cat, gridId, isPhoto);
-      currentPages[cat] = 1;
-      const grid = document.getElementById(gridId);
-      if(grid) grid.innerHTML = '<div style="text-align:center;padding:40px;"><span class="spinner" style="width:24px;height:24px;border-width:3px;"></span></div>';
-      await loadCategoryPage(cat, 1);
-      if (isPhoto) renderPhotoGrid(cat, gridId);
-      else renderCardList(cat, gridId);
-    }
-
-    async function loadCategoryPage(cat, pageNo = 1) {
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LOAD & RENDER DATA
+    ═══════════════════════════════════════════════════════════════════════════ */
+    async function loadPage(cat, subCat, pageNo) {
+      currentPage = pageNo;
       const filters = { category: cat, page: pageNo, limit: PAGE_SIZE };
-      if (activeSubCat[cat]) filters.subCategory = activeSubCat[cat];
-
+      if (subCat) filters.subCategory = subCat;
       const res = await API.svc.getAll(filters);
       if (res && typeof res.total !== 'undefined') {
         allSvcs[cat] = res.data;
         totalPages[cat] = Math.ceil(res.total / res.limit);
-        currentPages[cat] = pageNo;
       } else {
         allSvcs[cat] = res || [];
         totalPages[cat] = 1;
-        currentPages[cat] = 1;
       }
     }
 
-    function renderPaginationHtml(cat, gridId, isPhoto) {
-      let html = `<div style="grid-column:1/-1;text-align:center;margin-top:32px;display:flex;justify-content:center;gap:8px;">`;
-      const current = currentPages[cat] || 1;
-      const total = totalPages[cat] || 1;
-      
-      if (current > 1) {
-        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage(event, '${cat}', ${current - 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-left-s-line"></i></button>`;
-      }
-      
-      for (let i = 1; i <= total; i++) {
-        if (i === current) {
-          html += `<button class="btn btn-primary" style="padding:8px 16px;min-width:auto;">${i}</button>`;
-        } else {
-          html += `<button class="btn btn-outline" style="padding:8px 16px;min-width:auto;" onclick="goToPage(event, '${cat}', ${i}, '${gridId}', ${isPhoto})">${i}</button>`;
-        }
-      }
-      
-      if (current < total) {
-        html += `<button class="btn btn-outline" style="padding:8px 12px;min-width:auto;" onclick="goToPage(event, '${cat}', ${current + 1}, '${gridId}', ${isPhoto})"><i class="ri-arrow-right-s-line"></i></button>`;
-      }
-      
-      html += `</div>`;
-      return html;
-    }
-    
-    async function goToPage(ev, cat, pageNo, gridId, isPhoto) {
-      if (ev && ev.currentTarget) {
-        ev.currentTarget.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
-      }
-      await loadCategoryPage(cat, pageNo);
-      if (isPhoto) renderPhotoGrid(cat, gridId);
-      else renderCardList(cat, gridId);
-      
-      const grid = document.getElementById(gridId);
-      if (grid) {
-        const offset = 100;
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = grid.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
-      }
-    }
+    function renderGrid() {
+      const svcs = allSvcs[currentCat] || [];
+      const grid = document.getElementById('panel-grid');
+      const isPhoto = IS_PHOTO_CAT[currentCat];
 
-    // ── Render Photo Grid ──
-    function renderPhotoGrid(cat, gridId) {
-      const svcs = allSvcs[cat] || [];
-      const grid = document.getElementById(gridId);
       if (!svcs.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)"><i class="ri-image-line" style="font-size:2rem;display:block;margin-bottom:8px;"></i>Chưa có dịch vụ nào</div>';
+        grid.innerHTML = `<div class="svc-empty">
+          <i class="ri-image-2-line"></i>
+          <p>Chưa có dịch vụ nào trong danh mục này</p>
+        </div>`;
         return;
       }
-      
-      let html = svcs.map(s => photoCardHtml(s)).join('');
-      
-      if (totalPages[cat] && totalPages[cat] > 1) {
-        html += renderPaginationHtml(cat, gridId, true);
+
+      let html = isPhoto
+        ? `<div class="photo-grid">${svcs.map(s => photoCardHtml(s)).join('')}</div>`
+        : svcs.map(s => cardHHtml(s)).join('');
+
+      // Pagination
+      const total = totalPages[currentCat] || 1;
+      if (total > 1) {
+        html += `<div class="paging-row">`;
+        if (currentPage > 1) html += `<button class="btn btn-ghost btn-sm" onclick="gotoPage(${currentPage-1})"><i class="ri-arrow-left-s-line"></i></button>`;
+        for (let i=1; i<=total; i++) {
+          html += `<button class="btn ${i===currentPage?'btn-primary':'btn-ghost'} btn-sm" onclick="gotoPage(${i})" style="min-width:36px;">${i}</button>`;
+        }
+        if (currentPage < total) html += `<button class="btn btn-ghost btn-sm" onclick="gotoPage(${currentPage+1})"><i class="ri-arrow-right-s-line"></i></button>`;
+        html += `</div>`;
       }
-      
+
       grid.innerHTML = html;
+    }
+
+    async function gotoPage(pageNo) {
+      const grid = document.getElementById('panel-grid');
+      grid.innerHTML = `<div style="text-align:center;padding:60px;"><span class="spinner" style="width:36px;height:36px;border-width:3px;display:inline-block;"></span></div>`;
+      await loadPage(currentCat, currentSubCat, pageNo);
+      renderGrid();
+      document.getElementById('content-panel').scrollIntoView({ behavior:'smooth', block:'start' });
     }
 
     function photoCardHtml(s) {
       const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image || ''));
       const nameLower = s.name ? s.name.toLowerCase() : '';
-      const hasCaoCap = nameLower.includes('cao cấp') || nameLower.includes('vip') || s.subCategory === 'cao-cap';
+      const hasCaoCap  = nameLower.includes('cao cấp') || s.subCategory === 'cao-cap';
       const hasNangCao = nameLower.includes('nâng cao') || s.subCategory === 'nang-cao';
-      
-      let badgeHtml = '';
-      if (hasCaoCap) {
-        badgeHtml = `<div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg, var(--gold), #d4af37);color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;box-shadow:0 4px 12px rgba(184,148,90,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:4px;"><i class="ri-vip-crown-fill"></i> Cao cấp</div>`;
-      } else if (hasNangCao) {
-        badgeHtml = `<div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg, #4A90E2, #357ABD);color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;box-shadow:0 4px 12px rgba(74,144,226,0.3);z-index:2;text-transform:uppercase;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.4);display:flex;align-items:center;gap:4px;"><i class="ri-star-fill"></i> Nâng cao</div>`;
-      }
-
+      let badge = '';
+      if (hasCaoCap)  badge = `<div style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--gold),#d4af37);color:white;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;z-index:2;display:flex;align-items:center;gap:3px;"><i class="ri-vip-crown-fill"></i>Cao cấp</div>`;
+      else if (hasNangCao) badge = `<div style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#4A90E2,#357ABD);color:white;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;z-index:2;display:flex;align-items:center;gap:3px;"><i class="ri-star-fill"></i>Nâng cao</div>`;
       return `<div class="photo-card" onclick="openDetail('${s.id}')" style="position:relative;">
-        ${badgeHtml}
+        ${badge}
         <img src="${imgSrc}" alt="${s.name}" loading="lazy" onerror="this.src='https://placehold.co/400x530?text=BêTráp'">
         <div class="photo-card-overlay">
-          <div class="photo-card-name" style="margin-bottom:4px;">${s.name}</div>
-          ${s.category !== 'be-trap' ? `<div style="font-size:0.95rem; font-weight:700; color:var(--gold); margin-bottom:12px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">${UI.formatCurrency(s.price)} / ${s.unit || 'buổi'}</div>` : ''}
+          <div class="photo-card-name">${s.name}</div>
+          ${s.category !== 'be-trap' ? `<div class="photo-card-price">${UI.formatCurrency(s.price)} / ${s.unit || 'buổi'}</div>` : ''}
           <button onclick="event.stopPropagation();openDetail('${s.id}')">Xem chi tiết</button>
         </div>
       </div>`;
     }
 
-    // ── Render Card List (MC/Media) ──
-    function renderCardList(cat, gridId) {
-      const svcs = allSvcs[cat] || [];
-      const grid = document.getElementById(gridId);
-      if (!svcs.length) {
-        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Chưa có dịch vụ nào</div>';
-        return;
-      }
-      let html = svcs.map(s => {
-        const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image||''));
-        return `<div class="svc-card-h" onclick="openDetail('${s.id}')">
-          <div class="svc-card-h-img"><img src="${imgSrc}" alt="${s.name}" onerror="this.src='https://placehold.co/180x140?text=BêTráp'"></div>
-          <div class="svc-card-h-body">
-            <div style="font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
-            <div style="font-weight:700;font-size:1rem;color:var(--text-dark);">${s.name}</div>
-            <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">${(s.description||'').slice(0,120)}${s.description && s.description.length>120?'...':''}</div>
-            <div style="font-size:.8rem;color:var(--text-muted);"><i class="ri-map-pin-line"></i> ${s.location||'—'}</div>
-            <div style="display:flex;gap:8px;margin-top:6px;">
-                <button class="btn btn-outline btn-sm" style="width:fit-content;" onclick="event.stopPropagation();openDetail('${s.id}')"><i class="ri-eye-line"></i> Xem chi tiết</button>
-                <button class="btn btn-primary btn-sm" style="width:fit-content;" onclick="event.stopPropagation();openBookSimple('${cat}','${s.id}')"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
-            </div>
+    function cardHHtml(s) {
+      const imgSrc = s.image && s.image.startsWith('http') ? s.image : (rootPath() + (s.image||''));
+      return `<div class="svc-card-h" onclick="openDetail('${s.id}')">
+        <div class="svc-card-h-img"><img src="${imgSrc}" alt="${s.name}" onerror="this.src='https://placehold.co/180x140?text=BêTráp'"></div>
+        <div class="svc-card-h-body">
+          <div style="font-size:.7rem;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;">${CAT_LABELS[s.category]||''}</div>
+          <div style="font-weight:700;font-size:1rem;color:var(--text-dark);">${s.name}</div>
+          <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">${(s.description||'').slice(0,120)}${s.description&&s.description.length>120?'...':''}</div>
+          ${s.price ? `<div style="font-size:.9rem;color:var(--gold);font-weight:700;">${UI.formatCurrency(s.price)} / ${s.unit||'buổi'}</div>` : ''}
+          <div style="font-size:.8rem;color:var(--text-muted);"><i class="ri-map-pin-line"></i> ${s.location||'—'}</div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openDetail('${s.id}')"><i class="ri-eye-line"></i> Chi tiết</button>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openBookSimple('${s.category}','${s.id}')"><i class="ri-calendar-check-line"></i> Đặt ngay</button>
           </div>
-        </div>`;
-      }).join('');
-      
-      if (totalPages[cat] && totalPages[cat] > 1) {
-        html += renderPaginationHtml(cat, gridId, false);
-      }
-      
-      grid.innerHTML = html;
+        </div>
+      </div>`;
     }
 
-    // ── Detail Lightbox ──
+    /* ═══════════════════════════════════════════════════════════════════════════
+       DETAIL LIGHTBOX
+    ═══════════════════════════════════════════════════════════════════════════ */
     function openDetail(svcId) {
       let svc = null;
       for (const cat of Object.keys(allSvcs)) {
@@ -638,61 +1071,53 @@
       }
       if (!svc) return;
       const imgSrc = svc.image && svc.image.startsWith('http') ? svc.image : (rootPath() + (svc.image||''));
-      const mainImg = document.getElementById('dm-img');
-      mainImg.src = imgSrc;
-      
+      document.getElementById('dm-img').src = imgSrc;
       const gallery = document.getElementById('dm-gallery');
       gallery.innerHTML = '';
       if (svc.gallery && svc.gallery.length > 0) {
         const allImages = [imgSrc, ...svc.gallery.map(url => url.startsWith('http') ? url : rootPath() + url)];
-        gallery.innerHTML = allImages.map((url, i) => 
+        gallery.innerHTML = allImages.map((url, i) =>
           `<img src="${url}" class="dm-thumb ${i===0?'active':''}" onclick="document.getElementById('dm-img').src='${url}'; document.querySelectorAll('.dm-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">`
         ).join('');
         gallery.style.display = 'flex';
-      } else {
-        gallery.style.display = 'none';
-      }
-
+      } else { gallery.style.display = 'none'; }
       document.getElementById('dm-name').textContent = svc.name;
-      document.getElementById('dm-cat').textContent = CAT_LABELS[svc.category] || svc.category;
-      document.getElementById('dm-desc').innerHTML = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
-      
+      document.getElementById('dm-cat').textContent  = CAT_LABELS[svc.category] || svc.category;
+      document.getElementById('dm-desc').innerHTML   = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
       const pkgDiv = document.getElementById('dm-packages');
       if (svc.price) {
-        pkgDiv.innerHTML = `<div style="font-size:1.2rem;color:var(--gold);font-weight:700;margin-top:16px;">
-          ${UI.formatCurrency(svc.price)} / ${svc.unit || 'buổi'}
-        </div>`;
+        pkgDiv.innerHTML = `<div style="font-size:1.2rem;color:var(--gold);font-weight:700;">${UI.formatCurrency(svc.price)} / ${svc.unit||'buổi'}</div>`;
         pkgDiv.style.display = 'block';
-      } else {
-        pkgDiv.style.display = 'none';
-      }
-
+      } else { pkgDiv.style.display = 'none'; }
+      // Book btn in detail
+      const dmBook = document.getElementById('dm-book-btn');
+      dmBook.style.display = 'inline-flex';
+      dmBook.onclick = () => { closeDetail(); openBookSimple(svc.category, svc.id); };
       document.getElementById('detail-modal').classList.add('open');
     }
     function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
     document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
 
-    // ── Book Simple (Be-trap / MC / Media) ──
+    /* ═══════════════════════════════════════════════════════════════════════════
+       BOOK SIMPLE
+    ═══════════════════════════════════════════════════════════════════════════ */
     const BS_CONFIG = {
-      'be-trap':    { title:'Đặt Đội Bê Tráp',   subtitle:'Điền thông tin ngày lễ của bạn', qty:true },
+      'be-trap':    { title:'Đặt Đội Bê Tráp',   subtitle:'Điền thông tin ngày lễ của bạn',      qty:true },
       'lam-trap':   { title:'Đặt Tráp Ăn Hỏi',   subtitle:'Cho chúng tôi biết kiểu tráp bạn muốn', qty:false },
-      'ao-dai':     { title:'Thuê Áo Dài',        subtitle:'Số bộ và ngày cần thuê', qty:true },
-      'mc-su-kien': { title:'Đặt MC Sự Kiện',     subtitle:'Thông tin buổi lễ của bạn', qty:false },
-      'media':      { title:'Đặt Media',           subtitle:'Gói chụp ảnh / quay phim', qty:false },
+      'ao-dai':     { title:'Thuê Áo Dài',        subtitle:'Số bộ và ngày cần thuê',              qty:true },
+      'mc-su-kien': { title:'Đặt MC Sự Kiện',     subtitle:'Thông tin buổi lễ của bạn',           qty:false },
+      'media':      { title:'Đặt Media',           subtitle:'Gói chụp ảnh / quay phim',           qty:false },
     };
 
     function openBookSimple(cat, svcId = null) {
       const sess = API.auth.currentSession();
       if (!sess) return UI.modal({ title:'Cần đăng nhập', body:'Vui lòng đăng nhập để đặt dịch vụ.', confirmText:'Đăng nhập', onConfirm:()=>location.href='login.html' });
-
       currentBookCat = cat;
       currentBookSvcId = svcId;
       const cfg = BS_CONFIG[cat] || BS_CONFIG['be-trap'];
-      document.getElementById('bs-title').textContent = cfg.title;
+      document.getElementById('bs-title').textContent    = cfg.title;
       document.getElementById('bs-subtitle').textContent = cfg.subtitle;
       document.getElementById('bs-row-qty').style.display = cfg.qty ? 'block' : 'none';
-
-      // Populate service dropdown if no specific svcId
       const svcRow = document.getElementById('bs-row-svc');
       const svcSel = document.getElementById('bs-svc-select');
       const svcs = allSvcs[cat] || [];
@@ -703,39 +1128,32 @@
         svcRow.style.display = 'none';
         if (!svcId && svcs.length === 1) currentBookSvcId = svcs[0].id;
       }
-
-      // Reset
-      ['bs-date','bs-time','bs-address','bs-qty','bs-note'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      ['bs-date','bs-time','bs-address','bs-qty','bs-note'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
       document.getElementById('bs-submit').disabled = false;
       document.getElementById('bs-submit').textContent = 'Đăng ký';
-
       const modal = document.getElementById('book-simple-modal');
       modal.style.opacity = '1'; modal.style.pointerEvents = 'all';
       document.getElementById('book-simple-inner').style.transform = 'translateY(0)';
     }
-
     function closeBookSimple() {
       const modal = document.getElementById('book-simple-modal');
       modal.style.opacity = '0'; modal.style.pointerEvents = 'none';
       document.getElementById('book-simple-inner').style.transform = 'translateY(20px)';
     }
-
+    document.getElementById('book-simple-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeBookSimple(); });
     document.getElementById('bs-submit').addEventListener('click', async () => {
-      const date = document.getElementById('bs-date').value;
-      const time = document.getElementById('bs-time').value;
+      const date    = document.getElementById('bs-date').value;
+      const time    = document.getElementById('bs-time').value;
       const address = document.getElementById('bs-address').value.trim();
       if (!date || !time) return UI.toast('Vui lòng điền ngày và giờ', 'error');
       if (!address || address.length < 5) return UI.toast('Vui lòng nhập địa chỉ tổ chức', 'error');
-
       let serviceId = currentBookSvcId;
       const sel = document.getElementById('bs-svc-select');
       if (!serviceId && sel && sel.value) serviceId = sel.value;
       if (!serviceId) return UI.toast('Vui lòng chọn dịch vụ', 'error');
-
-      const qty = document.getElementById('bs-qty').value;
-      const note = document.getElementById('bs-note').value;
+      const qty    = document.getElementById('bs-qty').value;
+      const note   = document.getElementById('bs-note').value;
       const noteStr = [qty ? 'Số lượng: '+qty : '', note].filter(Boolean).join(' | ');
-
       const btn = document.getElementById('bs-submit');
       btn.disabled = true; btn.textContent = 'Đang xử lý...';
       try {
@@ -746,6 +1164,25 @@
         btn.disabled = false; btn.textContent = 'Đăng ký';
       }
     });
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       MOBILE SIDEBAR
+    ═══════════════════════════════════════════════════════════════════════════ */
+    function toggleMobileSidebar() {
+      const sb = document.getElementById('svc-sidebar');
+      const ov = document.getElementById('mobile-overlay');
+      const isOpen = sb.classList.contains('mobile-open');
+      sb.classList.toggle('mobile-open', !isOpen);
+      ov.classList.toggle('show', !isOpen);
+      document.getElementById('mobile-toggle').innerHTML = isOpen
+        ? '<i class="ri-menu-2-line"></i>'
+        : '<i class="ri-close-line"></i>';
+    }
+    function closeMobileSidebar() {
+      document.getElementById('svc-sidebar').classList.remove('mobile-open');
+      document.getElementById('mobile-overlay').classList.remove('show');
+      document.getElementById('mobile-toggle').innerHTML = '<i class="ri-menu-2-line"></i>';
+    }
   </script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>AOS.init({ duration:700, once:true });</script>
