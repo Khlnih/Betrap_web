@@ -454,20 +454,6 @@
               <i class="ri-store-2-line"></i> Đăng Ký Cung Cấp
             </a>
           </div>
-          <div class="hero-stats-row">
-            <div class="hero-stat">
-              <div class="num" data-count="500">0</div>
-              <div class="lbl">Đơn thành công</div>
-            </div>
-            <div class="hero-stat">
-              <div class="num" data-count="120">0</div>
-              <div class="lbl">Đánh giá</div>
-            </div>
-            <div class="hero-stat">
-              <div class="num" data-count="98">0</div>
-              <div class="lbl">% Hài lòng</div>
-            </div>
-          </div>
         </div>
 
         <!-- RIGHT – floating cards + image -->
@@ -718,9 +704,6 @@
       UI.initPage();
       UI.renderFooter('footer-container');
 
-      // Compute actual stats from data
-      await calculateHeroStats();
-
       // Counter animation
       const counters = document.querySelectorAll('[data-count]');
       const io = new IntersectionObserver(entries => {
@@ -736,39 +719,6 @@
       // Render featured services
       renderFeatured();
     });
-
-    async function calculateHeroStats() {
-      try {
-        let sat = 98;
-        let totalReviewsCount = 120;
-        let doneTxnsCalc = 15;
-
-        if (API.stats && API.stats.global) {
-          const st = await API.stats.global();
-          if (st) {
-            if (st.doneTxns === 0 && st.totalReviews === 0) {
-              // Dữ liệu mẫu ban đầu nếu hệ thống hoàn toàn mới
-              doneTxnsCalc = 1500;
-              totalReviewsCount = 450;
-              sat = 98;
-            } else {
-              doneTxnsCalc = st.doneTxns;
-              totalReviewsCount = st.totalReviews;
-              sat = st.avgRating ? Math.round((st.avgRating / 5) * 100) : 100;
-            }
-          }
-        }
-
-        const statEls = document.querySelectorAll('.hero-stat .num');
-        if (statEls.length === 3) {
-          statEls[0].dataset.count = doneTxnsCalc;
-          statEls[1].dataset.count = totalReviewsCount;
-          statEls[2].dataset.count = sat;
-        }
-      } catch(e) {
-        console.error('Error computing stats:', e);
-      }
-    }
 
     async function renderFeatured() {
       const svcs = await API.svc.getAll({ sort: 'rating' });
