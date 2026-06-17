@@ -96,6 +96,9 @@ exports.createLead = async (req, res) => {
 
         const mt = b.mamTrap || null;
         const id = 'LEAD_' + uid().toUpperCase();
+        
+        let weddingDate = b.ngayAnHoi || null;
+        if (weddingDate === 'undecided' || weddingDate === '') weddingDate = null;
 
         await db.query(`
             INSERT INTO Leads
@@ -108,7 +111,7 @@ exports.createLead = async (req, res) => {
                 mt ? (mt.soTrap != null ? String(mt.soTrap) : null) : null,
                 JSON.stringify(mt ? (mt.cacTrap || []) : []),
                 mt ? (mt.yeuCauRieng || null) : null,
-                b.phongCach || null, b.khuVuc || null, b.ngayAnHoi || null,
+                b.phongCach || null, b.khuVuc || null, weddingDate,
                 b.diaDiem || null, b.nganSach || null,
                 c.thoiGian || null, c.kenh || null, b.loaiYeuCau || 'day-du'
             ]
@@ -127,7 +130,32 @@ exports.getLeads = async (req, res) => {
         if (!req.user || req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Chỉ admin mới xem được danh sách yêu cầu.' });
         }
-        const r = await db.query('SELECT * FROM Leads ORDER BY CreatedAt DESC LIMIT 500');
+        // Đảm bảo bảng tồn tại (safety net nếu initDB chưa kịp chạy)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS Leads (
+                Id             VARCHAR(50) PRIMARY KEY,
+                Name           VARCHAR(200) NOT NULL,
+                Phone          VARCHAR(30)  NOT NULL,
+                Zalo           VARCHAR(30),
+                Email          VARCHAR(150),
+                Services       TEXT,
+                TrayCount      VARCHAR(20),
+                Trays          TEXT,
+                TrayNote       TEXT,
+                Style          VARCHAR(50),
+                Region         VARCHAR(30),
+                WeddingDate    VARCHAR(30),
+                Location       VARCHAR(300),
+                Budget         VARCHAR(50),
+                ContactTime    VARCHAR(30),
+                ContactChannel VARCHAR(30),
+                RequestType    VARCHAR(30) DEFAULT 'day-du',
+                Status         VARCHAR(20) DEFAULT 'new',
+                CreatedAt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UpdatedAt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        const r = await db.query('SELECT * FROM leads ORDER BY createdat DESC LIMIT 500');
         const leads = r.recordset.map(row => ({
             ...row,
             services: safeJSONParse(row.services, []),
@@ -139,6 +167,7 @@ exports.getLeads = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
 
 // PUT /api/leads/:id/status  (ADMIN — đổi trạng thái yêu cầu)
 exports.updateLeadStatus = async (req, res) => {

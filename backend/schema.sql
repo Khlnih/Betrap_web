@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS Services CASCADE;
 DROP TABLE IF EXISTS CustomerProfiles CASCADE;
 DROP TABLE IF EXISTS ProviderProfiles CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
+DROP TABLE IF EXISTS Leads CASCADE;
 
 -- 1. Bảng Users
 CREATE TABLE Users (
@@ -245,22 +246,22 @@ CREATE TABLE BlogBlocks (
 CREATE TABLE Leads (
     Id              VARCHAR(50) PRIMARY KEY,
     Name            VARCHAR(200) NOT NULL,
-    Phone           VARCHAR(20) NOT NULL,
-    Zalo            VARCHAR(20),
+    Phone           VARCHAR(30)  NOT NULL,
+    Zalo            VARCHAR(30),
     Email           VARCHAR(150),
-    Services        TEXT,
-    TrayCount       VARCHAR(20),
-    Trays           TEXT,
+    Services        TEXT,            -- JSON array các dịch vụ quan tâm
+    TrayCount       VARCHAR(20),     -- '5' | '7' | '9' | 'tu-van-goi-y'
+    Trays           TEXT,            -- JSON array các tráp đã chọn
     TrayNote        TEXT,
     Style           VARCHAR(50),
-    Region          VARCHAR(50),
-    WeddingDate     VARCHAR(50),
-    Location        VARCHAR(500),
-    Budget          VARCHAR(100),
-    ContactTime     VARCHAR(50),
-    ContactChannel  VARCHAR(50),
-    RequestType     VARCHAR(50),
-    Status          VARCHAR(20) DEFAULT 'new', -- new, contacted, closed
+    Region          VARCHAR(30),
+    WeddingDate     VARCHAR(30),     -- ngày ăn hỏi hoặc 'undecided'
+    Location        VARCHAR(300),
+    Budget          VARCHAR(50),
+    ContactTime     VARCHAR(30),
+    ContactChannel  VARCHAR(30),
+    RequestType     VARCHAR(30) DEFAULT 'day-du', -- 'day-du' | 'goi-nhanh'
+    Status          VARCHAR(20) DEFAULT 'new',    -- new | contacted | quoted | won | lost
     CreatedAt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

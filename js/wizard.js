@@ -363,28 +363,45 @@
     btnNext.disabled=true; btnNext.innerHTML='<i class="ri-loader-4-line" style="animation:bw-spin 1s linear infinite"></i> Đang gửi…';
     const payload=buildPayload(mode);
     let code='BT-'+Math.random().toString(36).slice(2,8).toUpperCase();
+    let apiSaved=false, apiOffline=false;
     try{
       if(window.API && API.lead && API.lead.create){
         const r=await API.lead.create(payload);
-        if(r && r.id) code=r.id;
+        if(r && r.id){ code=r.id; apiSaved=true; }
+        else { apiSaved=true; }
       }else{
+        apiOffline=true;
         console.warn('[wizard] API.lead.create không có — chạy chế độ offline.', payload);
       }
     }catch(err){
-      // Không chặn trải nghiệm khách hàng nếu backend lỗi/chưa chạy
-      console.warn('[wizard] Gửi lead thất bại, hiển thị thành công offline:', err && err.message, payload);
+      console.error('[wizard] Gửi lead thất bại:', err && err.message, payload);
+      const isNetwork=/Failed to fetch|NetworkError|net::ERR/i.test(err && err.message||'');
+      if(isNetwork){
+        apiOffline=true;
+      } else {
+        // Lỗi rõ ràng từ server (400/500) — báo lỗi cho user
+        btnNext.disabled=false;
+        btnNext.innerHTML='<i class="ri-send-plane-fill"></i> Gửi yêu cầu';
+        footHelp.textContent='Gửi thất bại: '+(err && err.message||'Lỗi máy chủ. Vui lòng thử lại.');
+        footHelp.className='helper warn';
+        return;
+      }
     }
-    showSuccess(mode,code);
+    showSuccess(mode, code, apiSaved, apiOffline);
   }
 
-  function showSuccess(mode,code){
+  function showSuccess(mode, code, apiSaved, apiOffline){
     const extra = mode==='quick'
       ? `<p>Tư vấn viên sẽ gọi cho bạn qua số <b>${esc(state.phone)}</b> trong <b>~15 phút</b> (${timeName(state.contactTime)}).</p>`
       : `<p>Cảm ơn <b>${esc(state.name)||'bạn'}</b>. Đội ngũ CSKH sẽ liên hệ qua <b>${channelName(state.contactChannel)}</b> trong vòng <b>24 giờ</b> (${timeName(state.contactTime)}) để tư vấn và báo giá.</p>`;
+    const offlineNote = apiOffline
+      ? `<div style="margin-top:12px;padding:10px 14px;background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.4);border-radius:10px;font-size:.82rem;color:#92400e;"><i class="ri-wifi-off-line"></i> Lưu ý: Yêu cầu được ghi nhận nhưng chưa lưu vào hệ thống (server đang offline). Vui lòng <a href="https://zalo.me/" target="_blank" style="color:#b45309;font-weight:700;">nhắn Zalo</a> hoặc gọi lại sau.</div>`
+      : '';
     body.innerHTML=`<div class="success">
       <div class="seal"><i class="ri-check-line"></i></div>
       <h2>Đã gửi yêu cầu!</h2>${extra}
       <div class="code-tag">Mã yêu cầu: ${esc(code)}</div>
+      ${offlineNote}
       <div class="succ-actions">
         <a class="btn btn-zalo" href="${ZALO_OA}" target="_blank" rel="noopener"><i class="ri-wechat-line"></i> Nhắn Zalo ngay</a>
         <button class="btn btn-ghost" id="bw-succ-close"><i class="ri-home-4-line"></i> Đóng</button>
