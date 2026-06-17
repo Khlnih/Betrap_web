@@ -365,24 +365,32 @@ const UI = (() => {
   function renderContactWidget() {
     if (document.getElementById('contact-widget')) return;
     const phone = "0915650548";
+    const fbLink = "https://facebook.com"; // Thêm link thực tế sau
     const html = `
       <div class="contact-widget" id="contact-widget">
         <div class="cw-panel" id="cw-panel">
           <div class="cw-header">
-            Hỗ trợ trực tuyến
+            Kết nối trực tuyến
             <button class="cw-close" onclick="document.getElementById('cw-fab').click()"><i class="ri-close-line"></i></button>
           </div>
-          <div class="cw-desc">BêTráp luôn sẵn sàng lắng nghe và hỗ trợ bạn 24/7.</div>
-          <a href="https://zalo.me/${phone}" target="_blank" class="cw-btn zalo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1024px-Icon_of_Zalo.svg.png" alt="Zalo" style="filter:brightness(0) invert(1); width: 24px; height: 24px;">
-            Chat Zalo ngay
+          <div class="cw-desc">Chọn nền tảng bạn quen thuộc để nhận tư vấn cực nhanh từ BêTráp nhé!</div>
+          <a href="https://zalo.me/${phone}" target="_blank" class="cw-btn cw-zalo">
+            <div class="cw-btn-icon"><span style="font-family:Arial;font-weight:900;font-size:18px;">Z</span></div>
+            <span>Chat qua Zalo</span>
           </a>
-          <a href="tel:${phone}" class="cw-btn phone">
-            <i class="ri-phone-fill"></i> Gọi ${phone}
+          <a href="${fbLink}" target="_blank" class="cw-btn cw-fb">
+            <div class="cw-btn-icon"><i class="ri-messenger-fill"></i></div>
+            <span>Chat qua Facebook</span>
           </a>
         </div>
-        <button class="cw-fab" id="cw-fab" onclick="this.classList.toggle('active'); document.getElementById('cw-panel').classList.toggle('open');">
-          <i class="ri-customer-service-2-fill"></i>
+        <button class="cw-fab" id="cw-fab" onclick="
+          this.classList.toggle('active'); 
+          document.getElementById('cw-panel').classList.toggle('open');
+          const icon = this.querySelector('i');
+          if(this.classList.contains('active')) { icon.className='ri-close-line'; icon.style.fontSize='2.6rem'; }
+          else { icon.className='ri-chat-smile-3-fill'; icon.style.fontSize='2.2rem'; }
+        ">
+          <i class="ri-chat-smile-3-fill" style="font-size:2.2rem; transition:all .2s;"></i>
         </button>
       </div>
     `;
