@@ -60,6 +60,7 @@ CREATE TABLE Services (
     Name VARCHAR(200) NOT NULL,
     Description TEXT,
     Price DECIMAL(18,0) NOT NULL,
+    PriceMax DECIMAL(18,0),
     Unit VARCHAR(50),
     Image VARCHAR(500),
     Location VARCHAR(200),

@@ -47,7 +47,7 @@ exports.getAll = async (req, res) => {
         const services = result.recordset.map(s => ({
             id: s.id, providerId: s.providerid, providerName: s.providername,
             category: s.category, subCategory: s.subcategory, name: s.name, description: s.description,
-            price: s.price, unit: s.unit, image: s.image, location: s.location,
+            price: s.price, priceMax: s.pricemax, unit: s.unit, image: s.image, location: s.location,
             active: s.active, rating: s.rating, reviewCount: s.reviewcount,
             tags: safeJSONParse(s.tags, []),
             gallery: safeJSONParse(s.gallery, []),
@@ -78,7 +78,7 @@ exports.getById = async (req, res) => {
             id: s.id, providerId: s.providerid, providerName: s.providername,
             providerPhone: s.providerphone, providerBio: s.bio,
             category: s.category, subCategory: s.subcategory, name: s.name, description: s.description,
-            price: s.price, unit: s.unit, image: s.image, location: s.location,
+            price: s.price, priceMax: s.pricemax, unit: s.unit, image: s.image, location: s.location,
             active: s.active, rating: s.rating, reviewCount: s.reviewcount,
             tags: safeJSONParse(s.tags, []),
             gallery: safeJSONParse(s.gallery, []),
@@ -88,39 +88,38 @@ exports.getById = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-    const { category, subCategory, name, description, price, unit, image, location, tags, gallery } = req.body;
+    const { category, subCategory, name, description, price, priceMax, unit, image, location, tags, gallery } = req.body;
     if (!category || !name || !price) return res.status(400).json({ error: 'Thiếu thông tin dịch vụ.' });
     try {
         const id = 'SVC_' + uid();
         const tagsStr = JSON.stringify(tags || []);
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
         await db.query(
-            `INSERT INTO Services (Id, ProviderId, Category, SubCategory, Name, Description, Price, Unit, Image, Location, Tags, Gallery)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-            [id, req.user.userId, category, subCategory || null, name, description || null, parseFloat(price), unit || 'buổi', image || null, location || null, tagsStr, galleryStr]
+            `INSERT INTO Services (Id, ProviderId, Category, SubCategory, Name, Description, Price, PriceMax, Unit, Image, Location, Tags, Gallery)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+            [id, req.user.userId, category, subCategory || null, name, description || null, parseFloat(price), priceMax ? parseFloat(priceMax) : null, unit || 'buổi', image || null, location || null, tagsStr, galleryStr]
         );
         res.json({ id, message: 'Tạo dịch vụ thành công!' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
 
 exports.update = async (req, res) => {
-    const { name, subCategory, description, price, unit, image, location, tags, gallery, active } = req.body;
+    const { name, subCategory, description, price, priceMax, unit, image, location, tags, gallery, active } = req.body;
     try {
         const check = await db.query('SELECT ProviderId FROM Services WHERE Id = $1', [req.params.id]);
         if (!check.recordset.length) return res.status(404).json({ error: 'Service not found' });
-        if (check.recordset[0].providerid !== req.user.userId) return res.status(403).json({ error: 'Không có quyền.' });
-        
-        const tagsStr = tags ? JSON.stringify(tags) : null;
+        if (check.recordset[0].providerid !== req.user.userId) return res.status(403).json({ error: 'Forbidden' });
+
+        const tagsStr = JSON.stringify(tags || []);
         const galleryStr = gallery && gallery.length ? JSON.stringify(gallery) : null;
-        const isActive = active !== undefined ? active : true;
         
         await db.query(
-            `UPDATE Services SET Name=$1, SubCategory=$2, Description=$3, Price=$4, Unit=$5, Image=$6,
-             Location=$7, Tags=$8, Gallery=$9, Active=$10, UpdatedAt=CURRENT_TIMESTAMP
-             WHERE Id=$11`,
-            [name, subCategory || null, description || null, parseFloat(price), unit || 'buổi', image || null, location || null, tagsStr, galleryStr, isActive, req.params.id]
+            `UPDATE Services 
+             SET Name=$1, SubCategory=$2, Description=$3, Price=$4, PriceMax=$5, Unit=$6, Image=$7, Location=$8, Tags=$9, Gallery=$10, Active=$11, UpdatedAt=CURRENT_TIMESTAMP
+             WHERE Id=$12`,
+            [name, subCategory || null, description || null, parseFloat(price), priceMax ? parseFloat(priceMax) : null, unit || 'buổi', image || null, location || null, tagsStr, galleryStr, active !== false, req.params.id]
         );
-        res.json({ success: true });
+        res.json({ message: 'Cập nhật thành công!' });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
 
@@ -154,7 +153,7 @@ exports.getProviderServices = async (req, res) => {
         const services = result.recordset.map(s => ({
             id: s.id, providerId: s.providerid, providerName: s.providername,
             category: s.category, subCategory: s.subcategory, name: s.name, description: s.description,
-            price: s.price, unit: s.unit, image: s.image, location: s.location,
+            price: s.price, priceMax: s.pricemax, unit: s.unit, image: s.image, location: s.location,
             active: s.active === 1 || s.active === true,
             rating: s.rating, reviewCount: s.reviewcount,
             tags: safeJSONParse(s.tags, []),
