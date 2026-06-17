@@ -24,7 +24,6 @@
     {id:'mam-trap', ic:'ri-gift-2-line',     name:'Mâm tráp ăn hỏi'},
     {id:'be-trap',  ic:'ri-team-line',        name:'Đội bê tráp'},
     {id:'ao-dai',   ic:'ri-shirt-line',       name:'Thuê áo dài'},
-    {id:'media',    ic:'ri-camera-lens-line', name:'Chụp ảnh & quay phim'},
     {id:'mc',       ic:'ri-mic-2-line',       name:'MC dẫn lễ'},
   ];
   // Northern (miền Bắc) trays. img = ảnh thật; nếu chưa có dùng swatch màu.
@@ -41,9 +40,9 @@
     {id:'banh-kem',  emoji:'🎂', name:'Bánh kem',          desc:'Mâm bánh hiện đại',      color:'#E0D2C0'},
   ];
   const TIERS = [
-    {n:5, img:'trap5', name:'Gói cơ bản',   price:'từ 3,5 triệu', desc:'Đủ lễ truyền thống: trầu cau, rượu thuốc, chè, mứt sen, bánh cốm.'},
-    {n:7, img:'trap7', name:'Gói phổ biến', price:'từ 5,8 triệu', desc:'Thêm bánh phu thê và mâm ngũ quả kết long phụng.', badge:'Chọn nhiều'},
-    {n:9, img:'trap9', name:'Gói đầy đủ',   price:'từ 8,5 triệu', desc:'Trọn vẹn thêm xôi gấc – gà và lợn sữa quay.'},
+    {n:5, img:'trap5', name:'Tiêu chuẩn', price:'từ 3,5 triệu', desc:'Mâm truyền thống xếp tháp tròn, trang trí hoa lụa. Sính lễ phổ thông, phom dáng chuẩn theo mẫu.'},
+    {n:7, img:'trap7', name:'Nâng cao', price:'từ 5,8 triệu', desc:'Mâm hiện đại, trang trí hoa lụa cao cấp hoặc điểm hoa tươi. Lễ vật thương hiệu, thiết kế sang trọng.', badge:'Chọn nhiều'},
+    {n:9, img:'trap9', name:'Cao cấp', price:'từ 8,5 triệu', desc:'Mâm VIP nghệ thuật, 100% hoa tươi hoặc kết long phụng. Lễ vật thượng hạng, thiết kế độc bản.'},
   ];
   const DEFAULTS = {
     5:['trau-cau','ruou-thuoc','che','mut-sen','banh-com'],
@@ -170,10 +169,10 @@
     body.innerHTML=`
       <div class="opt-grid three">${TIERS.map(t=>`
         <div class="tier-card ${state.trayCount===t.n?'on':''}" data-count="${t.n}">
-          <div class="photo"><img src="${IMG[t.img]}" alt="Mâm ${t.n} tráp">
-            <span class="numbadge"><b>${t.n}</b> tráp</span>${t.badge?`<span class="topbadge">${t.badge}</span>`:''}
-            <button class="zoom-btn" data-zoom="${t.img}" data-cap="Mâm ${t.n} tráp – ${t.name}" aria-label="Phóng to"><i class="ri-zoom-in-line"></i></button></div>
-          <div class="body"><div class="t-name">${t.name}</div><div class="t-price">${t.price} <small>/ bộ</small></div><div class="t-desc">${t.desc}</div></div>
+          <div class="photo"><img src="${IMG[t.img]}" alt="${t.name}">
+            ${t.badge?`<span class="topbadge">${t.badge}</span>`:''}
+            <button class="zoom-btn" data-zoom="${t.img}" data-cap="${t.name}" aria-label="Phóng to"><i class="ri-zoom-in-line"></i></button></div>
+          <div class="body"><div class="t-name">${t.name}</div><div class="t-desc">${t.desc}</div></div>
           <span class="check"><i class="ri-check-line"></i></span></div>`).join('')}</div>
       <div class="advisor ${state.trayCount==='advisor'?'on':''}" data-count="advisor">
         <div class="a-ic"><i class="ri-customer-service-2-line"></i></div>
@@ -182,14 +181,14 @@
     body.querySelectorAll('[data-count]').forEach(el=>el.onclick=(e)=>{
       if(e.target.closest('[data-zoom]'))return;
       const raw=el.dataset.count,n=raw==='advisor'?'advisor':+raw,changed=state.trayCount!==n;
-      state.trayCount=n; if(changed&&typeof n==='number')state.trays=new Set(DEFAULTS[n]);
+      state.trayCount=n; if(changed&&typeof n==='number')state.trays=new Set(DEFAULTS[5]);
       body.querySelectorAll('[data-count]').forEach(c=>{const cn=c.dataset.count==='advisor'?'advisor':+c.dataset.count;c.classList.toggle('on',cn===n);});
       refreshNav();
     });
     bindZoom(); return 'count';
   }
   function renderTrays(){
-    if(!(state.trayCount===5||state.trayCount===7||state.trayCount===9)){state.trayCount=7;state.trays=new Set(DEFAULTS[7]);}
+    if(!state.trays || state.trays.size === 0 || !state.trays.has('trau-cau')){state.trays=new Set(DEFAULTS[5]);}
     body.innerHTML=`
       <div id="bw-pill" class="count-pill"></div>
       <div class="reassure"><i class="ri-information-line"></i><span>Chưa chắc nên chọn gì? Cứ để mặc định — tư vấn viên sẽ tinh chỉnh giúp bạn khi gọi.</span></div>
@@ -202,9 +201,9 @@
       }).join('')}</div>
       <div class="field" style="margin-top:16px"><label for="bw-tray-note">Yêu cầu riêng cho tráp <span style="color:var(--bw-muted);font-weight:400">(không bắt buộc)</span></label>
         <textarea class="in" id="bw-tray-note" placeholder="Ví dụ: tráp trầu cau kết hình trái tim, tông đỏ – vàng…">${esc(state.trayNote)}</textarea></div>`;
-    const pill=()=>{const p=document.getElementById('bw-pill');const n=state.trays.size,need=state.trayCount,full=n===need;p.className='count-pill'+(full?' full':'');p.innerHTML=`<i class="ri-${full?'checkbox-circle':'gift'}-line"></i> Đã chọn ${n}/${need} tráp`;};
+    const pill=()=>{const p=document.getElementById('bw-pill');const n=state.trays.size,need=5,full=n===need;p.className='count-pill'+(full?' full':'');p.innerHTML=`<i class="ri-${full?'checkbox-circle':'gift'}-line"></i> Đã chọn ${n}/${need} tráp`;};
     body.querySelectorAll('[data-tray]').forEach(el=>{const id=el.dataset.tray,item=TRAYS.find(t=>t.id===id);if(item.locked)return;
-      el.onclick=(e)=>{if(e.target.closest('[data-zoom]'))return;if(state.trays.has(id))state.trays.delete(id);else{if(state.trays.size>=state.trayCount){flash();return;}state.trays.add(id);}el.classList.toggle('on',state.trays.has(id));pill();refreshNav();};});
+      el.onclick=(e)=>{if(e.target.closest('[data-zoom]'))return;if(state.trays.has(id))state.trays.delete(id);else{if(state.trays.size>=5){flash();return;}state.trays.add(id);}el.classList.toggle('on',state.trays.has(id));pill();refreshNav();};});
     body.querySelector('#bw-tray-note').oninput=e=>state.trayNote=e.target.value;
     bindZoom(); pill(); return 'trays';
   }
@@ -288,14 +287,14 @@
     switch(meta){
       case 'services':return state.services.size>0;
       case 'count':return state.trayCount!==null;
-      case 'trays':return state.trays.size===state.trayCount;
+      case 'trays':return state.trays.size===5;
       case 'details':return true;
       case 'contact':case 'quick':return state.name.trim()&&phoneOK(state.phone)&&state.consent;
       default:return true;
     }
   }
   function helperFor(meta){
-    if(meta==='trays'){const n=state.trays.size,need=state.trayCount;return n===need?'':`Chọn thêm ${need-n} tráp nữa`;}
+    if(meta==='trays'){const n=state.trays.size,need=5;return n===need?'':`Chọn thêm ${need-n} tráp nữa`;}
     if((meta==='contact'||meta==='quick')&&!state.consent)return 'Vui lòng tích đồng ý để gửi';
     if(meta==='services'&&state.services.size===0)return 'Chọn ít nhất 1 dịch vụ';
     return '';
@@ -386,6 +385,33 @@
         footHelp.className='helper warn';
         return;
       }
+    }
+    if(apiOffline){
+      const pending = JSON.parse(localStorage.getItem('bt_pending_leads') || '[]');
+      const b = payload.mamTrap;
+      const c = payload.lienHe;
+      pending.push({
+        id: code,
+        name: c?.hoTen,
+        phone: c?.soDienThoai,
+        zalo: c?.zalo,
+        email: c?.email,
+        services: payload.services || [],
+        traycount: b?.soTrap,
+        trays: b?.cacTrap || [],
+        traynote: b?.yeuCauRieng,
+        style: payload.phongCach,
+        region: payload.khuVuc,
+        weddingdate: payload.ngayAnHoi,
+        location: payload.diaDiem,
+        budget: payload.nganSach,
+        contacttime: c?.thoiGian,
+        contactchannel: c?.kenh,
+        requesttype: payload.loaiYeuCau,
+        status: 'new',
+        createdat: payload.taoLuc
+      });
+      localStorage.setItem('bt_pending_leads', JSON.stringify(pending));
     }
     showSuccess(mode, code, apiSaved, apiOffline);
   }

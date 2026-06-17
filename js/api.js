@@ -10,7 +10,7 @@ const API = (() => {
   const hostname = window.location.hostname;
   // Tự động nhận diện API (nếu chạy local thì trỏ thẳng lên Vercel để test dễ dàng nếu không bật backend local)
   const BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') 
-    ? 'https://betrap-web.vercel.app/api' // Đổi thành URL thật để test local không lỗi
+    ? 'http://localhost:3000/api'
     : '/api';
 
   // ── Token helpers ─────────────────────────────────────────────────────────
@@ -423,8 +423,22 @@ const API = (() => {
   // ── REQUESTS (yêu cầu tư vấn công khai từ trang chủ — không cần đăng nhập) ─────
   const lead = {
     create:       async (data)       => await post('/requests', data, false),
-    list:         async ()           => await get('/requests', true),                       // ADMIN
-    updateStatus: async (id, status) => await put('/requests/' + id + '/status', { status }, true), // ADMIN
+    list:         async ()           => {
+      let serverLeads = [];
+      try { serverLeads = await get('/requests', true); } catch(err) { console.warn('Offline mode', err); }
+      const pending = JSON.parse(localStorage.getItem('bt_pending_leads') || '[]');
+      return [...pending, ...(Array.isArray(serverLeads)?serverLeads:[])].sort((a,b) => new Date(b.createdat||0) - new Date(a.createdat||0));
+    },
+    updateStatus: async (id, status) => {
+      const pending = JSON.parse(localStorage.getItem('bt_pending_leads') || '[]');
+      const idx = pending.findIndex(x => x.id === id);
+      if(idx !== -1){
+        pending[idx].status = status;
+        localStorage.setItem('bt_pending_leads', JSON.stringify(pending));
+        return { success: true };
+      }
+      return await put('/requests/' + id + '/status', { status }, true);
+    },
   };
 
   return { auth, svc, txn, consultation, lead, chat, review, favorites, stats, users, utils, admin, blog };
