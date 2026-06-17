@@ -107,9 +107,12 @@ const initDB = async () => {
                 ContactChannel VARCHAR(30),
                 RequestType    VARCHAR(30) DEFAULT 'day-du', -- 'day-du' | 'goi-nhanh'
                 Status         VARCHAR(20) DEFAULT 'new',    -- new | contacted | quoted | won | lost
-                CreatedAt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                CreatedAt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UpdatedAt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        await pool.query(`ALTER TABLE Leads ADD COLUMN IF NOT EXISTS UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
 
         console.log('✅ Database columns and tables initialized.');
     } catch (e) {
