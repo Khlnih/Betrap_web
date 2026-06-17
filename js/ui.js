@@ -12,6 +12,7 @@ const UI = (() => {
     initScrollNav();
     initReveal();
     initInteractions();
+    renderContactWidget();
   }
 
   function initInteractions() {
@@ -358,6 +359,34 @@ const UI = (() => {
     return `<button id="fav-btn-${serviceId}" onclick="window.__toggleFav && window.__toggleFav('${serviceId}')" class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}">
       ${isFav ? '♥' : '♡'} ${isFav ? 'Yêu thích' : 'Yêu thích'}
     </button>`;
+  }
+
+  // ─── CONTACT WIDGET ───────────────────────────────────────────────────
+  function renderContactWidget() {
+    if (document.getElementById('contact-widget')) return;
+    const phone = "0915650548";
+    const html = `
+      <div class="contact-widget" id="contact-widget">
+        <div class="cw-panel" id="cw-panel">
+          <div class="cw-header">
+            Hỗ trợ trực tuyến
+            <button class="cw-close" onclick="document.getElementById('cw-fab').click()"><i class="ri-close-line"></i></button>
+          </div>
+          <div class="cw-desc">BêTráp luôn sẵn sàng lắng nghe và hỗ trợ bạn 24/7.</div>
+          <a href="https://zalo.me/${phone}" target="_blank" class="cw-btn zalo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1024px-Icon_of_Zalo.svg.png" alt="Zalo" style="filter:brightness(0) invert(1); width: 24px; height: 24px;">
+            Chat Zalo ngay
+          </a>
+          <a href="tel:${phone}" class="cw-btn phone">
+            <i class="ri-phone-fill"></i> Gọi ${phone}
+          </a>
+        </div>
+        <button class="cw-fab" id="cw-fab" onclick="this.classList.toggle('active'); document.getElementById('cw-panel').classList.toggle('open');">
+          <i class="ri-customer-service-2-fill"></i>
+        </button>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
   }
 
   return {
