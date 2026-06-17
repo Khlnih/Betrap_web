@@ -8,9 +8,9 @@ const API = (() => {
 
   // ── Cấu hình (thay đổi URL khi deploy) ───────────────────────────────────
   const hostname = window.location.hostname;
-  // Tự động nhận diện API (nếu chạy local thì gọi 3000, nếu trên mạng thì gọi /api)
+  // Tự động nhận diện API (nếu chạy local thì trỏ thẳng lên Vercel để test dễ dàng nếu không bật backend local)
   const BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') 
-    ? 'http://localhost:3000/api' 
+    ? 'https://betrap-web.vercel.app/api' // Đổi thành URL thật để test local không lỗi
     : '/api';
 
   // ── Token helpers ─────────────────────────────────────────────────────────
@@ -420,11 +420,11 @@ const API = (() => {
     }
   };
 
-  // ── LEADS (yêu cầu tư vấn công khai từ trang chủ — không cần đăng nhập) ─────
+  // ── REQUESTS (yêu cầu tư vấn công khai từ trang chủ — không cần đăng nhập) ─────
   const lead = {
-    create:       async (data)       => await post('/leads', data, false),
-    list:         async ()           => await get('/leads', true),                       // ADMIN
-    updateStatus: async (id, status) => await put('/leads/' + id + '/status', { status }, true), // ADMIN
+    create:       async (data)       => await post('/requests', data, false),
+    list:         async ()           => await get('/requests', true),                       // ADMIN
+    updateStatus: async (id, status) => await put('/requests/' + id + '/status', { status }, true), // ADMIN
   };
 
   return { auth, svc, txn, consultation, lead, chat, review, favorites, stats, users, utils, admin, blog };
