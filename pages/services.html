@@ -664,8 +664,48 @@
           </button>
         </div>
 
-        <!-- Category Description Box -->
-        <div id="cat-desc-box" style="display:none; margin-bottom: 24px; padding: 18px; background: rgba(212,185,150,.08); border: 1px solid rgba(212,185,150,.4); border-radius: 12px; font-size: 0.9rem; line-height: 1.6; color: var(--text-body);"></div>
+        <!-- Package Details Accordion (Trap only) -->
+        <div id="trap-details-accordion" style="display:none; margin-bottom:24px;">
+          <button onclick="toggleTrapDetails()" style="width:100%; border:1.5px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:rgba(212,185,150,0.1); cursor:pointer; outline:none; transition:all 0.3s;">
+            <span style="font-weight:700; color:var(--gold-dark); font-size:.95rem; display:flex; align-items:center; gap:8px;">
+              <i class="ri-sparkling-fill"></i> Xem chi tiết điểm khác biệt giữa các gói Tráp
+            </span>
+            <i class="ri-arrow-down-s-line" id="trap-details-arrow" style="font-size:1.3rem; color:var(--gold-dark); transition:transform 0.3s;"></i>
+          </button>
+          <div id="trap-details-content" style="display:none; background:#fff; border:1px solid #E5E7EB; border-top:none; border-radius:0 0 12px 12px; padding:24px; font-size:.9rem; line-height:1.6; color:var(--text-body); margin-top:-6px;">
+            <div style="margin-bottom:20px;">
+              <h4 style="color:var(--dark); font-size:1.05rem; margin-bottom:10px; border-left:3px solid var(--gold); padding-left:10px; font-family:'Playfair Display', serif;">📦 Gói Tiêu chuẩn</h4>
+              <ul style="padding-left:20px; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">
+                <li><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật được sắp xếp theo dáng tháp tròn xếp tầng cân đối và trang trọng.</li>
+                <li><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</li>
+                <li><b>Sính lễ bên trong:</b> Các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp với phong tục cưới hỏi truyền thống.</li>
+                <li><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</li>
+                <li><b>Đặc điểm:</b> Sử dụng hoa lụa, vải voan hoặc ruy băng có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng theo màu, giúp tối ưu chi phí.</li>
+              </ul>
+            </div>
+            <div style="margin-bottom:20px;">
+              <h4 style="color:var(--dark); font-size:1.05rem; margin-bottom:10px; border-left:3px solid var(--gold); padding-left:10px; font-family:'Playfair Display', serif;">✨ Gói Nâng cao</h4>
+              <ul style="padding-left:20px; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">
+                <li><b>Hình thức mâm tráp:</b> Tráp gỗ sơn mài cao cấp (tròn/vuông bo góc), tráp mica trong suốt, hoặc các khay chân cao (rồng phượng nhỏ) tạo sự thanh lịch, thông thoáng.</li>
+                <li><b>Phong cách trang trí:</b> Hoàn toàn bằng <b>hoa tươi</b> (hoa hồng, lan, cẩm tú cầu, baby...) kết hợp lá phụ nhập khẩu. Mâm kết dáng nghệ thuật (xòe rộng hoặc bay bổng) chứ không gò bó trong tháp tròn cứng nhắc.</li>
+                <li><b>Sính lễ bên trong:</b> Nâng cấp các dòng sản phẩm có bao bì sang trọng (chè hộp thiếc, bánh cốm đặt hộp đóng quai ruy băng, rượu vang ngoại nhập).</li>
+                <li><b>Đặc điểm:</b> Rất bắt mắt, lên hình phóng sự cưới nổi bật và hiện đại.</li>
+                <li><b>Nhóm màu Phổ thông:</b> Đỏ - Cam, Hồng Pastel, Trắng - Xanh Cốm (sử dụng hoa nội địa tươi sáng). Mức giá ở khoảng <b>Tiêu chuẩn</b>.</li>
+                <li><b>Nhóm màu Hot Trend:</b> Xanh Mint, Vàng Kem/Champagne, Hồng Cam Sữa. Cần phối hoa cao cấp/nhập khẩu để lên đúng màu nên <b>chi phí sẽ cao hơn</b>.</li>
+              </ul>
+            </div>
+            <div>
+              <h4 style="color:var(--dark); font-size:1.05rem; margin-bottom:10px; border-left:3px solid var(--gold); padding-left:10px; font-family:'Playfair Display', serif;">👑 Gói Cao cấp</h4>
+              <ul style="padding-left:20px; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">
+                <li><b>Hình thức mâm tráp:</b> Khay chân cao mạ vàng, khay kim loại champagne, khay oval có chân đế, tráp gỗ khảm trai hoặc thiết kế riêng theo concept. Đồng bộ, sang trọng và cá nhân hóa.</li>
+                <li><b>Phong cách trang trí:</b> Hoa tươi cao cấp kết hợp phụ kiện tuyển chọn. Mâm kết hoa nghệ thuật tinh tế đẳng cấp. Mâm hoa quả được tạo hình Rồng Phượng công phu.</li>
+                <li><b>Sính lễ bên trong:</b> Dòng sản phẩm tinh hoa nhất với bao bì thượng lưu, dành cho những gia đình mong muốn lễ ăn hỏi chỉn chu tuyệt đối.</li>
+                <li><b>Màu Sang trọng / Độc đáo:</b> Xanh ngọc lục bảo (Emerald), Tím khói, Trắng tinh khôi (Lan Hồ Điệp). Giá nhập hoa rất cao và kén người chơi.</li>
+                <li><b>Màu Siêu hiếm / Độc quyền:</b> Xanh Dương (Royal Blue), Đen - Vàng Kim (Black & Gold), Đỏ Rượu Vang Đậm (Burgundy).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
         <!-- Grid -->
         <div id="panel-grid"></div>
@@ -886,86 +926,16 @@
       document.getElementById('panel-title').textContent    = t;
       document.getElementById('panel-subtitle').textContent = s;
 
-      const catBox = document.getElementById('cat-desc-box');
-      catBox.style.display = 'none';
-      if (section === 'trap') {
-        catBox.innerHTML = `
-          <style>
-            .trap-acc-group { display:flex; flex-direction:column; gap:20px; }
-            .tier-box { background:#fff; border:1px solid rgba(212,185,150,.3); border-radius:12px; padding:20px; box-shadow:0 4px 16px rgba(0,0,0,.02); }
-            .tier-title { font-size:1.2rem; font-weight:700; color:var(--gold-dark); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-            .tier-title i { font-size:1.5rem; color:var(--gold); }
-            
-            .tier-details { margin-top:4px; }
-            .tier-details summary { cursor:pointer; font-weight:600; color:var(--text-dark); list-style:none; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background:rgba(212,185,150,.1); border-radius:8px; transition:all .2s; font-size:.9rem; }
-            .tier-details summary::-webkit-details-marker { display:none; }
-            .tier-details summary:hover { background:rgba(212,185,150,.2); }
-            .tier-details[open] summary i { transform:rotate(180deg); }
-            .tier-details summary i { transition:transform .3s; }
-            
-            .tier-content { margin-top:16px; padding-top:16px; border-top:1px dashed rgba(212,185,150,.4); }
-            .tier-content ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
-            .tier-content li { font-size:.9rem; color:var(--text-body); line-height:1.6; display:flex; align-items:flex-start; gap:8px; }
-            .tier-content li::before { content:'\\EA73'; font-family:'remixicon'; color:var(--gold); font-size:1.15rem; flex-shrink:0; margin-top:-2px; }
-            .tier-content b { color:var(--text-dark); }
-          </style>
-
-          <div class="trap-acc-group">
-            <!-- Gói Tiêu Chuẩn -->
-            <div class="tier-box">
-              <div class="tier-title"><i class="ri-copper-coin-line"></i> Gói Tiêu Chuẩn</div>
-              <details class="tier-details">
-                <summary>📄 Xem nội dung dịch vụ <i class="ri-arrow-down-s-line"></i></summary>
-                <div class="tier-content">
-                  <ul>
-                    <li><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm bạc hoặc mâm sơn mài đỏ truyền thống. Dáng tháp tròn xếp tầng cân đối.</li>
-                    <li><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</li>
-                    <li><b>Sính lễ bên trong:</b> Các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp phong tục.</li>
-                    <li><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</li>
-                    <li><b>Ghi chú:</b> Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng theo màu.</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <!-- Gói Nâng Cao -->
-            <div class="tier-box">
-              <div class="tier-title"><i class="ri-vip-diamond-line"></i> Gói Nâng Cao</div>
-              <details class="tier-details">
-                <summary>📄 Xem nội dung dịch vụ <i class="ri-arrow-down-s-line"></i></summary>
-                <div class="tier-content">
-                  <ul>
-                    <li><b>Hình thức mâm tráp:</b> Tráp gỗ sơn mài cao cấp (tròn, vuông bo góc), tráp mica trong suốt, hoặc khay chân cao (rồng phượng nhỏ).</li>
-                    <li><b>Phong cách trang trí:</b> 100% hoa tươi (hồng, lan, cẩm tú cầu...) & lá phụ nhập khẩu. Mâm kết dáng nghệ thuật (xòe rộng, bay bổng).</li>
-                    <li><b>Sính lễ bên trong:</b> Bao bì sang trọng hơn (chè hộp thiếc, bánh hộp giấy quai ruy băng, rượu ngoại nhập).</li>
-                    <li><b>Màu phổ thông:</b> Đỏ Cam, Hồng Pastel, Trắng Xanh Cốm.</li>
-                    <li><b>Màu Hot Trend:</b> Xanh Mint, Vàng Kem/Champagne, Hồng Cam Sữa (Chi phí cao hơn do dùng hoa đặc biệt).</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <!-- Gói Cao Cấp -->
-            <div class="tier-box">
-              <div class="tier-title"><i class="ri-vip-crown-line"></i> Gói Cao Cấp</div>
-              <details class="tier-details">
-                <summary>📄 Xem nội dung dịch vụ <i class="ri-arrow-down-s-line"></i></summary>
-                <div class="tier-content">
-                  <ul>
-                    <li><b>Hình thức mâm tráp:</b> Khay chân cao mạ vàng, khay kim loại vàng champagne, tráp gỗ khảm trai, tráp sơn mài thiết kế riêng đồng bộ.</li>
-                    <li><b>Phong cách trang trí:</b> Hoa tươi cao cấp cùng phụ kiện tuyển chọn. Bố cục tinh tế, điểm nhấn nổi bật đẳng cấp. Mâm hoa quả tạo hình công phu.</li>
-                    <li><b>Sính lễ bên trong:</b> Dòng cao cấp với bao bì cực kỳ sang trọng, cá nhân hóa.</li>
-                    <li><b>Màu Sang trọng / Độc đáo:</b> Xanh ngọc lục bảo, Tím khói, Trắng tinh khôi (Lan Hồ Điệp).</li>
-                    <li><b>Màu Siêu hiếm / Độc quyền:</b> Xanh Dương (Classic Blue), Đen Vàng Kim (Black & Gold), Đỏ Burgundy.</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-          </div>
-        `;
-        catBox.style.display = 'block';
-      } else {
-        catBox.innerHTML = '';
+      // Show/hide Trap Details Accordion
+      const trapAcc = document.getElementById('trap-details-accordion');
+      if (trapAcc) {
+        if (section === 'trap') {
+          trapAcc.style.display = 'block';
+        } else {
+          trapAcc.style.display = 'none';
+          document.getElementById('trap-details-content').style.display = 'none';
+          document.getElementById('trap-details-arrow').style.transform = 'rotate(0)';
+        }
       }
 
       // Breadcrumb
@@ -1169,7 +1139,6 @@
       document.getElementById('dm-name').textContent = svc.name;
       document.getElementById('dm-cat').textContent  = CAT_LABELS[svc.category] || svc.category;
       document.getElementById('dm-desc').innerHTML   = (svc.description||'Chưa có mô tả.').replace(/\n/g,'<br>');
-      
       const pkgDiv = document.getElementById('dm-packages');
       if (svc.price) {
         pkgDiv.innerHTML = `<div style="font-size:1.2rem;color:var(--gold);font-weight:700;">${UI.formatCurrency(svc.price)} / ${svc.unit||'buổi'}</div>`;
@@ -1183,6 +1152,19 @@
     }
     function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
     document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
+
+    // Toggle trap details accordion
+    function toggleTrapDetails() {
+      const content = document.getElementById('trap-details-content');
+      const arrow = document.getElementById('trap-details-arrow');
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0)';
+      }
+    }
 
     /* ═══════════════════════════════════════════════════════════════════════════
        BOOK SIMPLE
