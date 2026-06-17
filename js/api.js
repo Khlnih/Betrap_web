@@ -22,15 +22,18 @@ const API = (() => {
   const setSession  = (s)   => localStorage.setItem('bt_session', JSON.stringify(s));
   const clearSession= ()    => localStorage.removeItem('bt_session');
 
-  // ── Fetch wrapper ─────────────────────────────────────────────────────────
   async function req(method, path, body, needAuth = false) {
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = { 
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
     const token = getToken();
     if (needAuth) {
       if (!token) throw new Error('Chưa đăng nhập.');
       headers['Authorization'] = 'Bearer ' + token;
     } else if (token) {
-      // Gửi token nếu có (optional auth)
       headers['Authorization'] = 'Bearer ' + token;
     }
     const opts = { method, headers };
