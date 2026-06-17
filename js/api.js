@@ -417,7 +417,14 @@ const API = (() => {
     }
   };
 
-  return { auth, svc, txn, consultation, chat, review, favorites, stats, users, utils, admin, blog };
+  // ── LEADS (yêu cầu tư vấn công khai từ trang chủ — không cần đăng nhập) ─────
+  const lead = {
+    create:       async (data)       => await post('/leads', data, false),
+    list:         async ()           => await get('/leads', true),                       // ADMIN
+    updateStatus: async (id, status) => await put('/leads/' + id + '/status', { status }, true), // ADMIN
+  };
+
+  return { auth, svc, txn, consultation, lead, chat, review, favorites, stats, users, utils, admin, blog };
 })();
 
 // Helper: get root path relative to current page

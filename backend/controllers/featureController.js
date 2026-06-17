@@ -78,3 +78,85 @@ exports.createConsultation = async (req, res) => {
         res.json({ id });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
+
+// ── LEADS (yêu cầu tư vấn công khai từ trang chủ) ──────────────────────────
+const cleanPhone = (p) => (p || '').replace(/[\s.\-]/g, '');
+const isPhone = (p) => /^(0\d{9}|(\+?84)\d{9})$/.test(cleanPhone(p));
+
+// POST /api/leads  (PUBLIC — không cần đăng nhập)
+exports.createLead = async (req, res) => {
+    try {
+        const b = req.body || {};
+        const c = b.lienHe || {};
+        const name = (c.hoTen || '').trim();
+        const phone = cleanPhone(c.soDienThoai);
+
+        if (!name) return res.status(400).json({ error: 'Vui lòng nhập họ tên.' });
+        if (!isPhone(phone)) return res.status(400).json({ error: 'Số điện thoại chưa hợp lệ.' });
+
+        const mt = b.mamTrap || null;
+        const id = 'LEAD_' + uid().toUpperCase();
+
+        await db.query(`
+            INSERT INTO Leads
+              (Id, Name, Phone, Zalo, Email, Services, TrayCount, Trays, TrayNote,
+               Style, Region, WeddingDate, Location, Budget, ContactTime, ContactChannel, RequestType)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+            [
+                id, name, phone, (c.zalo || null), (c.email || null),
+                JSON.stringify(b.services || []),
+                mt ? (mt.soTrap != null ? String(mt.soTrap) : null) : null,
+                JSON.stringify(mt ? (mt.cacTrap || []) : []),
+                mt ? (mt.yeuCauRieng || null) : null,
+                b.phongCach || null, b.khuVuc || null, b.ngayAnHoi || null,
+                b.diaDiem || null, b.nganSach || null,
+                c.thoiGian || null, c.kenh || null, b.loaiYeuCau || 'day-du'
+            ]
+        );
+
+        res.json({ id });
+    } catch (err) {
+        console.error('createLead error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// GET /api/leads  (ADMIN — danh sách yêu cầu cho đội CSKH)
+exports.getLeads = async (req, res) => {
+    try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Chỉ admin mới xem được danh sách yêu cầu.' });
+        }
+        const r = await db.query('SELECT * FROM Leads ORDER BY CreatedAt DESC LIMIT 500');
+        const leads = r.recordset.map(row => ({
+            ...row,
+            services: safeJSONParse(row.services, []),
+            trays: safeJSONParse(row.trays, []),
+        }));
+        res.json(leads);
+    } catch (err) {
+        console.error('getLeads error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// PUT /api/leads/:id/status  (ADMIN — đổi trạng thái yêu cầu)
+exports.updateLeadStatus = async (req, res) => {
+    try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Chỉ admin mới được cập nhật.' });
+        }
+        const { status } = req.body || {};
+        const allowed = ['new', 'contacted', 'quoted', 'won', 'lost'];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ error: 'Trạng thái không hợp lệ.' });
+        }
+        const r = await db.query('UPDATE Leads SET Status=$1 WHERE Id=$2', [status, req.params.id]);
+        if (!r.rowCount) return res.status(404).json({ error: 'Không tìm thấy yêu cầu.' });
+        res.json({ id: req.params.id, status });
+    } catch (err) {
+        console.error('updateLeadStatus error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+

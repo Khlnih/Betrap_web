@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/main.css?v=1.6">
   <link rel="stylesheet" href="css/components.css?v=1.6">
   <link rel="stylesheet" href="css/animations.css?v=1.6">
+  <link rel="stylesheet" href="css/wizard.css?v=1.0">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
     :root {
@@ -447,7 +448,7 @@
           </h1>
           <p>Kết nối dịch vụ cưới hỏi chuyên nghiệp từ đội cưới hỏi, mâm quả đến trang phục — giúp ngày trọng đại của bạn chỉn chu và đẳng cấp hơn.</p>
           <div class="hero-cta">
-            <a href="pages/services.html" class="btn-pink">
+            <a href="pages/services.html" class="btn-pink" id="open-service-wizard" data-open-wizard>
               Tìm Dịch Vụ <i class="ri-arrow-right-line"></i>
             </a>
             <a href="pages/register.html?role=provider" class="btn-ghost-dark">
@@ -852,5 +853,6 @@
       animation.onfinish = () => confetti.remove();
     }
   </script>
+  <script src="js/wizard.js?v=1.0"></script>
 </body>
 </html>

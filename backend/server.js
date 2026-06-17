@@ -110,6 +110,13 @@ const { providerOnly } = require('./routes/serviceRoutes');
 app.get('/api/provider/services', authMiddleware, providerOnly, serviceController.getProviderServices);
 
 // ── Start Server ──────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-});
+// Chạy trực tiếp (local: `node server.js` / `npm start`) thì mới mở cổng lắng nghe.
+// Trên Vercel serverless, file này được api/index.js `require`, nên KHÔNG gọi listen,
+// chỉ export `app` để Vercel dùng làm request handler.
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server is running on port ${PORT}`);
+    });
+}
+
+module.exports = app;

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Yêu cầu tư vấn — BêTráp Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <style>
+    body { background:#F4F5F7; font-family:'Plus Jakarta Sans',sans-serif; }
+    .dash-layout { display:flex; min-height:100vh; }
+    .dash-sidebar { width:280px; background:#fff; border-right:1px solid rgba(0,0,0,.05); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:40; box-shadow:4px 0 24px rgba(0,0,0,.02); }
+    .dash-brand { height:80px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,0,0,.05); }
+    .dash-brand img { height:48px; border-radius:8px; box-shadow:0 4px 12px rgba(191,167,162,.3); }
+    .dash-menu { padding:24px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+    .menu-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; color:#64748B; cursor:pointer; font-weight:600; transition:all .3s ease; text-decoration:none; }
+    .menu-item i { font-size:1.25rem; }
+    .menu-item:hover { color:var(--red-dark); background:rgba(166,44,56,.04); transform:translateX(4px); }
+    .menu-item.active { background:linear-gradient(135deg,var(--red-dark),var(--gold-dark)); color:#fff; box-shadow:0 8px 20px rgba(166,44,56,.25); }
+    .menu-item .pill { margin-left:auto; background:rgba(0,0,0,.08); color:inherit; font-size:.72rem; font-weight:800; padding:2px 9px; border-radius:999px; }
+    .menu-item.active .pill { background:rgba(255,255,255,.25); }
+
+    .dash-content { margin-left:280px; flex:1; padding:32px 40px; }
+    .dash-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+    .dash-title { font-family:'Playfair Display',serif; font-size:2rem; color:#1E293B; margin:0; }
+    .user-info { display:flex; align-items:center; gap:12px; }
+    .user-avatar { width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,var(--red-dark),var(--gold-dark)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; box-shadow:0 4px 12px rgba(166,44,56,.3); }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    .stat-card { background:#fff; border-radius:16px; padding:20px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 24px rgba(0,0,0,.03); border:1px solid rgba(0,0,0,.04); }
+    .stat-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0; }
+    .stat-icon.gold { background:rgba(220,165,174,.15); color:var(--gold-dark); }
+    .stat-icon.blue { background:rgba(59,130,246,.1); color:#3B82F6; }
+    .stat-icon.green { background:rgba(34,197,94,.12); color:#16A34A; }
+    .stat-icon.amber { background:rgba(245,158,11,.12); color:#D97706; }
+    .stat-card .s-l { color:#64748B; font-size:.82rem; font-weight:600; }
+    .stat-card .s-v { font-size:1.7rem; font-weight:800; color:#1E293B; line-height:1.1; }
+
+    .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .filters { display:flex; gap:8px; flex-wrap:wrap; }
+    .fchip { padding:8px 14px; border-radius:999px; background:#fff; border:1.5px solid #E5E7EB; color:#475569; font-weight:600; font-size:.85rem; cursor:pointer; transition:all .2s ease; }
+    .fchip:hover { border-color:var(--gold); }
+    .fchip.on { background:#1E293B; color:#fff; border-color:#1E293B; }
+    .fchip .c { opacity:.7; font-weight:800; margin-left:4px; }
+    .search { margin-left:auto; display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid #E5E7EB; border-radius:12px; padding:9px 14px; min-width:220px; }
+    .search input { border:none; outline:none; font-size:.9rem; width:100%; background:transparent; font-family:inherit; }
+    .search i { color:#94A3B8; }
+    .btn-refresh { background:#fff; border:1.5px solid #E5E7EB; border-radius:12px; padding:9px 14px; cursor:pointer; color:#475569; font-weight:600; display:inline-flex; align-items:center; gap:6px; }
+    .btn-refresh:hover { border-color:var(--gold); color:var(--gold-dark); }
+
+    .lead-card { background:#fff; border-radius:16px; border:1px solid rgba(0,0,0,.05); box-shadow:0 4px 20px rgba(0,0,0,.03); padding:20px 22px; margin-bottom:14px; border-left:5px solid #CBD5E1; }
+    .lead-card.s-new { border-left-color:#3B82F6; }
+    .lead-card.s-contacted { border-left-color:#D97706; }
+    .lead-card.s-quoted { border-left-color:#7C3AED; }
+    .lead-card.s-won { border-left-color:#16A34A; }
+    .lead-card.s-lost { border-left-color:#94A3B8; opacity:.78; }
+    .lead-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+    .lead-name { font-size:1.2rem; font-weight:800; color:#1E293B; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .lead-meta { color:#94A3B8; font-size:.82rem; margin-top:3px; }
+    .lead-actions-top { display:flex; gap:8px; }
+    .lead-actions-top a { text-decoration:none; }
+
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:999px; font-size:.74rem; font-weight:700; }
+    .badge.new { background:rgba(59,130,246,.12); color:#2563EB; }
+    .badge.contacted { background:rgba(245,158,11,.14); color:#B45309; }
+    .badge.quoted { background:rgba(124,58,237,.12); color:#6D28D9; }
+    .badge.won { background:rgba(34,197,94,.14); color:#15803D; }
+    .badge.lost { background:#F1F5F9; color:#64748B; }
+    .badge.quick { background:rgba(220,38,38,.1); color:#DC2626; }
+
+    .lead-contact { display:flex; flex-wrap:wrap; gap:8px 18px; margin:14px 0; padding:12px 14px; background:#F8FAFC; border-radius:12px; }
+    .lead-contact .ci { display:inline-flex; align-items:center; gap:7px; color:#334155; font-weight:600; font-size:.92rem; }
+    .lead-contact .ci i { color:var(--gold-dark); }
+    .lead-contact a { color:#2563EB; text-decoration:none; }
+    .copy-btn { border:none; background:#EEF2F7; color:#64748B; border-radius:8px; padding:3px 8px; cursor:pointer; font-size:.78rem; }
+    .copy-btn:hover { background:#E2E8F0; }
+
+    .lead-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px 22px; }
+    .kv { display:flex; flex-direction:column; gap:1px; }
+    .kv .k { color:#94A3B8; font-size:.74rem; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+    .kv .v { color:#1E293B; font-weight:600; font-size:.92rem; }
+    .kv.full { grid-column:1/-1; }
+    .trays-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
+    .trays-tags span { background:var(--gold-faint,rgba(212,185,150,.18)); color:var(--gold-dark); font-size:.78rem; font-weight:600; padding:2px 9px; border-radius:999px; }
+
+    .lead-foot { display:flex; align-items:center; gap:10px; margin-top:16px; padding-top:14px; border-top:1px dashed #E5E7EB; flex-wrap:wrap; }
+    .lead-foot label { color:#64748B; font-size:.85rem; font-weight:600; }
+    .status-select { border:1.5px solid #E5E7EB; border-radius:10px; padding:8px 12px; font-family:inherit; font-weight:600; color:#1E293B; background:#fff; cursor:pointer; font-size:.88rem; }
+    .status-select:focus { outline:none; border-color:var(--gold); }
+
+    .state { background:#fff; border-radius:16px; padding:60px 24px; text-align:center; color:#94A3B8; border:1px dashed #E5E7EB; }
+    .state i { font-size:3rem; display:block; margin-bottom:12px; color:#CBD5E1; }
+    .state h3 { color:#475569; margin:0 0 6px; font-family:'Playfair Display',serif; }
+    .spin { animation:spin 1s linear infinite; display:inline-block; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    @media (max-width:860px){
+      .dash-sidebar { position:relative; width:100%; height:auto; flex-direction:row; align-items:center; box-shadow:none; }
+      .dash-brand { height:auto; padding:12px; border:none; }
+      .dash-menu { flex-direction:row; overflow-x:auto; padding:12px; }
+      .menu-item .pill { display:none; }
+      .dash-content { margin-left:0; padding:20px; }
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="dash-layout">
+    <aside class="dash-sidebar">
+      <div class="dash-brand"><img src="../assets/images/logo.jpg" alt="BêTráp"></div>
+      <div class="dash-menu">
+        <a class="menu-item" href="admin-dashboard.html"><i class="ri-dashboard-line"></i> Tổng quan</a>
+        <a class="menu-item active" href="admin-leads.html"><i class="ri-inbox-archive-line"></i> Yêu cầu tư vấn <span class="pill" id="menu-count">0</span></a>
+        <a class="menu-item" href="services.html"><i class="ri-briefcase-4-line"></i> Dịch vụ</a>
+        <div style="margin-top:auto"></div>
+      </div>
+      <div style="padding:24px; border-top:1px solid rgba(0,0,0,.05)">
+        <button class="btn btn-ghost btn-block" style="color:#64748B;border:1px solid #E2E8F0;border-radius:12px;" onclick="logout()">
+          <i class="ri-logout-circle-r-line"></i> Đăng xuất
+        </button>
+      </div>
+    </aside>
+
+    <main class="dash-content animate-fadeIn">
+      <header class="dash-header">
+        <div>
+          <h1 class="dash-title">Yêu cầu tư vấn</h1>
+          <p style="color:#64748B;font-size:.95rem;margin:4px 0 0">Khách điền form "Tìm Dịch Vụ" sẽ hiện ở đây — gọi và cập nhật trạng thái.</p>
+        </div>
+        <div class="user-info">
+          <div style="text-align:right">
+            <div style="font-weight:700;color:#1E293B;font-size:.95rem" id="admin-name">Admin</div>
+            <div style="font-size:.8rem;color:#64748B">Quản trị viên</div>
+          </div>
+          <div class="user-avatar" id="admin-avatar">AD</div>
+        </div>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon gold"><i class="ri-inbox-line"></i></div><div><div class="s-l">Tổng yêu cầu</div><div class="s-v" id="st-total">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="ri-mail-unread-line"></i></div><div><div class="s-l">Mới (chưa xử lý)</div><div class="s-v" id="st-new">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="ri-phone-line"></i></div><div><div class="s-l">Đã liên hệ</div><div class="s-v" id="st-contacted">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon amber"><i class="ri-calendar-check-line"></i></div><div><div class="s-l">Hôm nay</div><div class="s-v" id="st-today">0</div></div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filters" id="filters"></div>
+        <div class="search"><i class="ri-search-line"></i><input id="q" placeholder="Tìm theo tên hoặc SĐT…"></div>
+        <button class="btn-refresh" id="btn-refresh"><i class="ri-refresh-line"></i> Tải lại</button>
+      </div>
+
+      <div id="leads-list">
+        <div class="state"><i class="ri-loader-4-line spin"></i><h3>Đang tải yêu cầu…</h3></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/db.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    // ── Auth gate (chỉ admin) ──
+    const session = API.auth.currentSession();
+    if (!session || session.role !== 'admin') { window.location.href = 'login.html'; }
+    if (session) {
+      document.getElementById('admin-name').textContent = session.name || 'Admin';
+      document.getElementById('admin-avatar').textContent = session.avatar || (session.name ? session.name.trim()[0].toUpperCase() : 'AD');
+    }
+
+    // ── Nhãn hiển thị ──
+    const SVC   = { 'mam-trap':'Mâm tráp ăn hỏi','be-trap':'Đội bê tráp','ao-dai':'Thuê áo dài','media':'Chụp ảnh & quay phim','mc':'MC dẫn lễ' };
+    const TRAY  = { 'trau-cau':'Trầu cau','ruou-thuoc':'Rượu & thuốc lá','che':'Chè','mut-sen':'Mứt hạt sen','banh-com':'Bánh cốm','phu-the':'Bánh phu thê','hoa-qua':'Hoa quả','xoi-ga':'Xôi gấc & gà','lon-quay':'Lợn sữa quay','banh-kem':'Bánh kem' };
+    const STYLE = { 'truyen-thong':'Truyền thống','hien-dai':'Hiện đại','sang-trong':'Sang trọng' };
+    const REGION= { 'bac':'Miền Bắc','trung':'Miền Trung','nam':'Miền Nam' };
+    const TIME  = { 'gio-hc':'Giờ hành chính','toi':'Buổi tối (sau 18h)','cuoi-tuan':'Cuối tuần','bat-ky':'Bất cứ lúc nào' };
+    const CHAN  = { 'goi':'Gọi điện','zalo':'Zalo','ca-hai':'Cả hai' };
+    const STATUS= { 'new':'Mới','contacted':'Đã liên hệ','quoted':'Đã báo giá','won':'Đã chốt','lost':'Không chốt' };
+    const STORDER = ['all','new','contacted','quoted','won','lost'];
+
+    let LEADS = [];
+    let filter = 'all';
+    let query = '';
+
+    const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const digits = s => (s||'').replace(/[^\d+]/g,'');
+    const get = (o, k) => o[k] ?? o[k.toLowerCase()] ?? o[k.charAt(0).toUpperCase()+k.slice(1)];
+    const fmtDate = s => { if(!s) return '—'; if(s==='undecided') return 'Chưa chốt'; const d=new Date(s); return isNaN(d)? esc(s) : d.toLocaleDateString('vi-VN'); };
+    const fmtDateTime = s => { const d=new Date(s); return isNaN(d)?'':d.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); };
+    function timeAgo(s){ const d=new Date(s); if(isNaN(d)) return ''; const m=Math.floor((Date.now()-d)/60000); if(m<1)return'vừa xong'; if(m<60)return m+' phút trước'; const h=Math.floor(m/60); if(h<24)return h+' giờ trước'; const dd=Math.floor(h/24); return dd+' ngày trước'; }
+
+    async function loadLeads(){
+      const box = document.getElementById('leads-list');
+      box.innerHTML = '<div class="state"><i class="ri-loader-4-line spin"></i><h3>Đang tải yêu cầu…</h3></div>';
+      try {
+        const data = await API.lead.list();
+        LEADS = Array.isArray(data) ? data : [];
+        renderStats(); renderFilters(); render();
+      } catch (err) {
+        const offline = /Failed to fetch|NetworkError/i.test(err && err.message || '');
+        box.innerHTML = `<div class="state"><i class="ri-error-warning-line"></i><h3>${offline?'Không kết nối được máy chủ':'Không tải được danh sách'}</h3><p>${esc(err && err.message || '')}</p></div>`;
+      }
+    }
+
+    function renderStats(){
+      const today = new Date().toDateString();
+      const n = s => LEADS.filter(l => (get(l,'status')||'new')===s).length;
+      document.getElementById('st-total').textContent = LEADS.length;
+      document.getElementById('st-new').textContent = n('new');
+      document.getElementById('st-contacted').textContent = n('contacted');
+      document.getElementById('st-today').textContent = LEADS.filter(l=>{const d=new Date(get(l,'createdat'));return !isNaN(d)&&d.toDateString()===today;}).length;
+      document.getElementById('menu-count').textContent = LEADS.length;
+    }
+
+    function renderFilters(){
+      const counts = s => s==='all' ? LEADS.length : LEADS.filter(l=>(get(l,'status')||'new')===s).length;
+      document.getElementById('filters').innerHTML = STORDER.map(s=>`
+        <div class="fchip ${filter===s?'on':''}" data-f="${s}">${s==='all'?'Tất cả':STATUS[s]}<span class="c">${counts(s)}</span></div>`).join('');
+      document.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{filter=el.dataset.f;renderFilters();render();});
+    }
+
+    function render(){
+      const box = document.getElementById('leads-list');
+      let list = LEADS.slice();
+      if (filter!=='all') list = list.filter(l=>(get(l,'status')||'new')===filter);
+      if (query) { const q=query.toLowerCase(); list = list.filter(l=>((get(l,'name')||'').toLowerCase().includes(q) || (get(l,'phone')||'').includes(q))); }
+      list.sort((a,b)=> new Date(get(b,'createdat')) - new Date(get(a,'createdat')));
+
+      if (!list.length){ box.innerHTML = `<div class="state"><i class="ri-inbox-line"></i><h3>Chưa có yêu cầu nào</h3><p>Khi khách điền form "Tìm Dịch Vụ", yêu cầu sẽ xuất hiện ở đây.</p></div>`; return; }
+
+      box.innerHTML = list.map(l=>{
+        const id = get(l,'id');
+        const status = get(l,'status') || 'new';
+        const name = esc(get(l,'name')) || '(không tên)';
+        const phone = get(l,'phone') || '';
+        const zalo = get(l,'zalo') || phone;
+        const email = get(l,'email');
+        const loc = get(l,'location');
+        const isQuick = (get(l,'requesttype')||'') === 'goi-nhanh';
+        const services = (get(l,'services')||[]).map(s=>SVC[s]||s);
+        const trayCount = get(l,'traycount');
+        const trays = (get(l,'trays')||[]).map(t=>TRAY[t]||t);
+        const trayNote = get(l,'traynote');
+        const rows = [];
+        rows.push(kv('Loại yêu cầu', isQuick ? 'Gọi nhanh ⚡' : 'Tư vấn đầy đủ'));
+        if (services.length) rows.push(kv('Dịch vụ', services.join(', ')));
+        if (trayCount) rows.push(kv('Gói mâm tráp', trayCount==='tu-van-goi-y' ? 'Để tư vấn gợi ý' : (trayCount+' tráp')));
+        if (trays.length) rows.push(`<div class="kv full"><span class="k">Các tráp</span><div class="trays-tags">${trays.map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>`);
+        if (trayNote) rows.push(`<div class="kv full"><span class="k">Yêu cầu riêng</span><span class="v">${esc(trayNote)}</span></div>`);
+        if (get(l,'style')) rows.push(kv('Phong cách', STYLE[get(l,'style')]||get(l,'style')));
+        rows.push(kv('Khu vực', REGION[get(l,'region')]||get(l,'region')||'—'));
+        rows.push(kv('Ngày ăn hỏi', fmtDate(get(l,'weddingdate'))));
+        if (get(l,'budget')) rows.push(kv('Ngân sách', get(l,'budget')));
+        rows.push(kv('Khung giờ tiện', TIME[get(l,'contacttime')]||'—'));
+        rows.push(kv('Muốn liên hệ qua', CHAN[get(l,'contactchannel')]|| (isQuick?'Gọi điện':'—')));
+
+        return `<div class="lead-card s-${status}">
+          <div class="lead-top">
+            <div>
+              <div class="lead-name">${name} <span class="badge ${status}">${STATUS[status]||status}</span>${isQuick?'<span class="badge quick"><i class="ri-flashlight-line"></i> Gọi nhanh</span>':''}</div>
+              <div class="lead-meta">${timeAgo(get(l,'createdat'))} · ${fmtDateTime(get(l,'createdat'))}</div>
+            </div>
+            <div class="lead-actions-top">
+              ${phone?`<a class="btn btn-sm btn-primary" href="tel:${esc(digits(phone))}"><i class="ri-phone-fill"></i> Gọi</a>`:''}
+              ${zalo?`<a class="btn btn-sm btn-ghost" href="https://zalo.me/${esc(digits(zalo))}" target="_blank" rel="noopener"><i class="ri-wechat-line"></i> Zalo</a>`:''}
+            </div>
+          </div>
+          <div class="lead-contact">
+            ${phone?`<span class="ci"><i class="ri-phone-line"></i> <a href="tel:${esc(digits(phone))}">${esc(phone)}</a> <button class="copy-btn" data-copy="${esc(phone)}">Sao chép</button></span>`:''}
+            ${(zalo&&zalo!==phone)?`<span class="ci"><i class="ri-wechat-line"></i> Zalo: ${esc(zalo)}</span>`:''}
+            ${email?`<span class="ci"><i class="ri-mail-line"></i> <a href="mailto:${esc(email)}">${esc(email)}</a></span>`:''}
+            ${loc?`<span class="ci"><i class="ri-map-pin-line"></i> ${esc(loc)}</span>`:''}
+          </div>
+          <div class="lead-grid">${rows.join('')}</div>
+          <div class="lead-foot">
+            <label>Trạng thái:</label>
+            <select class="status-select" data-id="${esc(id)}">
+              ${Object.keys(STATUS).map(s=>`<option value="${s}" ${s===status?'selected':''}>${STATUS[s]}</option>`).join('')}
+            </select>
+            <span style="color:#CBD5E1;font-size:.78rem">#${esc(id)}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+      box.querySelectorAll('.copy-btn').forEach(b=>b.onclick=()=>{ navigator.clipboard?.writeText(b.dataset.copy); UI.toast && UI.toast('Đã sao chép số điện thoại'); });
+      box.querySelectorAll('.status-select').forEach(sel=>sel.onchange=()=>setStatus(sel.dataset.id, sel.value, sel));
+    }
+
+    function kv(k,v){ return `<div class="kv"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`; }
+
+    async function setStatus(id, status, sel){
+      if (sel) sel.disabled = true;
+      try {
+        await API.lead.updateStatus(id, status);
+        const l = LEADS.find(x=>get(x,'id')===id); if (l){ l.status = status; l.Status = status; }
+        UI.toast && UI.toast('Đã cập nhật trạng thái');
+        renderStats(); renderFilters(); render();
+      } catch (err) {
+        UI.toast && UI.toast('Không cập nhật được: ' + (err && err.message||''), 'error');
+        if (sel) sel.disabled = false;
+      }
+    }
+
+    function logout(){ API.auth.logout(); window.location.href = 'login.html'; }
+    document.getElementById('q').addEventListener('input', e=>{ query=e.target.value.trim(); render(); });
+    document.getElementById('btn-refresh').addEventListener('click', loadLeads);
+    loadLeads();
+  </script>
+</body>
+</html>
