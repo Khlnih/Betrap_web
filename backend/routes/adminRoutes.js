@@ -11,6 +11,7 @@ router.patch('/admin/users/:id/toggle', authMiddleware, adminOnly, adminControll
 router.get('/admin/services', authMiddleware, adminOnly, adminController.getServices);
 router.patch('/admin/services/:id/toggle', authMiddleware, adminOnly, adminController.toggleService);
 router.put('/admin/providers/:id/verify', authMiddleware, adminOnly, adminController.verifyProvider);
+router.get('/admin/transactions', authMiddleware, adminOnly, adminController.getTransactions);
 
 // Stats Routes
 router.get('/stats/global', adminController.getGlobalStats);

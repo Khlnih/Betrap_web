@@ -118,6 +118,9 @@
         <div class="menu-item" onclick="switchTab('blogs')" id="tab-blogs">
           <i class="ri-article-line"></i> Blog
         </div>
+        <div class="menu-item" onclick="switchTab('transactions')" id="tab-transactions">
+          <i class="ri-file-list-3-line"></i> Đơn Đặt Lịch
+        </div>
         <div class="menu-item" onclick="switchTab('stats')" id="tab-stats">
           <i class="ri-bar-chart-2-line"></i> Thống Kê
         </div>
@@ -265,6 +268,24 @@
         </div>
       </section>
 
+      <section id="view-transactions" class="hidden">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Đơn Đặt Lịch</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table id="transactions-table">
+              <thead>
+                <tr>
+                  <th>Mã Đơn</th><th>Khách Hàng</th><th>Dịch Vụ</th><th>Ngày Làm Lễ</th><th>Tổng Tiền</th><th>Trạng Thái</th>
+                </tr>
+              </thead>
+              <tbody><!-- JS --></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -317,6 +338,7 @@
     let allUsers = [];
     let allServices = [];
     let allBlogs = [];
+    let allTransactions = [];
     let adminStats = null;
     let revenueChartInst = null;
 
@@ -328,6 +350,9 @@
             allBlogs = await API.blog.getAllAdmin();
         } catch(e) {}
         try {
+            allTransactions = await API.admin.getTransactions();
+        } catch(e) {}
+        try {
             adminStats = await API.stats.admin();
         } catch(e) {}
         updateStats();
@@ -335,6 +360,7 @@
         renderProviders();
         renderServices();
         renderBlogs();
+        renderTransactions();
       } catch (err) {
         UI.toast('Lỗi tải dữ liệu: ' + err.message, 'error');
       }
@@ -535,6 +561,7 @@
       document.getElementById('view-providers').classList.add('hidden');
       document.getElementById('view-services').classList.add('hidden');
       document.getElementById('view-blogs').classList.add('hidden');
+      document.getElementById('view-transactions').classList.add('hidden');
       document.getElementById('view-stats').classList.add('hidden');
       document.getElementById('view-' + tabId).classList.remove('hidden');
       
@@ -543,9 +570,38 @@
         'providers': 'Quản lý Nhà Cung Cấp',
         'services': 'Quản lý Dịch Vụ',
         'blogs': 'Quản lý Blog',
+        'transactions': 'Đơn Đặt Lịch',
         'stats': 'Thống Kê Hệ Thống'
       };
       document.getElementById('page-title').textContent = titles[tabId];
+    }
+
+    function renderTransactions() {
+      const tbody = document.querySelector('#transactions-table tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      allTransactions.forEach(t => {
+        const tr = document.createElement('tr');
+        
+        const badgeMap = {
+          'pending': '<span class="badge" style="background:rgba(245,158,11,0.1);color:#D97706">Chờ xác nhận</span>',
+          'confirmed': '<span class="badge" style="background:rgba(59,130,246,0.1);color:#3B82F6">Đã xác nhận</span>',
+          'done': '<span class="badge" style="background:rgba(34,197,94,0.1);color:#16A34A">Hoàn thành</span>',
+          'cancelled': '<span class="badge" style="background:rgba(239,68,68,0.1);color:#DC2626">Đã huỷ</span>'
+        };
+        const statusBadge = badgeMap[t.status] || t.status;
+        const date = t.date ? new Date(t.date).toLocaleDateString('vi-VN') : '-';
+        
+        tr.innerHTML = `
+          <td><span style="font-family:monospace;color:#94A3B8;font-size:0.8rem">${t.id}</span><br><span style="font-size:0.75rem;color:#64748B">${new Date(t.createdAt).toLocaleString('vi-VN')}</span></td>
+          <td style="font-weight:600;color:#1E293B">${t.customerName || 'Khách'}<br><span style="font-weight:400;font-size:0.85rem;color:#64748B">${t.customerPhone || ''}</span></td>
+          <td><div style="font-weight:600;color:#1E293B;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.serviceName}">${t.serviceName}</div><div style="font-size:0.8rem;color:#64748B">Của: ${t.providerName || '-'}</div></td>
+          <td>${t.time} <br> ${date}</td>
+          <td style="font-weight:700;color:var(--red-dark)">${UI.formatCurrency(t.price)}</td>
+          <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function renderBlogs() {

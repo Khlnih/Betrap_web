@@ -9,6 +9,35 @@ exports.verifyProvider = async (req, res) => {
     } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 };
 
+exports.getTransactions = async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT t.*, u.Name AS CustomerName, u.Phone AS CustomerPhone,
+                   p.Name AS ProviderName,
+                   s.Category AS ServiceCategory
+            FROM Transactions t
+            LEFT JOIN Users u ON t.CustomerId = u.Id
+            LEFT JOIN Users p ON t.ProviderId = p.Id
+            LEFT JOIN Services s ON t.ServiceId = s.Id
+            ORDER BY t.CreatedAt DESC
+        `);
+        res.json(result.recordset.map(t => ({
+            id: t.id, customerId: t.customerid, providerId: t.providerid,
+            serviceId: t.serviceid, serviceName: t.servicename,
+            serviceCategory: t.servicecategory || null,
+            price: t.price,
+            date: t.date ? (t.date instanceof Date ? t.date.toISOString().split('T')[0] : t.date) : null,
+            time: t.time, address: t.address, note: t.note, status: t.status,
+            cancelReason: t.cancelreason || null,
+            paymentMethod: t.paymentmethod, paymentStatus: t.paymentstatus,
+            customerName: t.customername || null,
+            customerPhone: t.customerphone || null,
+            providerName: t.providername || null,
+            createdAt: t.createdat, updatedAt: t.updatedat
+        })));
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
+};
+
 exports.getGlobalStats = async (req, res) => {
     try {
         const [txns, revCount, avgRat] = await Promise.all([
