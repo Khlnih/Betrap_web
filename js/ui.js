@@ -256,12 +256,7 @@ const UI = (() => {
                 <span style="font-family:var(--font-heading); font-weight:700;">Trap Connect</span>
               </div>
               <p class="brand-desc">Nền tảng kết nối dịch vụ đám hỏi truyền thống Việt Nam — uy tín, chuyên nghiệp, đáng nhớ.</p>
-              <div class="social-links mt-md">
-                <a class="social-link" href="#"><i class="ri-facebook-fill"></i></a>
-                <a class="social-link" href="#"><i class="ri-instagram-line"></i></a>
-                <a class="social-link" href="#"><i class="ri-tiktok-line"></i></a>
-                <a class="social-link" href="#"><i class="ri-youtube-line"></i></a>
-              </div>
+
             </div>
             <div>
               <p class="footer-heading">Dịch vụ</p>
