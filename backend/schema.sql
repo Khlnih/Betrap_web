@@ -240,3 +240,27 @@ CREATE TABLE BlogBlocks (
     Position  INT NOT NULL DEFAULT 0,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 11. Bảng Leads (Khách hàng từ Wizard Tìm Dịch Vụ)
+CREATE TABLE Leads (
+    Id              VARCHAR(50) PRIMARY KEY,
+    Name            VARCHAR(200) NOT NULL,
+    Phone           VARCHAR(20) NOT NULL,
+    Zalo            VARCHAR(20),
+    Email           VARCHAR(150),
+    Services        TEXT,
+    TrayCount       VARCHAR(20),
+    Trays           TEXT,
+    TrayNote        TEXT,
+    Style           VARCHAR(50),
+    Region          VARCHAR(50),
+    WeddingDate     VARCHAR(50),
+    Location        VARCHAR(500),
+    Budget          VARCHAR(100),
+    ContactTime     VARCHAR(50),
+    ContactChannel  VARCHAR(50),
+    RequestType     VARCHAR(50),
+    Status          VARCHAR(20) DEFAULT 'new', -- new, contacted, closed
+    CreatedAt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
