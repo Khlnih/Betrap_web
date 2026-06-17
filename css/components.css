@@ -225,7 +225,7 @@
 
 /* CONTACT WIDGET */
 .contact-widget { position: fixed; bottom: 32px; right: 32px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
-.cw-panel { background: white; border-radius: 24px; box-shadow: 0 16px 40px rgba(0,0,0,.15); padding: 24px; width: 300px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: bottom right; border: 1px solid rgba(0,0,0,.04); }
+.cw-panel { background: white; border-radius: 24px 24px 8px 24px; box-shadow: 0 16px 40px rgba(0,0,0,.15); padding: 24px; width: 300px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: bottom right; border: 1px solid rgba(0,0,0,.04); }
 .cw-panel.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
 .cw-header { font-weight: 800; font-size: 1.15rem; color: var(--text-dark); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-h); }
 .cw-close { cursor: pointer; color: var(--text-muted); font-size: 1.4rem; transition: all .2s; border: none; background: transparent; padding: 0; display:flex; align-items:center; justify-content:center; width: 32px; height: 32px; border-radius: 50%; }
