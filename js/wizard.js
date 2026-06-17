@@ -17,7 +17,7 @@
     'trau-cau': imgPath('lamtrap-4.jpg'), 'ruou-thuoc': imgPath('lamtrap-5.jpg'),
     'hoa-qua': imgPath('lamtrap-6.jpg'), 'lon-quay': imgPath('lamtrap-8.jpg'),
   };
-  const ZALO_OA = "https://zalo.me/"; // ← thay bằng link Zalo OA của bạn
+  const ZALO_OA = "https://zalo.me/0915650548"; // ← Zalo của cửa hàng
 
   // ---- data ----
   const SERVICES = [
