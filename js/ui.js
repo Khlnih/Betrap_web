@@ -365,7 +365,7 @@ const UI = (() => {
   function renderContactWidget() {
     if (document.getElementById('contact-widget')) return;
     const phone = "0915650548";
-    const fbLink = "https://facebook.com"; // Thêm link thực tế sau
+    const fbLink = "https://www.facebook.com/profile.php?id=61585035730901";
     const html = `
       <div class="contact-widget" id="contact-widget">
         <div class="cw-panel" id="cw-panel">
