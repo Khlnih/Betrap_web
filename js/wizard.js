@@ -50,7 +50,7 @@
     7:['trau-cau','ruou-thuoc','che','mut-sen','banh-com','phu-the','hoa-qua'],
     9:['trau-cau','ruou-thuoc','che','mut-sen','banh-com','phu-the','hoa-qua','xoi-ga','lon-quay'],
   };
-  const STYLES=[{id:'truyen-thong',name:'Truyền thống',hint:'Tông đỏ rực rỡ'},{id:'hien-dai',name:'Hiện đại',hint:'Pastel nhẹ nhàng'},{id:'sang-trong',name:'Sang trọng',hint:'Vàng kim cao cấp'}];
+  const STYLES=[{id:'tieu-chuan',name:'Tiêu chuẩn',hint:'Mâm nhôm, hoa lụa'},{id:'nang-cao',name:'Nâng cao',hint:'Hoa tươi, mica'},{id:'cao-cap',name:'Cao cấp',hint:'Khay mạ vàng, hoa nhập'}];
   const REGIONS=[{id:'bac',name:'Miền Bắc'},{id:'trung',name:'Miền Trung'},{id:'nam',name:'Miền Nam'}];
   const BUDGETS=['Dưới 5 triệu','5 – 10 triệu','10 – 20 triệu','Trên 20 triệu','Chưa xác định'];
   const TIMES=[{id:'gio-hc',name:'Giờ hành chính'},{id:'toi',name:'Buổi tối (sau 18h)'},{id:'cuoi-tuan',name:'Cuối tuần'},{id:'bat-ky',name:'Bất cứ lúc nào'}];
@@ -211,7 +211,24 @@
   function flash(){const p=document.getElementById('bw-pill');if(p)p.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],{duration:260});}
   function renderDetails(){
     body.innerHTML=`
-      <div class="field"><label>Phong cách trang trí</label><div class="opt-grid three">${STYLES.map(s=>`<div class="chip sm center ${state.style===s.id?'on':''}" data-style="${s.id}" style="flex-direction:column;gap:2px;padding:12px 8px"><b style="color:var(--bw-dark)">${s.name}</b><small style="color:var(--bw-muted);font-size:.76rem">${s.hint}</small></div>`).join('')}</div></div>
+      <div class="field"><label>Gói trang trí</label>
+        <div class="opt-grid three">${STYLES.map(s=>`<div class="chip sm center ${state.style===s.id?'on':''}" data-style="${s.id}" style="flex-direction:column;gap:2px;padding:12px 8px"><b style="color:var(--bw-dark)">${s.name}</b><small style="color:var(--bw-muted);font-size:.76rem">${s.hint}</small></div>`).join('')}</div>
+        <div style="margin-top:12px">
+          <button type="button" class="btn-ghost" style="width:100%;justify-content:space-between;padding:10px 14px;border-radius:var(--bw-r-md);font-size:.85rem;color:var(--bw-gold-dark);border-color:var(--bw-gold-light)" onclick="const c=this.nextElementSibling; c.style.display=c.style.display==='none'?'block':'none'; this.querySelector('i').style.transform=c.style.display==='none'?'none':'rotate(180deg)'">
+            <span style="font-weight:700">✨ Xem chi tiết điểm khác biệt giữa các gói</span><i class="ri-arrow-down-s-line" style="transition:transform 0.3s ease"></i>
+          </button>
+          <div style="display:none; margin-top:8px; padding:16px; background:#fff; border:1px solid var(--bw-cream-dark); border-radius:var(--bw-r-md); font-size:.82rem; line-height:1.55; color:var(--bw-muted); max-height:50vh; overflow-y:auto; text-align:left">
+            <h4 style="color:var(--bw-dark); font-size:.9rem; margin-bottom:4px;">1. Gói Tiêu chuẩn</h4>
+            <p><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật xếp dáng tháp tròn cân đối.<br><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp chữ "Hỷ", nơ đỏ và ruy băng.<br><b>Sính lễ bên trong:</b> Thương hiệu bánh kẹo, chè, thuốc lá, rượu phổ biến.<br><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.<br><b>Đặc điểm:</b> Dùng hoa lụa/vải voan có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế.</p>
+            <hr style="border:none; border-top:1px dashed var(--bw-cream-dark); margin:12px 0">
+            <h4 style="color:var(--bw-dark); font-size:.9rem; margin-bottom:4px;">2. Gói Nâng cao</h4>
+            <p><b>Hình thức:</b> Dùng tráp gỗ sơn mài (Tròn viên mãn, Vuông bo góc hiện đại), tráp mica trong suốt, mâm nhôm, hoặc khay chân cao rồng phượng để tạo cảm giác thanh lịch.<br><b>Trang trí:</b> Hoàn toàn bằng hoa tươi (hồng, cẩm tú cầu, baby...) & lá phụ nhập khẩu. Mâm kết dáng nghệ thuật (tháp tròn, xòe rộng, hoặc bay bổng nhẹ nhàng). Mâm hoa quả kết Rồng Phượng tinh tế.<br><b>Sính lễ:</b> Dòng sản phẩm có bao bì sang trọng (chè hộp thiếc, bánh hộp giấy quai ruy băng, rượu ngoại nhập).<br><b>Nhóm màu phổ thông (Giá tiêu chuẩn):</b> Đỏ Cam, Hồng Pastel, Trắng Xanh Cốm (Dùng hoa nội địa như hồng Đà Lạt, tú cầu, ly).<br><b>Nhóm màu Hot Trend (Chi phí cao hơn):</b> Xanh Mint, Vàng Kem, Hồng Cam Sữa (Phối hoa cao cấp/nhập khẩu).</p>
+            <hr style="border:none; border-top:1px dashed var(--bw-cream-dark); margin:12px 0">
+            <h4 style="color:var(--bw-dark); font-size:.9rem; margin-bottom:4px;">3. Gói Cao cấp</h4>
+            <p><b>Hình thức:</b> Dòng tráp và khay cao cấp như khay chân cao mạ vàng, khay vàng champagne, tráp gỗ khảm trai, tráp sơn mài cao cấp hoặc thiết kế riêng theo concept. Đồng bộ, sang trọng và cá nhân hóa cao.<br><b>Trang trí:</b> Hoa tươi cao cấp cùng phụ kiện tuyển chọn. Bố cục tinh tế, điểm nhấn đẳng cấp. Mâm hoa quả tạo hình công phu.<br><b>Sính lễ:</b> Bao bì sang trọng, đồng bộ, tuyển chọn kỹ lưỡng.<br><b>Màu Sang trọng / Độc đáo:</b> Xanh ngọc lục bảo, Tím khói, Trắng tinh khôi (Lan Hồ Điệp). <i>(Giá hoa nhập/Hồ điệp cao gấp 3-4 lần hoa nội)</i>.<br><b>Màu Siêu hiếm / Độc quyền:</b> Xanh Dương (Classic Blue), Đen Vàng Kim, Đỏ Rượu Vang Đậm.</p>
+          </div>
+        </div>
+      </div>
       <div class="field"><label>Khu vực tổ chức</label><div class="opt-grid three">${REGIONS.map(r=>`<div class="chip sm center ${state.region===r.id?'on':''}" data-region="${r.id}">${r.name}</div>`).join('')}</div></div>
       <div class="two-col">
         <div class="field"><label for="bw-date">Ngày ăn hỏi (dự kiến)</label><input type="date" class="in" id="bw-date" value="${state.date==='undecided'?'':state.date}"><label class="consent" style="margin-top:7px"><input type="checkbox" id="bw-nodate" ${state.date==='undecided'?'checked':''}><span>Chưa chốt ngày</span></label></div>
