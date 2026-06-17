@@ -29,7 +29,7 @@
     /* Timeline styles */
     .timeline {
       position: relative;
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: var(--sp-2xl) 0;
     }
@@ -39,35 +39,35 @@
       top: 0; bottom: 0;
       left: 16px;
       width: 2px;
-      background: rgba(212, 185, 150, 0.3); /* gold faint */
+      background: linear-gradient(to bottom, var(--gold), transparent);
     }
     .timeline-month {
       position: relative;
-      padding-left: 48px;
-      margin-bottom: var(--sp-2xl);
+      padding-left: 56px;
+      margin-bottom: 60px;
     }
     .timeline-month-label {
       position: relative;
       font-family: var(--font-h);
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.8rem;
+      font-weight: 800;
       color: var(--text-dark);
-      margin-bottom: var(--sp-lg);
+      margin-bottom: var(--sp-xl);
       display: inline-block;
     }
     .timeline-month-label::before {
       content: '';
       position: absolute;
-      left: -37px; top: 8px;
-      width: 12px; height: 12px;
+      left: -46px; top: 8px;
+      width: 14px; height: 14px;
       border-radius: 50%;
       background: var(--gold);
-      border: 3px solid var(--cream);
-      box-shadow: 0 0 0 3px rgba(212, 185, 150, 0.2);
+      border: 3px solid white;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
     }
     .timeline-month.empty .timeline-month-label {
       color: var(--text-muted);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-family: var(--font);
       font-weight: 500;
       margin-bottom: 0;
@@ -76,59 +76,93 @@
       background: var(--text-muted);
       box-shadow: none;
       width: 10px; height: 10px;
-      left: -36px; top: 6px;
+      left: -44px; top: 8px;
     }
     
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
     .blog-card {
       display: flex;
-      gap: var(--sp-lg);
+      flex-direction: column;
       background: white;
-      border-radius: var(--r-md);
-      padding: var(--sp-md);
-      box-shadow: var(--shadow-sm);
-      transition: all var(--t-normal);
-      border: 1px solid rgba(212, 185, 150, 0.15);
-      margin-bottom: var(--sp-md);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(212, 185, 150, 0.1);
       text-decoration: none;
       color: inherit;
     }
     .blog-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--gold);
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px rgba(212, 175, 55, 0.15);
+      border-color: rgba(212,175,55,.4);
+    }
+    .blog-card-img-wrap {
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+      background: var(--cream);
+      position: relative;
     }
     .blog-card-img {
-      width: 160px;
-      height: 120px;
-      border-radius: var(--r-sm);
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      flex-shrink: 0;
-      background: var(--cream);
+      transition: transform 0.6s ease;
+    }
+    .blog-card:hover .blog-card-img {
+      transform: scale(1.08);
     }
     .blog-card-content {
-      flex: 1;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      flex: 1;
     }
     .blog-card-title {
       font-family: var(--font-h);
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1.4rem;
+      font-weight: 800;
       color: var(--text-dark);
-      margin-bottom: 8px;
-      line-height: 1.3;
+      margin-bottom: 16px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .blog-card-meta {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 0.9rem;
+      color: var(--gold-dark);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 6px;
+      font-weight: 600;
+      margin-top: auto;
     }
-    @media (max-width: 600px) {
-      .blog-card { flex-direction: column; }
-      .blog-card-img { width: 100%; height: 180px; }
+    .read-more-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.3s;
+    }
+    .blog-card:hover .read-more-text {
+      gap: 10px;
+    }
+    
+    @media (max-width: 800px) {
+      .blog-grid { grid-template-columns: 1fr; }
     }
     
     .load-more {
@@ -220,12 +254,15 @@
             const blogs = await API.blog.getByMonth(currY, currM);
             let blogsHtml = blogs.map(b => `
               <a href="blog-detail.html?id=${b.Slug || b.Id}" class="blog-card">
-                ${b.CoverImage ? `<img src="${b.CoverImage}" class="blog-card-img" alt="Cover">` : '<div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:#ddd"><i class="ri-image-line"></i></div>'}
+                <div class="blog-card-img-wrap">
+                  ${b.CoverImage ? `<img src="${b.CoverImage}" class="blog-card-img" alt="Cover">` : '<div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;color:#ddd"><i class="ri-image-line"></i></div>'}
+                </div>
                 <div class="blog-card-content">
                   <div class="blog-card-title">${b.Title}</div>
                   <div class="blog-card-meta">
-                    <span><i class="ri-calendar-line"></i> ${UI.formatDate(b.PublishedAt)}</span>
+                    <i class="ri-calendar-line"></i> ${UI.formatDate(b.PublishedAt)}
                   </div>
+                  <div class="read-more-text">Đọc bài viết <i class="ri-arrow-right-line"></i></div>
                 </div>
               </a>
             `).join('');
@@ -233,7 +270,9 @@
             html += `
               <div class="timeline-month">
                 <div class="timeline-month-label">Tháng ${currM}/${currY}</div>
-                ${blogsHtml}
+                <div class="blog-grid">
+                  ${blogsHtml}
+                </div>
               </div>
             `;
           } else {
@@ -302,18 +341,22 @@
         }
         
         let html = '<div class="timeline-month"><div class="timeline-month-label">Kết quả tìm kiếm cho: "' + val + '"</div>';
+        html += '<div class="blog-grid">';
         html += blogs.map(b => `
           <a href="blog-detail.html?id=${b.Slug || b.Id}" class="blog-card">
-            ${b.CoverImage ? `<img src="${b.CoverImage}" class="blog-card-img" alt="Cover">` : '<div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:#ddd"><i class="ri-image-line"></i></div>'}
+            <div class="blog-card-img-wrap">
+              ${b.CoverImage ? `<img src="${b.CoverImage}" class="blog-card-img" alt="Cover">` : '<div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;color:#ddd"><i class="ri-image-line"></i></div>'}
+            </div>
             <div class="blog-card-content">
               <div class="blog-card-title">${b.Title}</div>
               <div class="blog-card-meta">
-                <span><i class="ri-calendar-line"></i> ${UI.formatDate(b.PublishedAt)}</span>
+                <i class="ri-calendar-line"></i> ${UI.formatDate(b.PublishedAt)}
               </div>
+              <div class="read-more-text">Đọc bài viết <i class="ri-arrow-right-line"></i></div>
             </div>
           </a>
         `).join('');
-        html += '</div>';
+        html += '</div></div>';
         
         timelineEl.innerHTML = html;
       } catch(e) {
