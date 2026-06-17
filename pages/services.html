@@ -494,18 +494,53 @@
             Tráp Ăn Hỏi
             <i class="ri-arrow-down-s-line sb-sub-arrow" id="sub-arr-trap"></i>
           </div>
-          <div class="sb-sub-body" id="sub-body-trap">
-            <div class="sb-leaf active" id="sl-trap-all"      onclick="selectItem('trap','lam-trap','')">
+            <div class="sb-leaf active" id="sl-trap-all" onclick="selectItem('trap','lam-trap','')">
               <span class="sb-leaf-dot"></span> Tất cả
             </div>
-            <div class="sb-leaf" id="sl-trap-tieu-chuan"    onclick="selectItem('trap','lam-trap','tieu-chuan')">
+            
+            <!-- Tiêu chuẩn -->
+            <div class="sb-leaf" id="sl-trap-tieu-chuan" onclick="selectItem('trap','lam-trap','tieu-chuan')">
               <span class="sb-leaf-dot"></span> Tiêu chuẩn
+              <i class="ri-information-line" style="margin-left:auto; color:var(--gold-dark); cursor:pointer;" onclick="event.stopPropagation(); toggleSbInfo('sb-info-basic', this)"></i>
             </div>
-            <div class="sb-leaf" id="sl-trap-nang-cao"       onclick="selectItem('trap','lam-trap','nang-cao')">
+            <div id="sb-info-basic" style="display:none; margin:0 12px 8px 24px; padding:12px; background:#fff; border-left:2px solid var(--gold); border-radius:0 8px 8px 0; font-size:0.75rem; color:var(--text-body); line-height:1.5; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+              <ul style="padding-left:14px; margin:0; display:flex; flex-direction:column; gap:6px;">
+                <li><b>Hình thức:</b> Mâm nhôm bạc hoặc sơn mài đỏ. Xếp dáng tháp tròn.</li>
+                <li><b>Trang trí:</b> Hoa lụa, chữ Hỷ, ruy băng.</li>
+                <li><b>Sính lễ:</b> Thương hiệu phổ biến.</li>
+                <li><b>Màu sắc:</b> Đỏ truyền thống, Hồng cánh sen.</li>
+                <li><b>Đặc điểm:</b> Phom rập khuôn, tối ưu chi phí.</li>
+              </ul>
+            </div>
+
+            <!-- Nâng cao -->
+            <div class="sb-leaf" id="sl-trap-nang-cao" onclick="selectItem('trap','lam-trap','nang-cao')">
               <span class="sb-leaf-dot"></span> Nâng cao
+              <i class="ri-information-line" style="margin-left:auto; color:var(--gold-dark); cursor:pointer;" onclick="event.stopPropagation(); toggleSbInfo('sb-info-premium', this)"></i>
             </div>
-            <div class="sb-leaf" id="sl-trap-cao-cap"         onclick="selectItem('trap','lam-trap','cao-cap')">
+            <div id="sb-info-premium" style="display:none; margin:0 12px 8px 24px; padding:12px; background:#fff; border-left:2px solid var(--gold); border-radius:0 8px 8px 0; font-size:0.75rem; color:var(--text-body); line-height:1.5; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+              <ul style="padding-left:14px; margin:0; display:flex; flex-direction:column; gap:6px;">
+                <li><b>Hình thức:</b> Gỗ sơn mài cao cấp, mica trong suốt, khay rồng phượng.</li>
+                <li><b>Trang trí:</b> 100% <b>hoa tươi</b> (hồng, lan...). Cắm xòe rộng/bay bổng nghệ thuật.</li>
+                <li><b>Sính lễ:</b> Bao bì sang trọng (chè hộp thiếc, bánh quai ruy băng).</li>
+                <li><b>Màu Phổ thông:</b> Đỏ, Cam, Hồng Pastel, Trắng Xanh. (Giá tiêu chuẩn).</li>
+                <li><b>Màu Hot Trend:</b> Xanh Mint, Vàng Kem, Hồng Cam Sữa. (Cần hoa cao cấp/nhập khẩu → giá cao hơn).</li>
+              </ul>
+            </div>
+
+            <!-- Cao cấp -->
+            <div class="sb-leaf" id="sl-trap-cao-cap" onclick="selectItem('trap','lam-trap','cao-cap')">
               <span class="sb-leaf-dot"></span> Cao cấp
+              <i class="ri-information-line" style="margin-left:auto; color:var(--gold-dark); cursor:pointer;" onclick="event.stopPropagation(); toggleSbInfo('sb-info-luxury', this)"></i>
+            </div>
+            <div id="sb-info-luxury" style="display:none; margin:0 12px 8px 24px; padding:12px; background:#fff; border-left:2px solid var(--gold); border-radius:0 8px 8px 0; font-size:0.75rem; color:var(--text-body); line-height:1.5; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+              <ul style="padding-left:14px; margin:0; display:flex; flex-direction:column; gap:6px;">
+                <li><b>Hình thức:</b> Khay mạ vàng, khay oval, khay khảm trai thiết kế riêng.</li>
+                <li><b>Trang trí:</b> Hoa tươi cao cấp, phụ kiện tuyển chọn. Hoa quả kết Rồng Phượng công phu.</li>
+                <li><b>Sính lễ:</b> Thượng lưu nhất, chỉn chu tuyệt đối.</li>
+                <li><b>Màu Sang trọng:</b> Xanh ngọc lục bảo, Tím khói, Trắng tinh khôi (Lan Hồ Điệp). Giá rất cao.</li>
+                <li><b>Màu Siêu hiếm:</b> Xanh Royal, Black & Gold, Đỏ Burgundy.</li>
+              </ul>
             </div>
           </div>
           <div class="sb-sep"></div>
@@ -662,49 +697,6 @@
           <button id="panel-book-btn" class="btn btn-primary btn-sm" style="display:none;" onclick="openBookSimple(currentCat)">
             <i class="ri-calendar-check-line"></i> Đặt ngay
           </button>
-        </div>
-
-        <!-- Package Details Accordion (Trap only) -->
-        <div id="trap-details-accordion" style="display:none; margin-bottom:24px;">
-          <button onclick="toggleTrapDetails()" style="width:100%; border:1.5px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:rgba(212,185,150,0.1); cursor:pointer; outline:none; transition:all 0.3s;">
-            <span style="font-weight:700; color:var(--gold-dark); font-size:.95rem; display:flex; align-items:center; gap:8px;">
-              <i class="ri-sparkling-fill"></i> Xem chi tiết điểm khác biệt giữa các gói Tráp
-            </span>
-            <i class="ri-arrow-down-s-line" id="trap-details-arrow" style="font-size:1.3rem; color:var(--gold-dark); transition:transform 0.3s;"></i>
-          </button>
-          <div id="trap-details-content" style="display:none; background:#fff; border:1px solid #E5E7EB; border-top:none; border-radius:0 0 12px 12px; padding:24px; font-size:.9rem; line-height:1.6; color:var(--text-body); margin-top:-6px;">
-            <div style="margin-bottom:20px;">
-              <h4 style="color:var(--dark); font-size:1.05rem; margin-bottom:10px; border-left:3px solid var(--gold); padding-left:10px; font-family:'Playfair Display', serif;">📦 Gói Tiêu chuẩn</h4>
-              <ul style="padding-left:20px; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">
-                <li><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật được sắp xếp theo dáng tháp tròn xếp tầng cân đối và trang trọng.</li>
-                <li><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</li>
-                <li><b>Sính lễ bên trong:</b> Các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp với phong tục cưới hỏi truyền thống.</li>
-                <li><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</li>
-                <li><b>Đặc điểm:</b> Sử dụng hoa lụa, vải voan hoặc ruy băng có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng theo màu, giúp tối ưu chi phí.</li>
-              </ul>
-            </div>
-            <div style="margin-bottom:20px;">
-              <h4 style="color:var(--dark); font-size:1.05rem; margin-bottom:10px; border-left:3px solid var(--gold); padding-left:10px; font-family:'Playfair Display', serif;">✨ Gói Nâng cao</h4>
-              <ul style="padding-left:20px; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">
-                <li><b>Hình thức mâm tráp:</b> Tráp gỗ sơn mài cao cấp (tròn/vuông bo góc), tráp mica trong suốt, hoặc các khay chân cao (rồng phượng nhỏ) tạo sự thanh lịch, thông thoáng.</li>
-                <li><b>Phong cách trang trí:</b> Hoàn toàn bằng <b>hoa tươi</b> (hoa hồng, lan, cẩm tú cầu, baby...) kết hợp lá phụ nhập khẩu. Mâm kết dáng nghệ thuật (xòe rộng hoặc bay bổng) chứ không gò bó trong tháp tròn cứng nhắc.</li>
-                <li><b>Sính lễ bên trong:</b> Nâng cấp các dòng sản phẩm có bao bì sang trọng (chè hộp thiếc, bánh cốm đặt hộp đóng quai ruy băng, rượu vang ngoại nhập).</li>
-                <li><b>Đặc điểm:</b> Rất bắt mắt, lên hình phóng sự cưới nổi bật và hiện đại.</li>
-                <li><b>Nhóm màu Phổ thông:</b> Đỏ - Cam, Hồng Pastel, Trắng - Xanh Cốm (sử dụng hoa nội địa tươi sáng). Mức giá ở khoảng <b>Tiêu chuẩn</b>.</li>
-                <li><b>Nhóm màu Hot Trend:</b> Xanh Mint, Vàng Kem/Champagne, Hồng Cam Sữa. Cần phối hoa cao cấp/nhập khẩu để lên đúng màu nên <b>chi phí sẽ cao hơn</b>.</li>
-              </ul>
-            </div>
-            <div>
-              <h4 style="color:var(--dark); font-size:1.05rem; margin-bottom:10px; border-left:3px solid var(--gold); padding-left:10px; font-family:'Playfair Display', serif;">👑 Gói Cao cấp</h4>
-              <ul style="padding-left:20px; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">
-                <li><b>Hình thức mâm tráp:</b> Khay chân cao mạ vàng, khay kim loại champagne, khay oval có chân đế, tráp gỗ khảm trai hoặc thiết kế riêng theo concept. Đồng bộ, sang trọng và cá nhân hóa.</li>
-                <li><b>Phong cách trang trí:</b> Hoa tươi cao cấp kết hợp phụ kiện tuyển chọn. Mâm kết hoa nghệ thuật tinh tế đẳng cấp. Mâm hoa quả được tạo hình Rồng Phượng công phu.</li>
-                <li><b>Sính lễ bên trong:</b> Dòng sản phẩm tinh hoa nhất với bao bì thượng lưu, dành cho những gia đình mong muốn lễ ăn hỏi chỉn chu tuyệt đối.</li>
-                <li><b>Màu Sang trọng / Độc đáo:</b> Xanh ngọc lục bảo (Emerald), Tím khói, Trắng tinh khôi (Lan Hồ Điệp). Giá nhập hoa rất cao và kén người chơi.</li>
-                <li><b>Màu Siêu hiếm / Độc quyền:</b> Xanh Dương (Royal Blue), Đen - Vàng Kim (Black & Gold), Đỏ Rượu Vang Đậm (Burgundy).</li>
-              </ul>
-            </div>
-          </div>
         </div>
 
         <!-- Grid -->
@@ -926,18 +918,6 @@
       document.getElementById('panel-title').textContent    = t;
       document.getElementById('panel-subtitle').textContent = s;
 
-      // Show/hide Trap Details Accordion
-      const trapAcc = document.getElementById('trap-details-accordion');
-      if (trapAcc) {
-        if (section === 'trap') {
-          trapAcc.style.display = 'block';
-        } else {
-          trapAcc.style.display = 'none';
-          document.getElementById('trap-details-content').style.display = 'none';
-          document.getElementById('trap-details-arrow').style.transform = 'rotate(0)';
-        }
-      }
-
       // Breadcrumb
       renderBreadcrumb(section, subCat);
 
@@ -1118,6 +1098,18 @@
     /* ═══════════════════════════════════════════════════════════════════════════
        DETAIL LIGHTBOX
     ═══════════════════════════════════════════════════════════════════════════ */
+    function toggleSbInfo(id, iconEl) {
+      const el = document.getElementById(id);
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        iconEl.style.transform = 'rotate(180deg)';
+      } else {
+        el.style.display = 'none';
+        iconEl.style.transform = 'rotate(0)';
+      }
+    }
+
+    // Modal helpers
     function openDetail(svcId) {
       let svc = null;
       for (const cat of Object.keys(allSvcs)) {
@@ -1152,19 +1144,6 @@
     }
     function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
     document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
-
-    // Toggle trap details accordion
-    function toggleTrapDetails() {
-      const content = document.getElementById('trap-details-content');
-      const arrow = document.getElementById('trap-details-arrow');
-      if (content.style.display === 'none') {
-        content.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
-      } else {
-        content.style.display = 'none';
-        arrow.style.transform = 'rotate(0)';
-      }
-    }
 
     /* ═══════════════════════════════════════════════════════════════════════════
        BOOK SIMPLE
