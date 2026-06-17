@@ -659,96 +659,13 @@
             <div class="svc-title" id="panel-title">—</div>
             <div class="svc-subtitle" id="panel-subtitle"></div>
           </div>
-          <button id="panel-book-btn" class="btn btn-primary btn-sm" style="display:none;" onclick="openBookSimple(currentCat)">
-            <i class="ri-calendar-check-line"></i> Đặt ngay
-          </button>
-        </div>
-
-        <!-- Tier Comparison Guide (Only for lam-trap) -->
-        <style>
-          .tier-guide-wrap { background:linear-gradient(135deg, #fffcf9, #fff7eb); border-radius:24px; border:1px solid rgba(255,255,255,0.8); margin-bottom:36px; box-shadow:0 16px 40px rgba(212,185,150,0.12); overflow:hidden; position:relative; }
-          .tier-guide-bg { position:absolute; top:-50px; right:-50px; width:250px; height:250px; background:rgba(212,185,150,0.25); border-radius:50%; filter:blur(40px); z-index:0; pointer-events:none; }
-          .tier-guide-bg-2 { position:absolute; bottom:-50px; left:-50px; width:200px; height:200px; background:rgba(201,97,106,0.1); border-radius:50%; filter:blur(40px); z-index:0; pointer-events:none; }
-          .tier-tab-container { display:flex; background:rgba(212,185,150,0.15); border-radius:50px; padding:6px; margin:0 auto 28px; max-width:500px; position:relative; z-index:1; }
-          .tier-tab { flex:1; text-align:center; padding:12px 16px; font-weight:700; cursor:pointer; color:var(--text-muted); transition:all .3s cubic-bezier(0.4, 0, 0.2, 1); border-radius:50px; font-size:.95rem; }
-          .tier-tab:hover { color:var(--dark); }
-          .tier-tab.active-tab { background:linear-gradient(135deg, var(--gold), var(--gold-light)); color:white; box-shadow:0 6px 16px rgba(212,185,150,0.4); }
-          .tier-content { animation:slideUpFade .4s ease; position:relative; z-index:1; }
-          @keyframes slideUpFade { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-          .tier-title { font-family:var(--font-h); font-size:1.6rem; margin-bottom:20px; background:linear-gradient(135deg, #A87C4F, #D4B996); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block; }
-          .tier-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
-          .tier-item { display:flex; gap:16px; background:rgba(255,255,255,0.65); backdrop-filter:blur(8px); border:1px solid white; padding:16px 20px; border-radius:16px; align-items:flex-start; box-shadow:0 4px 16px rgba(0,0,0,0.02); transition:all .25s; }
-          .tier-item:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,185,150,0.1); background:rgba(255,255,255,0.9); }
-          .tier-icon { color:var(--gold); font-size:1.4rem; line-height:1; filter:drop-shadow(0 2px 4px rgba(212,185,150,0.3)); }
-          .tier-text { font-size:.95rem; line-height:1.6; color:var(--text-body); }
-          .tier-text b { color:var(--dark); font-weight:700; }
-          .tier-note { background:rgba(201,97,106,0.06); border-left:4px solid #C9616A; }
-          .tier-note-icon { color:#C9616A; font-size:1.4rem; line-height:1; }
-          .tier-note-box { background:rgba(255,255,255,0.5); padding:12px 16px; border-radius:12px; margin-top:10px; border:1px dashed rgba(212,185,150,0.4); }
-          .tier-note-box span { display:inline-block; width:24px; text-align:center; margin-right:4px; }
-        </style>
-        <div id="tier-comparison-guide" class="tier-guide-wrap" style="display:none;">
-          <div class="tier-guide-bg"></div>
-          <div class="tier-guide-bg-2"></div>
-          
-          <div style="padding:32px 24px 0; position:relative; z-index:1; text-align:center;">
-            <h2 style="font-family:var(--font-h); font-size:1.8rem; color:var(--dark); margin-bottom:8px;">Cẩm nang Phân khúc Tráp Lễ</h2>
-            <p style="color:var(--text-muted); font-size:.95rem; margin-bottom:28px;">Khám phá sự khác biệt để lựa chọn gói phù hợp nhất cho ngày trọng đại của bạn</p>
-            
-            <div class="tier-tab-container">
-              <div class="tier-tab" onclick="switchTierTab('tieu-chuan')" id="tab-tieu-chuan">Tiêu chuẩn</div>
-              <div class="tier-tab" onclick="switchTierTab('nang-cao')" id="tab-nang-cao">Nâng cao</div>
-              <div class="tier-tab" onclick="switchTierTab('cao-cap')" id="tab-cao-cap">Cao cấp</div>
-            </div>
-          </div>
-
-          <div style="padding:0 24px 36px; max-width:800px; margin:0 auto;">
-            <!-- Tiêu chuẩn Content -->
-            <div id="tier-content-tieu-chuan" class="tier-content" style="display:none;">
-              <div style="text-align:center;"><h3 class="tier-title">Gói Tráp Tiêu Chuẩn</h3></div>
-              <ul class="tier-list">
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật được sắp xếp theo dáng tháp tròn xếp tầng cân đối và trang trọng.</div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Sính lễ bên trong:</b> Sử dụng các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp với phong tục cưới hỏi truyền thống.</div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</div></li>
-                <li class="tier-item tier-note"><i class="ri-information-fill tier-note-icon"></i> <div class="tier-text"><b>Ghi chú:</b> Sử dụng hoa lụa, vải voan hoặc ruy băng đỏ/hồng có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng theo màu.</div></li>
-              </ul>
-            </div>
-            
-            <!-- Nâng cao Content -->
-            <div id="tier-content-nang-cao" class="tier-content" style="display:none;">
-              <div style="text-align:center;"><h3 class="tier-title">Gói Tráp Nâng Cao</h3></div>
-              <ul class="tier-list">
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Hình thức mâm tráp:</b> Thay vì mâm nhôm, gói này thường dùng tráp gỗ sơn mài cao cấp, tráp mica trong suốt, hoặc các khay chân cao (rồng phượng) để tạo cảm giác thanh lịch.
-                  <div class="tier-note-box">
-                    <span>🔴</span> <b>Hình tròn:</b> Phổ biến nhất, mang ý nghĩa viên mãn, tròn đầy.<br>
-                    <span>🟥</span> <b>Hình vuông bo góc:</b> Hiện đại hơn, thường dùng trong gói cao cấp.<br>
-                    <span>✨</span> <b>Tráp mica:</b> Trong suốt, hiện đại, sang trọng.<br>
-                    <span>🐉</span> <b>Khay chân cao:</b> Tạo độ cao và điểm nhấn (khay rồng phượng).
-                  </div>
-                </div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Phong cách trang trí:</b> Sử dụng 100% hoa tươi (hồng, lan, cẩm tú cầu, baby...) kết hợp lá phụ nhập khẩu. Mâm lễ kết dáng nghệ thuật bay bổng hoặc xòe rộng. Mâm hoa quả kết Rồng Phượng tinh tế.</div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Sính lễ bên trong:</b> Được nâng cấp lên các sản phẩm có bao bì cực kỳ sang trọng (chè hộp thiếc, bánh đặt hộp quai ruy băng đồng bộ, rượu vang ngoại).</div></li>
-                <li class="tier-item tier-note"><i class="ri-information-fill tier-note-icon"></i> <div class="tier-text"><b>Lưu ý Màu sắc:</b><br>
-                  - <i>Nhóm phổ thông:</i> Đỏ Cam, Hồng Pastel, Trắng Xanh Cốm (dùng hoa nội địa).<br>
-                  - <i>Nhóm Hot Trend:</i> Xanh Mint, Vàng Kem/Champagne, Hồng Cam Sữa (phát sinh chi phí vì yêu cầu hoa nhập khẩu/cao cấp).
-                </div></li>
-              </ul>
-            </div>
-
-            <!-- Cao cấp Content -->
-            <div id="tier-content-cao-cap" class="tier-content" style="display:none;">
-              <div style="text-align:center;"><h3 class="tier-title">Gói Tráp Cao Cấp</h3></div>
-              <ul class="tier-list">
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Hình thức mâm tráp:</b> Khay chân cao mạ vàng, khay vàng champagne, khay oval có chân đế, tráp gỗ khảm trai, hoặc thiết kế riêng biệt 100% theo concept. Tính cá nhân hóa cao.</div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Phong cách trang trí:</b> Hoa tươi đẳng cấp kết hợp phụ kiện decor chọn lọc kỹ. Bố cục hoa nghệ thuật, tinh tế. Mâm hoa quả tạo hình công phu tỉ mỉ, tôn lên sự sang trọng tuyệt đối.</div></li>
-                <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Sính lễ bên trong:</b> Chỉ tuyển chọn các thương hiệu ngoại nhập cao cấp nhất, bao bì đồng bộ hoàn hảo (bánh, trà, rượu) dành cho những gia đình kỹ tính nhất.</div></li>
-                <li class="tier-item tier-note"><i class="ri-information-fill tier-note-icon"></i> <div class="tier-text"><b>Lưu ý Màu sắc Độc Quyền:</b><br>
-                  - <i>Sang trọng / Độc đáo:</i> Xanh ngọc lục bảo, Tím khói, Trắng tinh khôi (Lan Hồ Điệp). Giá hoa nhập thường cao gấp 3-4 lần hoa nội địa.<br>
-                  - <i>Siêu hiếm:</i> Xanh Dương (Royal Blue), Đen Vàng Kim (Black & Gold), Đỏ Burgundy.
-                </div></li>
-              </ul>
-            </div>
+          <div style="display:flex; gap:8px;">
+            <button id="btn-guide-modal" class="btn btn-ghost-dark btn-sm" style="display:none; background:linear-gradient(135deg,rgba(212,185,150,0.1),rgba(212,185,150,0.2)); color:var(--gold-dark); border:1px solid rgba(212,185,150,0.4);" onclick="openTierModal()">
+              <i class="ri-book-read-line"></i> <span class="hide-on-mobile" style="margin-left:4px;">Cẩm nang</span>
+            </button>
+            <button id="panel-book-btn" class="btn btn-primary btn-sm" style="display:none;" onclick="openBookSimple(currentCat)">
+              <i class="ri-calendar-check-line"></i> Đặt ngay
+            </button>
           </div>
         </div>
 
@@ -762,6 +679,117 @@
   <div id="footer-container"></div>
   <div id="toast-container"></div>
   <div id="modal-overlay"></div>
+
+  <!-- Tier Comparison Modal -->
+  <style>
+    #tier-modal-overlay {
+      position:fixed; inset:0; background:rgba(20,10,5,0.7); backdrop-filter:blur(8px);
+      z-index:10000; display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .3s ease; padding:20px;
+    }
+    #tier-modal-overlay.open { opacity:1; pointer-events:all; }
+    
+    .tier-guide-wrap { background:linear-gradient(135deg, #fffcf9, #fff7eb); border-radius:24px; border:1px solid rgba(255,255,255,0.8); margin-bottom:0; box-shadow:0 16px 40px rgba(0,0,0,0.12); overflow-y:auto; position:relative; width:100%; max-width:850px; max-height:85vh; transform:translateY(20px); transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1); display:block; }
+    #tier-modal-overlay.open .tier-guide-wrap { transform:translateY(0); }
+    
+    .tier-modal-close { position:absolute; top:20px; right:20px; z-index:10; background:white; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:1px solid rgba(212,185,150,0.3); color:var(--dark); font-size:1.2rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); transition:all .2s; }
+    .tier-modal-close:hover { transform:scale(1.05); color:#C9616A; }
+
+    .tier-guide-bg { position:absolute; top:-50px; right:-50px; width:250px; height:250px; background:rgba(212,185,150,0.25); border-radius:50%; filter:blur(40px); z-index:0; pointer-events:none; }
+    .tier-guide-bg-2 { position:absolute; bottom:-50px; left:-50px; width:200px; height:200px; background:rgba(201,97,106,0.1); border-radius:50%; filter:blur(40px); z-index:0; pointer-events:none; }
+    .tier-tab-container { display:flex; background:rgba(212,185,150,0.15); border-radius:50px; padding:6px; margin:0 auto 28px; max-width:500px; position:relative; z-index:1; }
+    .tier-tab { flex:1; text-align:center; padding:12px 16px; font-weight:700; cursor:pointer; color:var(--text-muted); transition:all .3s cubic-bezier(0.4, 0, 0.2, 1); border-radius:50px; font-size:.95rem; }
+    .tier-tab:hover { color:var(--dark); }
+    .tier-tab.active-tab { background:linear-gradient(135deg, var(--gold), var(--gold-light)); color:white; box-shadow:0 6px 16px rgba(212,185,150,0.4); }
+    .tier-content { animation:slideUpFade .4s ease; position:relative; z-index:1; }
+    @keyframes slideUpFade { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .tier-title { font-family:var(--font-h); font-size:1.6rem; margin-bottom:20px; background:linear-gradient(135deg, #A87C4F, #D4B996); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block; }
+    .tier-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+    .tier-item { display:flex; gap:16px; background:rgba(255,255,255,0.65); backdrop-filter:blur(8px); border:1px solid white; padding:16px 20px; border-radius:16px; align-items:flex-start; box-shadow:0 4px 16px rgba(0,0,0,0.02); transition:all .25s; }
+    .tier-item:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,185,150,0.1); background:rgba(255,255,255,0.9); }
+    .tier-icon { color:var(--gold); font-size:1.4rem; line-height:1; filter:drop-shadow(0 2px 4px rgba(212,185,150,0.3)); }
+    .tier-text { font-size:.95rem; line-height:1.6; color:var(--text-body); }
+    .tier-text b { color:var(--dark); font-weight:700; }
+    .tier-note { background:rgba(201,97,106,0.06); border-left:4px solid #C9616A; }
+    .tier-note-icon { color:#C9616A; font-size:1.4rem; line-height:1; }
+    .tier-note-box { background:rgba(255,255,255,0.5); padding:12px 16px; border-radius:12px; margin-top:10px; border:1px dashed rgba(212,185,150,0.4); }
+    .tier-note-box span { display:inline-block; width:24px; text-align:center; margin-right:4px; }
+    @media(max-width:768px) {
+      .tier-guide-wrap { max-height:90vh; border-radius:20px; }
+      .tier-tab-container { flex-direction:column; border-radius:16px; }
+      .tier-tab { border-radius:12px; }
+      .tier-item { flex-direction:column; gap:8px; }
+      .hide-on-mobile { display:none; }
+    }
+  </style>
+
+  <div id="tier-modal-overlay" onclick="if(event.target===this) closeTierModal()">
+    <div id="tier-comparison-guide" class="tier-guide-wrap">
+      <button class="tier-modal-close" onclick="closeTierModal()"><i class="ri-close-line"></i></button>
+      <div class="tier-guide-bg"></div>
+      <div class="tier-guide-bg-2"></div>
+      
+      <div style="padding:32px 24px 0; position:relative; z-index:1; text-align:center;">
+        <h2 style="font-family:var(--font-h); font-size:1.8rem; color:var(--dark); margin-bottom:8px;">Cẩm nang Phân khúc Tráp Lễ</h2>
+        <p style="color:var(--text-muted); font-size:.95rem; margin-bottom:28px;">Khám phá sự khác biệt để lựa chọn gói phù hợp nhất cho ngày trọng đại của bạn</p>
+        
+        <div class="tier-tab-container">
+          <div class="tier-tab" onclick="switchTierTab('tieu-chuan')" id="tab-tieu-chuan">Tiêu chuẩn</div>
+          <div class="tier-tab" onclick="switchTierTab('nang-cao')" id="tab-nang-cao">Nâng cao</div>
+          <div class="tier-tab" onclick="switchTierTab('cao-cap')" id="tab-cao-cap">Cao cấp</div>
+        </div>
+      </div>
+
+      <div style="padding:0 24px 36px; max-width:800px; margin:0 auto;">
+        <!-- Tiêu chuẩn Content -->
+        <div id="tier-content-tieu-chuan" class="tier-content" style="display:none;">
+          <div style="text-align:center;"><h3 class="tier-title">Gói Tráp Tiêu Chuẩn</h3></div>
+          <ul class="tier-list">
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật được sắp xếp theo dáng tháp tròn xếp tầng cân đối và trang trọng.</div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Sính lễ bên trong:</b> Sử dụng các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp với phong tục cưới hỏi truyền thống.</div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</div></li>
+            <li class="tier-item tier-note"><i class="ri-information-fill tier-note-icon"></i> <div class="tier-text"><b>Ghi chú:</b> Sử dụng hoa lụa, vải voan hoặc ruy băng đỏ/hồng có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng theo màu.</div></li>
+          </ul>
+        </div>
+        
+        <!-- Nâng cao Content -->
+        <div id="tier-content-nang-cao" class="tier-content" style="display:none;">
+          <div style="text-align:center;"><h3 class="tier-title">Gói Tráp Nâng Cao</h3></div>
+          <ul class="tier-list">
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Hình thức mâm tráp:</b> Thay vì mâm nhôm, gói này thường dùng tráp gỗ sơn mài cao cấp, tráp mica trong suốt, hoặc các khay chân cao (rồng phượng) để tạo cảm giác thanh lịch.
+              <div class="tier-note-box">
+                <span>🔴</span> <b>Hình tròn:</b> Phổ biến nhất, mang ý nghĩa viên mãn, tròn đầy.<br>
+                <span>🟥</span> <b>Hình vuông bo góc:</b> Hiện đại hơn, thường dùng trong gói cao cấp.<br>
+                <span>✨</span> <b>Tráp mica:</b> Trong suốt, hiện đại, sang trọng.<br>
+                <span>🐉</span> <b>Khay chân cao:</b> Tạo độ cao và điểm nhấn (khay rồng phượng).
+              </div>
+            </div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Phong cách trang trí:</b> Sử dụng 100% hoa tươi (hồng, lan, cẩm tú cầu, baby...) kết hợp lá phụ nhập khẩu. Mâm lễ kết dáng nghệ thuật bay bổng hoặc xòe rộng. Mâm hoa quả kết Rồng Phượng tinh tế.</div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Sính lễ bên trong:</b> Được nâng cấp lên các sản phẩm có bao bì cực kỳ sang trọng (chè hộp thiếc, bánh đặt hộp quai ruy băng đồng bộ, rượu vang ngoại).</div></li>
+            <li class="tier-item tier-note"><i class="ri-information-fill tier-note-icon"></i> <div class="tier-text"><b>Lưu ý Màu sắc:</b><br>
+              - <i>Nhóm phổ thông:</i> Đỏ Cam, Hồng Pastel, Trắng Xanh Cốm (dùng hoa nội địa).<br>
+              - <i>Nhóm Hot Trend:</i> Xanh Mint, Vàng Kem/Champagne, Hồng Cam Sữa (phát sinh chi phí vì yêu cầu hoa nhập khẩu/cao cấp).
+            </div></li>
+          </ul>
+        </div>
+
+        <!-- Cao cấp Content -->
+        <div id="tier-content-cao-cap" class="tier-content" style="display:none;">
+          <div style="text-align:center;"><h3 class="tier-title">Gói Tráp Cao Cấp</h3></div>
+          <ul class="tier-list">
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Hình thức mâm tráp:</b> Khay chân cao mạ vàng, khay vàng champagne, khay oval có chân đế, tráp gỗ khảm trai, hoặc thiết kế riêng biệt 100% theo concept. Tính cá nhân hóa cao.</div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Phong cách trang trí:</b> Hoa tươi đẳng cấp kết hợp phụ kiện decor chọn lọc kỹ. Bố cục hoa nghệ thuật, tinh tế. Mâm hoa quả tạo hình công phu tỉ mỉ, tôn lên sự sang trọng tuyệt đối.</div></li>
+            <li class="tier-item"><i class="ri-checkbox-circle-fill tier-icon"></i> <div class="tier-text"><b>Sính lễ bên trong:</b> Chỉ tuyển chọn các thương hiệu ngoại nhập cao cấp nhất, bao bì đồng bộ hoàn hảo (bánh, trà, rượu) dành cho những gia đình kỹ tính nhất.</div></li>
+            <li class="tier-item tier-note"><i class="ri-information-fill tier-note-icon"></i> <div class="tier-text"><b>Lưu ý Màu sắc Độc Quyền:</b><br>
+              - <i>Sang trọng / Độc đáo:</i> Xanh ngọc lục bảo, Tím khói, Trắng tinh khôi (Lan Hồ Điệp). Giá hoa nhập thường cao gấp 3-4 lần hoa nội địa.<br>
+              - <i>Siêu hiếm:</i> Xanh Dương (Royal Blue), Đen Vàng Kim (Black & Gold), Đỏ Burgundy.
+            </div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Detail Lightbox -->
   <div id="detail-modal">
@@ -979,14 +1007,14 @@
       bookBtn.style.display = (section === 'betrap' || section === 'mc' || section === 'media') ? 'inline-flex' : 'none';
 
       // Tier Comparison Guide Logic
-      const tierGuide = document.getElementById('tier-comparison-guide');
+      const btnGuide = document.getElementById('btn-guide-modal');
       if (cat === 'lam-trap') {
-        tierGuide.style.display = 'block';
+        btnGuide.style.display = 'inline-flex';
         // Auto-select tab based on subCat, default to 'tieu-chuan' if not set or 'all'
         let targetTab = ['tieu-chuan', 'nang-cao', 'cao-cap'].includes(subCat) ? subCat : 'tieu-chuan';
         switchTierTab(targetTab);
       } else {
-        tierGuide.style.display = 'none';
+        btnGuide.style.display = 'none';
       }
 
       // Load & render
@@ -1294,6 +1322,16 @@
       document.getElementById('svc-sidebar').classList.remove('mobile-open');
       document.getElementById('mobile-overlay').classList.remove('show');
       document.getElementById('mobile-toggle').innerHTML = '<i class="ri-menu-2-line"></i>';
+    }
+
+    function openTierModal() {
+      document.getElementById('tier-modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeTierModal() {
+      document.getElementById('tier-modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
     }
   </script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
