@@ -889,35 +889,57 @@
       const catBox = document.getElementById('cat-desc-box');
       catBox.style.display = 'none';
       if (section === 'trap') {
-        if (subCat === 'tieu-chuan') {
-          catBox.innerHTML = `
-            <p><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật được sắp xếp theo dáng tháp tròn xếp tầng cân đối và trang trọng.</p>
-            <p><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</p>
-            <p><b>Sính lễ bên trong:</b> Sử dụng các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp với phong tục cưới hỏi truyền thống.</p>
-            <p><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</p>
-            <p style="margin-bottom:0"><b>Ghi chú & Đặc điểm:</b> Sử dụng hoa lụa, vải voan hoặc ruy băng đỏ/hồng có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng theo màu.</p>
-          `;
-          catBox.style.display = 'block';
-        } else if (subCat === 'nang-cao') {
-          catBox.innerHTML = `
-            <p><b>Hình thức mâm tráp:</b> Thay vì mâm nhôm, gói này thường dùng tráp gỗ sơn mài cao cấp (tròn viên mãn, vuông bo góc hiện đại), tráp mica trong suốt, hoặc các khay chân cao (khay rồng phượng nhỏ) để tạo cảm giác thanh lịch, thông thoáng.</p>
-            <p><b>Phong cách trang trí:</b> Sử dụng hoàn toàn bằng hoa tươi (hoa hồng, hoa lan, cẩm tú cầu, hoa baby...) kết hợp với lá phụ nhập khẩu. Các mâm lễ được kết dáng nghệ thuật, xòe rộng hoặc bay bổng chứ không bó hẹp trong phom tháp tròn cứng nhắc. Mâm hoa quả thường được kết Rồng Phượng ở mức độ vừa phải, tinh tế.</p>
-            <p><b>Sính lễ bên trong:</b> Được nâng cấp lên các dòng sản phẩm có bao bì đẹp mắt, sang trọng hơn (ví dụ: chè hộp thiếc, bánh cốm/bánh phu thê được đặt trong hộp giấy đóng quai ruy băng đồng bộ, rượu vang ngoại nhập).</p>
-            <p><b>Đặc điểm:</b> Trông rất bắt mắt, khi lên hình phóng sự cưới rất nổi bật và hiện đại.</p>
-            <p><b>Nhóm màu phổ thông (Giá tiêu chuẩn):</b> Đỏ - Cam, Hồng Pastel, Trắng - Xanh Cốm. (Sử dụng các dòng hoa nội địa phổ biến như hồng Đà Lạt, cẩm tú cầu, ly...)</p>
-            <p style="margin-bottom:0"><b>Nhóm màu Hot Trend (Chi phí cao hơn):</b> Xanh Mint (Xanh Bạc Hà), Vàng Kem/Champagne, Hồng Cam Sữa. (Các tông màu xu hướng thường yêu cầu phối hoa cao cấp hoặc kết hợp hoa nhập khẩu để đảm bảo đúng màu sắc).</p>
-          `;
-          catBox.style.display = 'block';
-        } else if (subCat === 'cao-cap') {
-          catBox.innerHTML = `
-            <p><b>Hình thức mâm tráp:</b> Sử dụng các dòng tráp và khay cao cấp như khay chân cao mạ vàng, khay kim loại màu vàng champagne, tráp gỗ khảm trai, tráp sơn mài cao cấp hoặc các mẫu tráp được thiết kế riêng theo tông màu và concept. Tổng thể được hoàn thiện đồng bộ, sang trọng và mang tính cá nhân hóa cao.</p>
-            <p><b>Phong cách trang trí:</b> Sử dụng hoa tươi cao cấp kết hợp cùng các phụ kiện trang trí được tuyển chọn kỹ lưỡng. Các mâm lễ được thiết kế theo phong cách nghệ thuật với bố cục hoa tinh tế, tạo điểm nhấn nổi bật và thể hiện sự đẳng cấp. Mâm hoa quả được tạo hình công phu.</p>
-            <p><b>Sính lễ bên trong:</b> Lựa chọn các dòng sản phẩm cao cấp với bao bì sang trọng và đồng bộ, bao gồm bánh, trà, rượu và các lễ vật truyền thống được tuyển chọn kỹ lưỡng.</p>
-            <p><b>Nhóm màu Sang trọng / Độc đáo:</b> Xanh ngọc lục bảo (Emerald), Tím khói (Dusty Lavender), Trắng tinh khôi (All White - dùng Lan Hồ Điệp).<br><i>Ghi chú: Hoa lan hồ điệp trắng hoặc các dòng hồng bụi nhập khẩu màu tím khói rất kén người chơi và giá nhập vào cao gấp 3-4 lần hoa nội địa.</i></p>
-            <p style="margin-bottom:0"><b>Nhóm màu Siêu hiếm / Độc quyền:</b> Xanh Dương (Classic Blue / Royal Blue), Đen - Vàng Kim (Black & Gold), Màu Đỏ Rượu Vang Đậm (Burgundy).</p>
-          `;
-          catBox.style.display = 'block';
-        }
+        catBox.innerHTML = `
+          <div style="font-weight:700; margin-bottom:12px; color:var(--text-dark); font-size:.95rem;">So sánh điểm khác biệt giữa các gói:</div>
+          <style>
+            .svc-acc details summary::-webkit-details-marker { display:none; }
+            .svc-acc details[open] summary i { transform: rotate(180deg); }
+          </style>
+          <div class="svc-acc" style="display:flex; flex-direction:column; gap:10px;">
+            <details style="background:rgba(255,255,255,.6); border:1px solid rgba(212,185,150,.4); border-radius:10px; overflow:hidden;">
+              <summary style="padding:12px 16px; cursor:pointer; font-weight:600; color:var(--gold-dark); list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+                <span style="display:flex;align-items:center;gap:8px"><i class="ri-add-line"></i> Gói Tiêu chuẩn</span><i class="ri-arrow-down-s-line" style="transition:transform .3s;"></i>
+              </summary>
+              <div style="padding:0 16px 16px 38px; font-size:.85rem;">
+                <p><b>Hình thức mâm tráp:</b> Sử dụng mâm nhôm màu bạc hoặc mâm sơn mài màu đỏ truyền thống. Lễ vật được sắp xếp theo dáng tháp tròn xếp tầng cân đối và trang trọng.</p>
+                <p><b>Phong cách trang trí:</b> Sử dụng hoa lụa kết hợp với chữ "Hỷ", nơ đỏ và ruy băng đồng bộ.</p>
+                <p><b>Sính lễ bên trong:</b> Sử dụng các thương hiệu bánh kẹo, chè, thuốc lá và rượu phổ biến, phù hợp với phong tục cưới hỏi truyền thống.</p>
+                <p><b>Màu sắc phổ biến:</b> Đỏ truyền thống, Hồng cánh sen.</p>
+                <p style="margin-bottom:0"><b>Ghi chú & Đặc điểm:</b> Sử dụng hoa lụa, vải voan hoặc ruy băng đỏ/hồng có sẵn. Phom tráp tháp tròn rập khuôn nên không tốn công thiết kế riêng.</p>
+              </div>
+            </details>
+            
+            <details style="background:rgba(255,255,255,.6); border:1px solid rgba(212,185,150,.4); border-radius:10px; overflow:hidden;">
+              <summary style="padding:12px 16px; cursor:pointer; font-weight:600; color:var(--gold-dark); list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+                <span style="display:flex;align-items:center;gap:8px"><i class="ri-add-line"></i> Gói Nâng cao</span><i class="ri-arrow-down-s-line" style="transition:transform .3s;"></i>
+              </summary>
+              <div style="padding:0 16px 16px 38px; font-size:.85rem;">
+                <p><b>Hình thức mâm tráp:</b> Thay vì mâm nhôm, gói này thường dùng tráp gỗ sơn mài cao cấp (tròn viên mãn, vuông bo góc hiện đại), tráp mica trong suốt, hoặc các khay chân cao (khay rồng phượng nhỏ).</p>
+                <p><b>Phong cách trang trí:</b> Sử dụng hoàn toàn bằng hoa tươi (hoa hồng, hoa lan, cẩm tú cầu, hoa baby...) kết hợp với lá phụ nhập khẩu. Mâm kết dáng nghệ thuật (tháp tròn, xòe rộng, hoặc bay bổng).</p>
+                <p><b>Sính lễ bên trong:</b> Được nâng cấp lên các dòng sản phẩm có bao bì đẹp mắt, sang trọng hơn (chè hộp thiếc, bánh hộp giấy quai ruy băng, rượu vang ngoại nhập).</p>
+                <p><b>Nhóm màu phổ thông (Giá tiêu chuẩn):</b> Đỏ - Cam, Hồng Pastel, Trắng - Xanh Cốm.</p>
+                <p style="margin-bottom:0"><b>Nhóm màu Hot Trend (Chi phí cao hơn):</b> Xanh Mint, Vàng Kem/Champagne, Hồng Cam Sữa.</p>
+              </div>
+            </details>
+
+            <details style="background:rgba(255,255,255,.6); border:1px solid rgba(212,185,150,.4); border-radius:10px; overflow:hidden;">
+              <summary style="padding:12px 16px; cursor:pointer; font-weight:600; color:var(--gold-dark); list-style:none; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+                <span style="display:flex;align-items:center;gap:8px"><i class="ri-add-line"></i> Gói Cao cấp</span><i class="ri-arrow-down-s-line" style="transition:transform .3s;"></i>
+              </summary>
+              <div style="padding:0 16px 16px 38px; font-size:.85rem;">
+                <p><b>Hình thức mâm tráp:</b> Sử dụng khay chân cao mạ vàng, khay kim loại vàng champagne, tráp gỗ khảm trai, tráp sơn mài cao cấp hoặc các mẫu thiết kế riêng theo tông màu và concept.</p>
+                <p><b>Phong cách trang trí:</b> Sử dụng hoa tươi cao cấp cùng phụ kiện trang trí được tuyển chọn kỹ lưỡng. Bố cục hoa tinh tế, điểm nhấn đẳng cấp.</p>
+                <p><b>Sính lễ bên trong:</b> Lựa chọn các dòng sản phẩm cao cấp với bao bì sang trọng và đồng bộ.</p>
+                <p><b>Màu Sang trọng / Độc đáo:</b> Xanh ngọc lục bảo, Tím khói, Trắng tinh khôi (Lan Hồ Điệp).</p>
+                <p style="margin-bottom:0"><b>Màu Siêu hiếm / Độc quyền:</b> Xanh Dương (Classic Blue), Đen - Vàng Kim (Black & Gold), Đỏ Rượu Vang Đậm.</p>
+              </div>
+            </details>
+          </div>
+        `;
+        catBox.style.display = 'block';
+        catBox.style.background = 'transparent';
+        catBox.style.border = 'none';
+        catBox.style.padding = '0';
       }
 
       // Breadcrumb
