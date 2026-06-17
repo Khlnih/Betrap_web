@@ -806,11 +806,6 @@
         <div class="detail-name" id="dm-name"></div>
         <div class="detail-packages" id="dm-packages" style="display:none;margin-top:16px;background:var(--cream);padding:16px;border-radius:12px;border:1px solid rgba(184,148,90,.2);"></div>
         <div class="detail-desc" id="dm-desc" style="margin-top:16px"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-          <button class="btn btn-primary btn-sm" id="dm-book-btn" style="display:none;" onclick="">
-            <i class="ri-calendar-check-line"></i> Đặt ngay
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -1231,10 +1226,6 @@
         pkgDiv.innerHTML = `<div style="font-size:1.2rem;color:var(--gold);font-weight:700;">${svc.priceMax && svc.priceMax > svc.price ? 'từ ' + UI.formatCurrency(svc.price) + ' - ' + UI.formatCurrency(svc.priceMax) : UI.formatCurrency(svc.price)} / ${svc.unit||'buổi'}</div>`;
         pkgDiv.style.display = 'block';
       } else { pkgDiv.style.display = 'none'; }
-      // Book btn in detail
-      const dmBook = document.getElementById('dm-book-btn');
-      dmBook.style.display = 'inline-flex';
-      dmBook.onclick = () => { closeDetail(); openBookSimple(svc.category, svc.id); };
       document.getElementById('detail-modal').classList.add('open');
     }
     function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
