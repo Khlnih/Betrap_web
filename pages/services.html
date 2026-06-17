@@ -19,16 +19,17 @@
     .svc-hero img { width:100%; max-height:380px; object-fit:cover; object-position:top center; display:block; }
     .svc-hero-overlay {
       position:absolute; inset:0;
-      background: linear-gradient(to bottom, rgba(20,10,5,.15) 0%, rgba(20,10,5,.55) 100%);
+      background: linear-gradient(to bottom, rgba(20,10,5,.3) 0%, rgba(20,10,5,.75) 100%);
+      backdrop-filter: blur(6px);
       display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
       padding: 40px 20px;
     }
     .svc-hero-title {
-      font-family: var(--font-h); font-size: clamp(2rem, 5vw, 3rem);
-      color: white; text-align:center; text-shadow: 0 2px 20px rgba(0,0,0,.5);
-      margin-bottom: 8px;
+      font-family: var(--font-h); font-size: clamp(2.5rem, 6vw, 4rem);
+      color: #fff; text-align:center; text-shadow: 0 4px 20px rgba(0,0,0,.6);
+      margin-bottom: 8px; letter-spacing: 0.05em;
     }
-    .svc-hero-sub { color: rgba(255,255,255,.8); font-size:.95rem; text-align:center; }
+    .svc-hero-sub { color: rgba(255,255,255,.9); font-size:1.1rem; text-align:center; font-weight: 300; letter-spacing: 0.02em; }
 
     /* ══ LAYOUT 2 CỘT ═════════════════════════════════════════════════════════ */
     .svc-layout {
@@ -49,9 +50,9 @@
       max-height: calc(100vh - var(--nav-h, 72px) - 40px);
       overflow-y: auto;
       background: white;
-      border-radius: 20px;
-      box-shadow: 0 4px 24px rgba(74,66,56,.08);
-      border: 1px solid rgba(212,185,150,.18);
+      border-radius: 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.04), 0 0 0 1px rgba(212,185,150,.15);
+      border: none;
       padding: 16px 0 20px;
       scrollbar-width: thin;
       scrollbar-color: var(--gold-light) transparent;
@@ -604,36 +605,37 @@
         </div>
 
         <!-- Quick-select cards -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-bottom:36px;">
-          <div onclick="selectItem('betrap','be-trap','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-
-            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Đội Bê Tráp</div>
-            <div style="font-size:.75rem;color:var(--text-muted);">Chuyên nghiệp, đúng giờ</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:20px; margin-bottom:36px;">
+          <div onclick="selectItem('betrap','be-trap','')" style="background:white;border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.04);border:1px solid rgba(212,185,150,.1);transition:all .3s ease;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(212,185,150,.15)'" onmouseout="this.style.borderColor='rgba(212,185,150,.1)';this.style.transform='';this.style.boxShadow='0 8px 32px rgba(0,0,0,.04)'">
+            <div style="font-size:2.5rem;color:var(--gold);margin-bottom:12px;"><i class="ri-team-line"></i></div>
+            <div style="font-weight:700;font-size:1.05rem;color:var(--text-dark);margin-bottom:6px;">Đội Bê Tráp</div>
+            <div style="font-size:.8rem;color:var(--text-muted);">Đội ngũ nam nữ thanh lịch, đúng giờ</div>
           </div>
-          <div onclick="selectItem('trap','lam-trap','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-
-            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Tráp Ăn Hỏi</div>
-            <div style="font-size:.75rem;color:var(--text-muted);">Truyền thống & hiện đại</div>
+          <div onclick="selectItem('trap','lam-trap','')" style="background:white;border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.04);border:1px solid rgba(212,185,150,.1);transition:all .3s ease;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(212,185,150,.15)'" onmouseout="this.style.borderColor='rgba(212,185,150,.1)';this.style.transform='';this.style.boxShadow='0 8px 32px rgba(0,0,0,.04)'">
+            <div style="font-size:2.5rem;color:var(--gold);margin-bottom:12px;"><i class="ri-gift-line"></i></div>
+            <div style="font-weight:700;font-size:1.05rem;color:var(--text-dark);margin-bottom:6px;">Tráp Ăn Hỏi</div>
+            <div style="font-size:.8rem;color:var(--text-muted);">Tráp rồng phượng, truyền thống & hiện đại</div>
           </div>
-          <div onclick="selectItem('aodai','ao-dai','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-
-            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Thuê Áo Dài</div>
-            <div style="font-size:.75rem;color:var(--text-muted);">Đa dạng mẫu mã</div>
+          <div onclick="selectItem('aodai','ao-dai','')" style="background:white;border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.04);border:1px solid rgba(212,185,150,.1);transition:all .3s ease;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(212,185,150,.15)'" onmouseout="this.style.borderColor='rgba(212,185,150,.1)';this.style.transform='';this.style.boxShadow='0 8px 32px rgba(0,0,0,.04)'">
+            <div style="font-size:2.5rem;color:var(--gold);margin-bottom:12px;"><i class="ri-t-shirt-line"></i></div>
+            <div style="font-weight:700;font-size:1.05rem;color:var(--text-dark);margin-bottom:6px;">Thuê Áo Dài</div>
+            <div style="font-size:.8rem;color:var(--text-muted);">Bộ sưu tập áo dài cưới hỏi cao cấp</div>
           </div>
-          <div onclick="selectItem('mc','mc-su-kien','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-
-            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">MC Sự Kiện</div>
-            <div style="font-size:.75rem;color:var(--text-muted);">Giọng truyền cảm</div>
+          <div onclick="selectItem('mc','mc-su-kien','')" style="background:white;border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.04);border:1px solid rgba(212,185,150,.1);transition:all .3s ease;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(212,185,150,.15)'" onmouseout="this.style.borderColor='rgba(212,185,150,.1)';this.style.transform='';this.style.boxShadow='0 8px 32px rgba(0,0,0,.04)'">
+            <div style="font-size:2.5rem;color:var(--gold);margin-bottom:12px;"><i class="ri-mic-2-line"></i></div>
+            <div style="font-weight:700;font-size:1.05rem;color:var(--text-dark);margin-bottom:6px;">MC Sự Kiện</div>
+            <div style="font-size:.8rem;color:var(--text-muted);">Người dẫn chương trình chuyên nghiệp</div>
           </div>
-          <div onclick="selectItem('media','media','')" style="background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1.5px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-
-            <div style="font-weight:700;font-size:.88rem;color:var(--text-dark);margin-bottom:4px;">Media</div>
-            <div style="font-size:.75rem;color:var(--text-muted);">Ảnh & video chuyên nghiệp</div>
+          <div onclick="selectItem('media','media','')" style="background:white;border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.04);border:1px solid rgba(212,185,150,.1);transition:all .3s ease;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(212,185,150,.15)'" onmouseout="this.style.borderColor='rgba(212,185,150,.1)';this.style.transform='';this.style.boxShadow='0 8px 32px rgba(0,0,0,.04)'">
+            <div style="font-size:2.5rem;color:var(--gold);margin-bottom:12px;"><i class="ri-camera-lens-line"></i></div>
+            <div style="font-weight:700;font-size:1.05rem;color:var(--text-dark);margin-bottom:6px;">Media</div>
+            <div style="font-size:.8rem;color:var(--text-muted);">Quay phim, chụp ảnh phóng sự cưới</div>
           </div>
-          <div onclick="window.location.href='booking-wizard.html'" style="background:linear-gradient(135deg,#fff5e8,#ffe0b8);border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 4px 16px rgba(212,185,150,.2);border:1.5px solid rgba(212,185,150,.4);transition:all .25s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-
-            <div style="font-weight:700;font-size:.88rem;color:var(--dark);margin-bottom:4px;">Đặt Combo</div>
-            <div style="font-size:.75rem;color:var(--text-muted);">Tráp + Áo Dài tiết kiệm</div>
+          <div onclick="window.location.href='booking-wizard.html'" style="background:linear-gradient(135deg, #fffaf2, #ffe6c7);border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;box-shadow:0 8px 32px rgba(212,185,150,.2);border:1.5px solid rgba(212,185,150,.6);transition:all .3s ease; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(212,185,150,.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 32px rgba(212,185,150,.2)'">
+            <div style="position: absolute; top: -20px; right: -20px; font-size: 8rem; color: rgba(212,185,150,0.1);"><i class="ri-vip-diamond-line"></i></div>
+            <div style="font-size:2.5rem;color:var(--gold-dark);margin-bottom:12px;position:relative;z-index:1;"><i class="ri-sparkling-2-fill"></i></div>
+            <div style="font-weight:700;font-size:1.05rem;color:var(--gold-dark);margin-bottom:6px;position:relative;z-index:1;">Combo Trọn Gói</div>
+            <div style="font-size:.8rem;color:#8a6a43;position:relative;z-index:1;">Tráp + Áo Dài + Bê Tráp tối ưu chi phí</div>
           </div>
         </div>
       </div>
