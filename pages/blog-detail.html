@@ -65,15 +65,16 @@
     
     .blog-body {
       flex: 1;
-      font-size: 1.1rem;
-      line-height: 1.8;
-      color: var(--text-body);
+      font-size: 1.125rem; /* 18px for great readability */
+      line-height: 1.85;
+      color: #333333; /* Darker color for sharper contrast on cream background */
+      letter-spacing: 0.01em;
     }
     
     /* Blog blocks styling */
     .block { margin-bottom: var(--sp-lg); }
-    .block-heading { font-family: var(--font-h); font-weight: 700; color: var(--text-dark); margin-top: var(--sp-xl); margin-bottom: var(--sp-md); font-size: 1.75rem; }
-    .block-paragraph { margin-bottom: var(--sp-md); white-space: pre-wrap; }
+    .block-heading { font-family: var(--font-h); font-weight: 700; color: var(--text-dark); margin-top: var(--sp-xl); margin-bottom: var(--sp-md); font-size: 1.8rem; }
+    .block-paragraph { margin-bottom: 1.75em; text-align: justify; } /* Added justify for the very neat look */
     .block-image { width: 100%; max-width: 100%; border-radius: var(--r-sm); margin: var(--sp-md) auto; display: block; }
     .block-image-caption { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: -10px; margin-bottom: var(--sp-md); }
     .block-table-wrap { overflow-x: auto; margin-bottom: var(--sp-md); }

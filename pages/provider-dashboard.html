@@ -295,7 +295,7 @@
           <label class="form-label">Giá chuẩn (VNĐ) *</label>
           <div style="display:flex;gap:8px;">
             <input id="so-price" class="form-control" type="number" min="0" value="100000" style="flex:2">
-            <input id="so-pricemax" class="form-control" type="number" min="0" placeholder="Đến giá (VNĐ)" style="flex:2; display:none;">
+            <input id="so-pricemax" class="form-control" type="number" min="0" placeholder="Đến giá (VNĐ)" style="flex:2;">
             <input id="so-unit" class="form-control" type="text" value="buổi" style="flex:1" placeholder="Đơn vị (vd: buổi, gói)">
           </div>
         </div>
@@ -462,6 +462,27 @@
       document.getElementById('prof-location').value = sess.location || '';
       document.getElementById('prof-bank').value     = sess.bank     || '';
       document.getElementById('prof-bio').value      = sess.bio      || '';
+
+      // Expose to window for inline onclick handlers
+      window.openServiceModal = openServiceModal;
+      window.closeServiceModal = closeServiceModal;
+      window.submitServiceModal = submitServiceModal;
+      window.toggleService = toggleService;
+      window.filterServicesCat = filterServicesCat;
+      window.previewServiceImage = previewServiceImage;
+      window.updateProfile = updateProfile;
+      window.closeDeclineOverlay = closeDeclineOverlay;
+      window.submitDeclineOrder = submitDeclineOrder;
+      window.closeOrderDetail = closeOrderDetail;
+      window.closeCropOverlay = closeCropOverlay;
+      window.applyCrop = applyCrop;
+      window.confirmOrder = confirmOrder;
+      window.promptCancelOrder = promptCancelOrder;
+      window.showOrderDetail = showOrderDetail;
+      window.markDone = markDone;
+      window.promptConsultationStatus = promptConsultationStatus;
+      window.showConsultationDetail = showConsultationDetail;
+      window.filterOrders = filterOrders;
     });
 
     function updatePendingBadge(count) {
@@ -969,9 +990,7 @@
       document.getElementById('so-pricemax').value = editSvc && editSvc.priceMax ? editSvc.priceMax : '';
       document.getElementById('so-unit').value     = editSvc ? (editSvc.unit || 'buổi') : 'buổi';
       
-      const isTrapModal = editSvc && (editSvc.category === 'lam-trap' || editSvc.category === 'mam-trap');
-      document.getElementById('so-pricemax').style.display = isTrapModal ? 'block' : 'none';
-      
+      document.getElementById('so-pricemax').style.display = 'block';
       renderSubCategories(editSvc ? editSvc.category : '', editSvc ? editSvc.subCategory : '');
       
       const imgPreview = document.getElementById('so-image-preview');
@@ -1080,8 +1099,6 @@
       document.getElementById('gallery-group').style.display = isMC ? 'block' : 'none';
       const isTrap = this.value === 'lam-trap' || this.value === 'mam-trap';
       document.getElementById('aodai-link-group').style.display = isTrap ? 'block' : 'none';
-      document.getElementById('so-pricemax').style.display = isTrap ? 'block' : 'none';
-      if (!isTrap) document.getElementById('so-pricemax').value = '';
       if (isTrap) loadAodaiCheckboxList(document.getElementById('so-id').value, []);
       renderSubCategories(this.value, '');
     });
