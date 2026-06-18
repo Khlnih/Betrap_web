@@ -125,12 +125,8 @@
     UI.launchConfetti(80);
 
     function goToDashboard() {
-      if (isProvider) {
-        if (!sess.verified) window.location.href = 'pending.html';
-        else window.location.href = 'provider-dashboard.html';
-      } else {
-        window.location.href = 'dashboard.html';
-      }
+      if (isProvider && !sess.verified) window.location.href = 'pending.html';
+      else window.location.href = '../index.html';
     }
 
     // Countdown

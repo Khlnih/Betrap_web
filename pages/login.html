@@ -83,11 +83,8 @@
     const s = API.auth.currentSession();
     if (s) {
       if (s.role === 'admin') window.location.href = 'admin-dashboard.html';
-      else if (s.role === 'provider') {
-        if (!s.verified) window.location.href = 'pending.html';
-        else window.location.href = 'provider-dashboard.html';
-      }
-      else window.location.href = 'dashboard.html';
+      else if (s.role === 'provider' && !s.verified) window.location.href = 'pending.html';
+      else window.location.href = '../index.html';
     }
 
     document.getElementById('login-form').addEventListener('submit', async e => {
@@ -105,11 +102,8 @@
         UI.toast('Đăng nhập thành công! 🎉', 'success');
         setTimeout(() => {
           if (session.role === 'admin') window.location.href = 'admin-dashboard.html';
-          else if (session.role === 'provider') {
-            if (!session.verified) window.location.href = 'pending.html';
-            else window.location.href = 'provider-dashboard.html';
-          }
-          else window.location.href = 'dashboard.html';
+          else if (session.role === 'provider' && !session.verified) window.location.href = 'pending.html';
+          else window.location.href = '../index.html';
         }, 800);
       } catch(err) {
         errEl.textContent = err.message;
