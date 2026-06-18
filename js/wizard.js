@@ -28,15 +28,15 @@
   ];
   // Northern (miền Bắc) trays. img = ảnh thật; nếu chưa có dùng swatch màu.
   const TRAYS = [
-    {id:'trau-cau',  emoji:'🍃', name:'Trầu cau',          desc:'Lễ vật mở đầu, bắt buộc', locked:true, img:'trau-cau'},
-    {id:'ruou-thuoc',emoji:'🍷', name:'Rượu & thuốc lá',   desc:'Mâm rượu, thuốc hoa lụa', img:'ruou-thuoc'},
+    {id:'trau-cau',  emoji:'🍃', name:'Trầu cau',          desc:'Lễ vật mở đầu, bắt buộc', locked:true, color:'#5C7A54'},
+    {id:'ruou-thuoc',emoji:'🍷', name:'Rượu & thuốc lá',   desc:'Mâm rượu, thuốc hoa lụa', color:'#8C2A2A'},
     {id:'che',       emoji:'🍵', name:'Chè',               desc:'Chè sen / Thái Nguyên',  color:'#7E9E63'},
     {id:'mut-sen',   emoji:'🪷', name:'Mứt hạt sen',       desc:'Hạt sen sấy, mứt sen',   color:'#D8C29A'},
     {id:'banh-com',  emoji:'🍡', name:'Bánh cốm',          desc:'Đặc sản HN, giấy đỏ',    color:'#9CB07A'},
     {id:'phu-the',   emoji:'💞', name:'Bánh phu thê',      desc:'Cặp bánh su sê',         color:'#C98B8B'},
-    {id:'hoa-qua',   emoji:'🍇', name:'Hoa quả – Ngũ quả', desc:'Kết long phụng',         img:'hoa-qua'},
+    {id:'hoa-qua',   emoji:'🍇', name:'Hoa quả – Ngũ quả', desc:'Kết long phụng',         color:'#E6A845'},
     {id:'xoi-ga',    emoji:'🍙', name:'Xôi gấc & gà',      desc:'Xôi gấc đỏ, gà luộc',    color:'#CD7B5C'},
-    {id:'lon-quay',  emoji:'🐷', name:'Lợn sữa quay',      desc:'Heo quay, mâm son',      img:'lon-quay'},
+    {id:'lon-quay',  emoji:'🐷', name:'Lợn sữa quay',      desc:'Heo quay, mâm son',      color:'#B3593D'},
     {id:'banh-kem',  emoji:'🎂', name:'Bánh kem',          desc:'Mâm bánh hiện đại',      color:'#E0D2C0'},
   ];
   const TIERS = [
