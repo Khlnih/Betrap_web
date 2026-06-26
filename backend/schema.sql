@@ -8,8 +8,6 @@
 -- USE BeTrapDB;
 -- GO
 
-DROP TABLE IF EXISTS TrackingEvents CASCADE;
-DROP TABLE IF EXISTS TrackingLinks CASCADE;
 DROP TABLE IF EXISTS BlogBlocks CASCADE;
 DROP TABLE IF EXISTS BlogPosts CASCADE;
 DROP TABLE IF EXISTS Consultations CASCADE;
@@ -267,22 +265,4 @@ CREATE TABLE Leads (
     Status          VARCHAR(20) DEFAULT 'new',    -- new | contacted | quoted | won | lost
     CreatedAt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 12. Bảng TrackingLinks
-CREATE TABLE TrackingLinks (
-    Id          VARCHAR(50) PRIMARY KEY,
-    AppSource   VARCHAR(100) NOT NULL,
-    UrlCode     VARCHAR(100) NOT NULL UNIQUE,
-    TargetUrl   VARCHAR(500) NOT NULL,
-    CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 13. Bảng TrackingEvents
-CREATE TABLE TrackingEvents (
-    Id          VARCHAR(50) PRIMARY KEY,
-    LinkId      VARCHAR(50) NOT NULL REFERENCES TrackingLinks(Id) ON DELETE CASCADE,
-    VisitorId   VARCHAR(100) NOT NULL,
-    UserAgent   TEXT,
-    CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

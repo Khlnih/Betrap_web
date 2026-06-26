@@ -5,43 +5,14 @@
 
 const UI = (() => {
 
+  // ─── INIT PAGE ──────────────────────────────────────────────────────────
   function initPage() {
-    checkReferral();
     // DB.SEED.run() -- Removed: seed data is now handled by SQL Server schema.sql
     renderNav();
     initScrollNav();
     initReveal();
     initInteractions();
     renderContactWidget();
-  }
-
-  function checkReferral() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    
-    if (refCode) {
-      let visitorId = localStorage.getItem('bt_visitor_id');
-      if (!visitorId) {
-        visitorId = 'vid_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-        localStorage.setItem('bt_visitor_id', visitorId);
-      }
-      
-      // Call backend to record visit
-      if (window.API && API.post) {
-        API.post('/tracking/visit', { urlCode: refCode, visitorId })
-           .catch(err => console.error('Tracking failed', err));
-      } else {
-        // Fallback fetch if API object isn't ready
-        fetch((window.API_BASE_URL || 'http://localhost:3000/api') + '/tracking/visit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ urlCode: refCode, visitorId })
-        }).catch(err => console.error('Tracking failed', err));
-      }
-      
-      // Optionally clean URL (remove ?ref=)
-      // window.history.replaceState({}, document.title, window.location.pathname);
-    }
   }
 
   function initInteractions() {

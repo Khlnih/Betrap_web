@@ -124,9 +124,6 @@
         <div class="menu-item" onclick="switchTab('stats')" id="tab-stats">
           <i class="ri-bar-chart-2-line"></i> Thống Kê
         </div>
-        <div class="menu-item" onclick="switchTab('tracking')" id="tab-tracking">
-          <i class="ri-links-line"></i> Link Giới Thiệu
-        </div>
         <a class="menu-item" href="admin-leads.html" style="text-decoration:none">
           <i class="ri-inbox-archive-line"></i> Yêu Cầu Tư Vấn
         </a>
@@ -289,67 +286,7 @@
         </div>
       </section>
 
-      <!-- VIEW TRACKING -->
-      <section id="view-tracking" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
-          <h2 style="font-family:var(--font-h); font-size:1.8rem; color:#1E293B; margin:0">Quản Lý Link Giới Thiệu</h2>
-          <button class="btn btn-primary" onclick="UI.openModal('createLinkModal')" style="border-radius:12px">
-            <i class="ri-add-line"></i> Tạo Link Mới
-          </button>
-        </div>
-        <div class="table-card">
-          <div class="table-header">
-            <h3 style="margin:0;font-size:1.1rem;color:#1E293B">Danh sách Link</h3>
-          </div>
-          <div style="overflow-x:auto">
-            <table id="tracking-table">
-              <thead>
-                <tr>
-                  <th>Nguồn (App)</th><th>Mã Link (UrlCode)</th><th>Link Đích</th><th>Unique / Tổng</th><th>Ngày Tạo</th><th>Thao Tác</th>
-                </tr>
-              </thead>
-              <tbody><!-- JS --></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
     </main>
-  </div>
-
-  <!-- Create Link Modal -->
-  <div class="modal-overlay" id="createLinkModal">
-    <div class="modal" style="max-width:450px; padding:0; overflow:hidden;">
-      <div class="modal-header" style="background:#F8FAFC; border-bottom:1px solid #E2E8F0; padding:20px 24px; margin-bottom:0;">
-        <h3 class="modal-title" style="font-size:1.2rem; color:#1E293B; margin:0;"><i class="ri-links-line" style="color:var(--red-dark); margin-right:8px"></i> Tạo Link Giới Thiệu</h3>
-        <button class="btn btn-ghost" style="padding:4px" onclick="UI.closeModal('createLinkModal')"><i class="ri-close-line"></i></button>
-      </div>
-      <div class="modal-body" style="padding:24px; background:white;">
-        <form id="create-link-form">
-          <div class="form-group">
-            <label class="form-label" style="font-size:0.85rem">Nguồn Ứng Dụng</label>
-            <select id="link-source" class="form-control" style="background:#F8FAFC; border-radius:10px" required>
-              <option value="Facebook">Facebook</option>
-              <option value="TikTok">TikTok</option>
-              <option value="Zalo">Zalo</option>
-              <option value="Instagram">Instagram</option>
-              <option value="Other">Khác</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:0.85rem">Mã Link (vd: fb123)</label>
-            <input type="text" id="link-code" class="form-control" style="background:#F8FAFC; border-radius:10px" required placeholder="fb123">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:0.85rem">URL Đích</label>
-            <input type="url" id="link-target" class="form-control" style="background:#F8FAFC; border-radius:10px" required placeholder="https://betrap.vn">
-          </div>
-          <button type="submit" class="btn btn-primary btn-block" style="border-radius:12px; margin-top:16px;">
-            <i class="ri-save-line"></i> Tạo Link
-          </button>
-        </form>
-      </div>
-    </div>
   </div>
 
   <!-- Create Provider Modal -->
@@ -402,7 +339,6 @@
     let allServices = [];
     let allBlogs = [];
     let allTransactions = [];
-    let allTrackingLinks = [];
     let adminStats = null;
     let revenueChartInst = null;
 
@@ -419,18 +355,12 @@
         try {
             adminStats = await API.stats.admin();
         } catch(e) {}
-        try {
-            if(API.admin.getTrackingLinks) {
-                allTrackingLinks = await API.admin.getTrackingLinks();
-            }
-        } catch(e) {}
         updateStats();
         renderUsers();
         renderProviders();
         renderServices();
         renderBlogs();
         renderTransactions();
-        if (typeof renderTrackingLinks === 'function') renderTrackingLinks();
       } catch (err) {
         UI.toast('Lỗi tải dữ liệu: ' + err.message, 'error');
       }
@@ -633,8 +563,6 @@
       document.getElementById('view-blogs').classList.add('hidden');
       document.getElementById('view-transactions').classList.add('hidden');
       document.getElementById('view-stats').classList.add('hidden');
-      document.getElementById('view-tracking')?.classList.add('hidden');
-      
       document.getElementById('view-' + tabId).classList.remove('hidden');
       
       const titles = {
@@ -643,8 +571,7 @@
         'services': 'Quản lý Dịch Vụ',
         'blogs': 'Quản lý Blog',
         'transactions': 'Đơn Đặt Lịch',
-        'stats': 'Thống Kê Hệ Thống',
-        'tracking': 'Quản lý Link Giới Thiệu'
+        'stats': 'Thống Kê Hệ Thống'
       };
       document.getElementById('page-title').textContent = titles[tabId];
     }
@@ -729,74 +656,6 @@
         UI.closeModal('providerModal'); e.target.reset(); await loadData();
       } catch (err) { UI.toast(err.message, 'error'); } 
       finally { btn.disabled = false; btn.textContent = 'Tạo Tài Khoản Cửa Hàng'; }
-    });
-
-    function renderTrackingLinks() {
-      const tbody = document.querySelector('#tracking-table tbody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      if (!allTrackingLinks || allTrackingLinks.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Chưa có link nào.</td></tr>';
-        return;
-      }
-      
-      allTrackingLinks.forEach(link => {
-        const id = link.id || link.Id;
-        const src = link.appsource || link.AppSource;
-        const code = link.urlcode || link.UrlCode;
-        const target = link.targeturl || link.TargetUrl;
-        const unique = link.uniquevisitors || link.UniqueVisitors || 0;
-        const created = new Date(link.createdat || link.CreatedAt).toLocaleDateString('vi-VN');
-        const linkHref = window.location.origin + '/?ref=' + code;
-        
-        let srcIcon = 'ri-links-line';
-        if (src.toLowerCase() === 'facebook') srcIcon = 'ri-facebook-circle-fill';
-        if (src.toLowerCase() === 'tiktok') srcIcon = 'ri-tiktok-fill';
-        if (src.toLowerCase() === 'instagram') srcIcon = 'ri-instagram-line';
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><div style="display:flex;align-items:center;gap:8px"><i class="${srcIcon}" style="font-size:1.2rem;color:var(--red-dark)"></i> <strong>${src}</strong></div></td>
-          <td><span style="font-family:monospace;background:#F1F5F9;padding:4px 8px;border-radius:6px">${code}</span> <a href="${linkHref}" target="_blank" style="margin-left:4px;color:#3B82F6" title="Mở link"><i class="ri-external-link-line"></i></a></td>
-          <td><div style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${target}">${target}</div></td>
-          <td><strong style="color:var(--gold-dark)">${unique}</strong> người dùng mới</td>
-          <td>${created}</td>
-          <td>
-            <button class="btn btn-sm btn-ghost" style="color:#DC2626;padding:4px 8px" onclick="deleteTrackingLink('${id}')" title="Xoá">
-              <i class="ri-delete-bin-line"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function deleteTrackingLink(id) {
-      if(!confirm('Bạn có chắc muốn xoá link này? Thống kê truy cập của link cũng sẽ bị xoá.')) return;
-      try {
-        await API.admin.deleteTrackingLink(id);
-        UI.toast('Đã xoá link', 'success');
-        await loadData();
-      } catch(e) {
-        UI.toast('Lỗi: ' + e.message, 'error');
-      }
-    }
-
-    document.getElementById('create-link-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        await API.admin.createTrackingLink({
-          appSource: document.getElementById('link-source').value,
-          urlCode: document.getElementById('link-code').value,
-          targetUrl: document.getElementById('link-target').value
-        });
-        UI.toast('Tạo link thành công!', 'success');
-        UI.closeModal('createLinkModal');
-        e.target.reset();
-        await loadData();
-      } catch (err) {
-        UI.toast(err.message, 'error');
-      }
     });
 
     function logout() { API.auth.logout(); window.location.href = 'login.html'; }

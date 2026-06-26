@@ -353,15 +353,6 @@ const API = (() => {
     },
     getTransactions: async () => {
       return await get('/admin/transactions', true);
-    },
-    getTrackingLinks: async () => {
-      return await get('/admin/tracking-links', true);
-    },
-    createTrackingLink: async (data) => {
-      return await post('/admin/tracking-links', data, true);
-    },
-    deleteTrackingLink: async (id) => {
-      return await del('/admin/tracking-links/' + id, true);
     }
   };
 
