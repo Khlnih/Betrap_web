@@ -100,6 +100,9 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api', messageRoutes);
 
+const trackingRoutes = require('./routes/trackingRoutes');
+app.use('/api/tracking', trackingRoutes);
+
 // Alias for old frontend routes calling /api/admin, /api/stats, /api/favorites, /api/consultations
 app.use('/api', adminRoutes);
 app.use('/api', featureRoutes);
